@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiBaseUrl } from "@/lib/supabase";
 
@@ -10,24 +7,20 @@ interface Business {
   created_at: string;
 }
 
-export default function BusinessesPage() {
-  const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`${apiBaseUrl}/businesses`)
-      .then((r) => (r.ok ? r.json() : []))
-      .then(setBusinesses)
-      .finally(() => setLoading(false));
-  }, []);
+export default async function BusinessesPage() {
+  let businesses: Business[] = [];
+  try {
+    const res = await fetch(`${apiBaseUrl}/businesses`);
+    if (res.ok) businesses = await res.json();
+  } catch {
+    // API unavailable
+  }
 
   return (
     <div className="p-6 max-w-4xl">
       <h1 className="text-2xl font-bold text-text mb-6">Businesses</h1>
 
-      {loading ? (
-        <p className="text-text-muted">Loading...</p>
-      ) : businesses.length === 0 ? (
+      {businesses.length === 0 ? (
         <div className="card text-center py-12">
           <p className="text-text-muted">No businesses found.</p>
           <p className="text-xs text-text-dim mt-2">
