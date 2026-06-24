@@ -69,5 +69,8 @@ app.include_router(crm_router)
 from chromagora_api.routes.tools import router as tools_router
 app.include_router(tools_router)
 
+from chromagora_api.routes.businesses import router as businesses_router
+app.include_router(businesses_router)
+
 from chromagora_api.routes.mobile import router as mobile_router
 app.include_router(mobile_router)
