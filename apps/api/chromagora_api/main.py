@@ -41,3 +41,6 @@ app.add_middleware(
 
 # Routes
 app.include_router(health_router)
+
+from chromagora_api.routes.authority import router as authority_router
+app.include_router(authority_router)
