@@ -10,7 +10,6 @@ from typing import Any, Optional
 from uuid import UUID, uuid4
 
 from chromagora_schemas.authority import PolicyDecision
-from chromagora_schemas.tools import ToolDefinition
 from chromagora_api.services.policy_kernel import evaluate_action_policy
 
 logger = logging.getLogger(__name__)
@@ -136,7 +135,6 @@ def request_tool_execution(
     # 2. Check BusinessToolPermission
     permission = _check_tool_permission(business_id, tool_def_id)
     if not permission:
-        # No permission record — default to blocked for external actions
         if tool_def.get("is_external_action"):
             result["status"] = "blocked"
             result["errors"].append(
@@ -149,12 +147,10 @@ def request_tool_execution(
     result["action_proposal_id"] = str(proposal_id)
 
     # 4. Evaluate policy
-    # Determine effective autonomy level
     tool_autonomy = tool_def.get("autonomy_level_required_default", 1)
     permission_max = permission.get("max_autonomy_level", 1)
     effective_autonomy = min(tool_autonomy, permission_max)
 
-    # Determine effective approval requirement
     approval_override = permission.get("requires_approval_override")
     if approval_override is not None:
         requires_approval = approval_override
@@ -243,7 +239,7 @@ def _persist_execution(
         return
     try:
         sb.table("action_executions").insert({
-            "tenant_id": "00000000-0000-0000-0000-000000000000",  # filled by trigger
+            "tenant_id": "00000000-0000-0000-0000-000000000000",
             "business_id": str(business_id),
             "action_proposal_id": str(proposal_id),
             "approval_request_id": str(approval_id) if approval_id else None,
@@ -255,7 +251,7 @@ def _persist_execution(
             "executed_by_type": actor_type,
             "executed_by_id": str(actor_id) if actor_id else None,
             "reversibility": "reversible",
-            "trace_id": str(proposal_id),  # for correlation
+            "trace_id": str(proposal_id),
         }).execute()
     except Exception as exc:
         logger.warning("Failed to persist execution: %s", exc)
@@ -334,7 +330,7 @@ def seed_dev_tools() -> list[str]:
                     "status": {"type": "string"},
                 },
             },
-            "output_schema": {"type": "object", "properties": {"success": {"type": "boolean"}}}},
+            "output_schema": {"type": "object", "properties": {"success": {"type": "boolean"}}},
             "risk_level": "low",
             "autonomy_level": 3,
             "is_external": False,

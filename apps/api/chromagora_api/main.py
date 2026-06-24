@@ -44,3 +44,6 @@ app.include_router(health_router)
 
 from chromagora_api.routes.authority import router as authority_router
 app.include_router(authority_router)
+
+from chromagora_api.routes.workflows import router as workflows_router
+app.include_router(workflows_router)
