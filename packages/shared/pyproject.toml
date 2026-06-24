@@ -1,0 +1,10 @@
+[project]
+name = "chromagora-shared"
+version = "0.1.0"
+description = "Shared utilities for Chromagora OS"
+requires-python = ">=3.11"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
