@@ -146,3 +146,37 @@ class MessageDraftResponse(MessageDraftBase):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+# ---------------------------------------------------------------------------
+# Mobile — capture payloads
+# ---------------------------------------------------------------------------
+
+class MobileNoteCapture(BaseModel):
+    """POST /mobile/capture/note body."""
+    business_id: UUID
+    content: str
+    job_id: Optional[UUID] = None
+    lead_id: Optional[UUID] = None
+    note_type: str = "field_note"
+
+
+class MobilePhotoMetadata(BaseModel):
+    """POST /mobile/capture/photo-metadata body."""
+    business_id: UUID
+    job_id: Optional[UUID] = None
+    lead_id: Optional[UUID] = None
+    caption: Optional[str] = None
+    photo_url: Optional[str] = None
+    taken_at: Optional[datetime] = None
+
+
+class MobileCaptureResponse(BaseModel):
+    id: UUID
+    business_id: UUID
+    note_type: str
+    content: Optional[str] = None
+    photo_url: Optional[str] = None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
