@@ -47,3 +47,9 @@ app.include_router(authority_router)
 
 from chromagora_api.routes.workflows import router as workflows_router
 app.include_router(workflows_router)
+
+from chromagora_api.routes.approvals import router as approvals_router
+app.include_router(approvals_router)
+
+from chromagora_api.routes.agents import router as agents_router
+app.include_router(agents_router)
