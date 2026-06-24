@@ -17,25 +17,25 @@ export default function Home() {
           >
             <h2 className="font-semibold text-text mb-1">Businesses</h2>
             <p className="text-sm text-text-muted">
-              Manage clients, authority, and tools
+              Manage clients, authority envelopes, and tool permissions
             </p>
           </Link>
           <Link
-            href="/approvals"
+            href="/businesses/authority"
             className="card hover:border-accent/50 transition-colors"
           >
-            <h2 className="font-semibold text-text mb-1">Approvals</h2>
+            <h2 className="font-semibold text-text mb-1">Authority</h2>
             <p className="text-sm text-text-muted">
-              Review agent-proposed actions
+              Configure agent autonomy levels 0-6
             </p>
           </Link>
           <Link
-            href="/agents"
+            href="/businesses/tools"
             className="card hover:border-accent/50 transition-colors"
           >
-            <h2 className="font-semibold text-text mb-1">Agents</h2>
+            <h2 className="font-semibold text-text mb-1">Tools</h2>
             <p className="text-sm text-text-muted">
-              Workforce and agent runs
+              Enable/disable tools per business
             </p>
           </Link>
           <Link
