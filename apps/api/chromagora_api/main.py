@@ -56,3 +56,6 @@ app.include_router(agents_router)
 
 from chromagora_api.routes.agent_tasks import router as agent_tasks_router
 app.include_router(agent_tasks_router)
+
+from chromagora_api.routes.procurement import router as procurement_router
+app.include_router(procurement_router)
