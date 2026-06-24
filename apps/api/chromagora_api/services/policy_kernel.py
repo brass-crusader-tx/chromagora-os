@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_supabase():
-    from chromagora_api.db import get_supabase
+    from chromagora_api.db.base import get_supabase
     return get_supabase()
 
 
@@ -243,3 +243,64 @@ def evaluate_action_policy(
     decision.model_tier_recommendation = recommended_tier.value
 
     return decision
+
+
+def evaluate_proposal(proposal) -> dict:
+    """Evaluate a ProposalCreate and return a simple decision dict.
+
+    Wraps evaluate_action_policy with a flat-dict return for eval compatibility.
+    """
+    from chromagora_schemas.authority import ProposalCreate as _PC
+    decision = evaluate_action_policy(
+        business_id=proposal.business_id,
+        actor_type=proposal.proposed_by_type,
+        actor_id=proposal.proposed_by_id,
+        action_type=proposal.action_type,
+        target_system=proposal.target_system,
+        autonomy_level_requested=proposal.autonomy_level_required,
+        dollar_exposure=proposal.expected_value,
+        risk_level=proposal.risk_level,
+        confidence=proposal.confidence,
+        payload_json=proposal.proposed_payload,
+    )
+    if decision.denied:
+        return {"decision": "denied", "reasons": decision.denial_reasons}
+    elif decision.requires_approval:
+        return {"decision": "approval_required", "reasons": decision.approval_reasons}
+    else:
+        return {"decision": "allowed"}
+
+
+def check_execution_allowed(
+    action_type: str,
+    has_approval: bool,
+    is_binding: bool,
+) -> bool:
+    """Check if execution is allowed for a binding action.
+
+    Binding actions (level 6) always require approval.
+    """
+    if is_binding and not has_approval:
+        return False
+    return True
+
+
+def check_claim_allowed(
+    claim_text: str,
+    claim_type: str = "general",
+) -> bool:
+    """Check if a message claim is allowed by policy.
+
+    Blocks forbidden claim types like guarantees, absolute promises, etc.
+    """
+    forbidden_keywords = [
+        "guarantee", "guaranteed", "100% satisfaction",
+        "promise", "promised", "assure", "assured",
+    ]
+    text_lower = claim_text.lower()
+    for keyword in forbidden_keywords:
+        if keyword in text_lower:
+            return False
+    if claim_type in ("guarantee", "absolute_promise"):
+        return False
+    return True

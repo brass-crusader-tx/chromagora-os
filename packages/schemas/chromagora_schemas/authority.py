@@ -92,6 +92,21 @@ class PolicyDecision(BaseModel):
 # Compliance Rule
 # ---------------------------------------------------------------------------
 
+class ProposalCreate(BaseModel):
+    business_id: UUID
+    proposed_by_type: str
+    proposed_by_id: UUID
+    action_type: str
+    title: str
+    description: str = ""
+    target_system: str = "internal"
+    proposed_payload: dict[str, Any] = Field(default_factory=dict)
+    expected_value: float = 0.0
+    confidence: float = 0.5
+    risk_level: str = "low"
+    autonomy_level_required: int = 0
+
+
 class ComplianceRuleType(str, Enum):
     CASL_COMMERCIAL_MESSAGE = "casl_commercial_message"
     PRIVACY_PERSONAL_DATA = "privacy_personal_data"

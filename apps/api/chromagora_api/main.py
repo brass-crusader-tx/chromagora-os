@@ -62,3 +62,6 @@ app.include_router(procurement_router)
 
 from chromagora_api.routes.demo import router as demo_router
 app.include_router(demo_router)
+
+from chromagora_api.routes.crm import router as crm_router
+app.include_router(crm_router)

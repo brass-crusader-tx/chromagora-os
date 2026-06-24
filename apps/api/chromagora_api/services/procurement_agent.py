@@ -63,6 +63,36 @@ def _score_fit(data: dict) -> dict:
     }
 
 
+def score_opportunity_fit(
+    service_types: list[str],
+    capacity_available: bool,
+    margin_estimate: float,
+    strategic_alignment: float,
+) -> float:
+    """Score opportunity fit using multi-factor heuristic.
+
+    Returns a float 0.0-1.0 based on service match, capacity,
+    margin, and strategic alignment.
+    """
+    score = 0.0
+
+    # Service type match (up to 0.3)
+    if service_types:
+        score += min(len(service_types) * 0.15, 0.3)
+
+    # Capacity (up to 0.25)
+    if capacity_available:
+        score += 0.25
+
+    # Margin (up to 0.25)
+    score += min(margin_estimate * 0.5, 0.25)
+
+    # Strategic alignment (up to 0.2)
+    score += min(strategic_alignment * 0.2, 0.2)
+
+    return min(score, 1.0)
+
+
 def evaluate_opportunity(
     tenant_id: UUID,
     business_id: UUID,
