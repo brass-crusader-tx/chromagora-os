@@ -40,10 +40,6 @@ def create_artifact(
     if not _check_enabled():
         logger.info("Creating memory artifact (vector flags=%s)", ENABLE_VECTOR_MEMORY)
 
-    sb = _get_supabase()
-    if not sb:
-        raise RuntimeError("Database not configured")
-
     now = datetime.now(timezone.utc).isoformat()
     data = {
         "business_id": str(business_id),
@@ -54,7 +50,7 @@ def create_artifact(
         "created_at": now,
         "updated_at": now,
     }
-    resp = sb.table("memory_artifacts").insert(data).execute()
+    resp = _table_admin("memory_artifacts").insert(data).execute()
     return resp.data[0] if resp.data else {}
 
 
@@ -80,15 +76,11 @@ def list_artifacts(business_id: UUID, artifact_type: str | None = None, limit: i
 
 def delete_artifact(artifact_id: UUID) -> bool:
     """Delete a memory artifact. Also cascades embeddings if table exists."""
-    sb = _get_supabase()
-    if not sb:
-        raise RuntimeError("Database not configured")
-
     # Delete embeddings first if table exists and feature is on
     if ENABLE_VECTOR_MEMORY:
-        sb.table("memory_embeddings").delete().eq("artifact_fk", str(artifact_id)).execute()
+        _table_admin("memory_embeddings").delete().eq("artifact_fk", str(artifact_id)).execute()
 
-    resp = sb.table("memory_artifacts").delete().eq("id", str(artifact_id)).execute()
+    resp = _table_admin("memory_artifacts").delete().eq("id", str(artifact_id)).execute()
     return bool(resp.data)
 
 
@@ -102,10 +94,6 @@ def store_embedding(
         logger.warning("store_embedding called but ENABLE_VECTOR_MEMORY=false, skipping")
         return None
 
-    sb = _get_supabase()
-    if not sb:
-        raise RuntimeError("Database not configured")
-
     now = datetime.now(timezone.utc).isoformat()
     data = {
         "artifact_fk": str(artifact_fk),
@@ -113,7 +101,7 @@ def store_embedding(
         "embedding_vector": embedding_vector,
         "created_at": now,
     }
-    resp = sb.table("memory_embeddings").insert(data).execute()
+    resp = _table_admin("memory_embeddings").insert(data).execute()
     return resp.data[0] if resp.data else None
 
 
@@ -150,5 +138,13 @@ def similarity_search(
 
 def _get_supabase():
     """Get Supabase client. Late import to allow patching in tests."""
-    from chromagora_api.db.base import get_supabase
+    from chromagora_api.db.base import get_supabase, get_supabase_admin
     return get_supabase()
+
+
+def _table_admin(name: str):
+    from chromagora_api.db.base import get_supabase_admin
+    sb = get_supabase_admin()
+    if not sb:
+        raise RuntimeError("Database not configured")
+    return sb.table(name)

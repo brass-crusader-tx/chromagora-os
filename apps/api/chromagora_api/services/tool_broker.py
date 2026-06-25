@@ -26,6 +26,13 @@ def _get_supabase_admin():
     return get_supabase_admin()
 
 
+def _table_admin(name: str):
+    sb = _get_supabase_admin()
+    if not sb:
+        raise RuntimeError("Database not configured")
+    return sb.table(name)
+
+
 # ---------------------------------------------------------------------------
 # Tool registry helpers
 # ---------------------------------------------------------------------------
@@ -234,11 +241,8 @@ def _persist_execution(
     actor_id: Optional[UUID],
 ) -> None:
     """Persist action execution to the ledger."""
-    sb = _get_supabase()
-    if not sb:
-        return
     try:
-        sb.table("action_executions").insert({
+        _table_admin("action_executions").insert({
             "tenant_id": "00000000-0000-0000-0000-000000000000",
             "business_id": str(business_id),
             "action_proposal_id": str(proposal_id),

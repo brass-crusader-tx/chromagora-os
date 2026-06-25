@@ -94,14 +94,17 @@ class InternalCrmLiteProvider(CrmProvider):
     """Internal CRM using Supabase tables (leads, quotes, jobs)."""
 
     def _get_supabase(self):
-        from chromagora_api.db.base import get_supabase
+        from chromagora_api.db.base import get_supabase, get_supabase_admin
         return get_supabase()
 
-    def create_lead(self, business_id: UUID, lead: CrmLead) -> str:
-        sb = self._get_supabase()
+    def _table_admin(self, name: str):
+        from chromagora_api.db.base import get_supabase_admin
+        sb = get_supabase_admin()
         if not sb:
             raise RuntimeError("Database not configured")
+        return sb.table(name)
 
+    def create_lead(self, business_id: UUID, lead: CrmLead) -> str:
         data = {
             "business_id": str(business_id),
             "customer_name": lead.customer_name,
@@ -110,32 +113,24 @@ class InternalCrmLiteProvider(CrmProvider):
             "status": lead.status,
             "notes": "",
         }
-        resp = sb.table("leads").insert(data).execute()
+        resp = self._table_admin("leads").insert(data).execute()
         if not resp.data:
             raise RuntimeError("Failed to create lead")
         lead.id = resp.data[0]["id"]
         return lead.id
 
     def update_lead(self, lead_id: str, updates: dict[str, Any]) -> bool:
-        sb = self._get_supabase()
-        if not sb:
-            raise RuntimeError("Database not configured")
-
         updates["updated_at"] = "now()"
-        resp = sb.table("leads").update(updates).eq("id", lead_id).execute()
+        resp = self._table_admin("leads").update(updates).eq("id", lead_id).execute()
         return bool(resp.data)
 
     def create_task(self, business_id: UUID, task: CrmTask) -> str:
-        sb = self._get_supabase()
-        if not sb:
-            raise RuntimeError("Database not configured")
-
         data = {
             "business_id": str(business_id),
             "title": task.title,
             "status": task.status,
         }
-        resp = sb.table("agent_tasks").insert(data).execute()
+        resp = self._table_admin("agent_tasks").insert(data).execute()
         if not resp.data:
             raise RuntimeError("Failed to create task")
         task.id = resp.data[0]["id"]

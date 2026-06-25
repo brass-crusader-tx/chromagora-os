@@ -24,6 +24,14 @@ def _get_supabase():
     return get_supabase()
 
 
+def _table_admin(name: str):
+    from chromagora_api.db import get_supabase_admin
+    sb = get_supabase_admin()
+    if not sb:
+        raise RuntimeError("Database not configured")
+    return sb.table(name)
+
+
 # ---------------------------------------------------------------------------
 # Core CRUD
 # ---------------------------------------------------------------------------
@@ -33,10 +41,6 @@ def create_workflow_run(
     data: WorkflowRunCreate,
 ) -> Optional[WorkflowRunResponse]:
     """Create a new workflow run."""
-    sb = _get_supabase()
-    if not sb:
-        return None
-
     payload = {
         "tenant_id": str(tenant_id),
         "business_id": str(data.business_id),
@@ -47,7 +51,7 @@ def create_workflow_run(
         "trace_id": data.trace_id or str(uuid4()),
         "status": WorkflowStatus.PENDING.value,
     }
-    resp = sb.table("workflow_runs").insert(payload).execute()
+    resp = _table_admin("workflow_runs").insert(payload).execute()
     if not resp.data:
         return None
     return WorkflowRunResponse(**resp.data[0])
@@ -58,10 +62,6 @@ def log_workflow_step(
     data: WorkflowStepLogCreate,
 ) -> Optional[WorkflowStepLogResponse]:
     """Log a workflow step execution."""
-    sb = _get_supabase()
-    if not sb:
-        return None
-
     payload = {
         "workflow_run_id": str(workflow_run_id),
         "step_name": data.step_name,
@@ -70,7 +70,7 @@ def log_workflow_step(
         "output_json": data.output_json,
         "error_message": data.error_message,
     }
-    resp = sb.table("workflow_step_logs").insert(payload).execute()
+    resp = _table_admin("workflow_step_logs").insert(payload).execute()
     if not resp.data:
         return None
     return WorkflowStepLogResponse(**resp.data[0])
@@ -84,10 +84,6 @@ def update_workflow_state(
     result_json: Optional[dict] = None,
 ) -> Optional[WorkflowRunResponse]:
     """Update workflow run status and state."""
-    sb = _get_supabase()
-    if not sb:
-        return None
-
     update_data: dict[str, Any] = {
         "status": status.value,
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -100,7 +96,7 @@ def update_workflow_state(
         update_data["result_json"] = result_json
 
     resp = (
-        sb.table("workflow_runs")
+        _table_admin("workflow_runs")
         .update(update_data)
         .eq("id", str(workflow_run_id))
         .execute()
@@ -120,10 +116,6 @@ def complete_workflow(
     result_json: Optional[dict] = None,
 ) -> Optional[WorkflowRunResponse]:
     """Mark a workflow as completed."""
-    sb = _get_supabase()
-    if not sb:
-        return None
-
     update_data: dict[str, Any] = {
         "status": WorkflowStatus.COMPLETED.value,
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -133,7 +125,7 @@ def complete_workflow(
         update_data["result_json"] = result_json
 
     resp = (
-        sb.table("workflow_runs")
+        _table_admin("workflow_runs")
         .update(update_data)
         .eq("id", str(workflow_run_id))
         .execute()
@@ -148,10 +140,6 @@ def fail_workflow(
     error_message: str = "Unknown error",
 ) -> Optional[WorkflowRunResponse]:
     """Mark a workflow as failed."""
-    sb = _get_supabase()
-    if not sb:
-        return None
-
     update_data: dict[str, Any] = {
         "status": WorkflowStatus.FAILED.value,
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -160,7 +148,7 @@ def fail_workflow(
     }
 
     resp = (
-        sb.table("workflow_runs")
+        _table_admin("workflow_runs")
         .update(update_data)
         .eq("id", str(workflow_run_id))
         .execute()

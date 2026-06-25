@@ -6,11 +6,19 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 from uuid import UUID
 
-from chromagora_api.db.base import get_supabase
+from chromagora_api.db.base import get_supabase, get_supabase_admin
 
 
 def _table(name: str):
     sb = get_supabase()
+    if not sb:
+        raise RuntimeError("Database not configured")
+    return sb.table(name)
+
+
+def _table_admin(name: str):
+    from chromagora_api.db.base import get_supabase_admin
+    sb = get_supabase_admin()
     if not sb:
         raise RuntimeError("Database not configured")
     return sb.table(name)
@@ -177,10 +185,6 @@ def list_mobile_approvals(business_id: UUID, status: str = "pending") -> list[di
 
 def mobile_approve(approval_id: UUID, decided_by: str = "operator") -> Optional[dict]:
     """Approve an approval request from mobile."""
-    sb = get_supabase()
-    if not sb:
-        raise RuntimeError("Database not configured")
-
     now = datetime.now(timezone.utc).isoformat()
     update_data = {
         "status": "approved",
@@ -189,7 +193,7 @@ def mobile_approve(approval_id: UUID, decided_by: str = "operator") -> Optional[
         "updated_at": now,
     }
     resp = (
-        sb.table("approval_requests")
+        _table_admin("approval_requests")
         .update(update_data)
         .eq("id", str(approval_id))
         .execute()
@@ -199,10 +203,6 @@ def mobile_approve(approval_id: UUID, decided_by: str = "operator") -> Optional[
 
 def mobile_reject(approval_id: UUID, decided_by: str = "operator", notes: str | None = None) -> Optional[dict]:
     """Reject an approval request from mobile."""
-    sb = get_supabase()
-    if not sb:
-        raise RuntimeError("Database not configured")
-
     now = datetime.now(timezone.utc).isoformat()
     update_data = {
         "status": "rejected",
@@ -212,7 +212,7 @@ def mobile_reject(approval_id: UUID, decided_by: str = "operator", notes: str | 
         "updated_at": now,
     }
     resp = (
-        sb.table("approval_requests")
+        _table_admin("approval_requests")
         .update(update_data)
         .eq("id", str(approval_id))
         .execute()
@@ -279,10 +279,6 @@ def capture_note(
     note_type: str = "field_note",
 ) -> dict[str, Any]:
     """Capture a field note. Stores as an event record."""
-    sb = get_supabase()
-    if not sb:
-        raise RuntimeError("Database not configured")
-
     now = datetime.now(timezone.utc).isoformat()
     payload = {
         "business_id": str(business_id),
@@ -298,7 +294,7 @@ def capture_note(
         "occurred_at": now,
         "created_at": now,
     }
-    resp = sb.table("events").insert(payload).execute()
+    resp = _table_admin("events").insert(payload).execute()
     return resp.data[0] if resp.data else {}
 
 
@@ -315,10 +311,6 @@ def capture_photo_metadata(
     taken_at: datetime | None = None,
 ) -> dict[str, Any]:
     """Capture photo metadata from mobile. No actual file upload — just a reference."""
-    sb = get_supabase()
-    if not sb:
-        raise RuntimeError("Database not configured")
-
     now = datetime.now(timezone.utc).isoformat()
     payload = {
         "business_id": str(business_id),
@@ -335,5 +327,5 @@ def capture_photo_metadata(
         "occurred_at": now,
         "created_at": now,
     }
-    resp = sb.table("events").insert(payload).execute()
+    resp = _table_admin("events").insert(payload).execute()
     return resp.data[0] if resp.data else {}

@@ -37,7 +37,7 @@ class TestInternalCrmLiteProvider:
         mock_sb.table.return_value = table_mock
 
         provider = InternalCrmLiteProvider()
-        with patch.object(provider, "_get_supabase", return_value=mock_sb):
+        with patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
             lead_id = provider.create_lead(uuid4(), CrmLead(
                 id="",
                 customer_name="Test",
@@ -57,7 +57,7 @@ class TestInternalCrmLiteProvider:
         mock_sb.table.return_value = table_mock
 
         provider = InternalCrmLiteProvider()
-        with patch.object(provider, "_get_supabase", return_value=mock_sb):
+        with patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
             result = provider.update_lead(str(uuid4()), {"status": "qualified"})
 
         assert result is True
@@ -71,7 +71,7 @@ class TestInternalCrmLiteProvider:
         mock_sb.table.return_value = table_mock
 
         provider = InternalCrmLiteProvider()
-        with patch.object(provider, "_get_supabase", return_value=mock_sb):
+        with patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
             result = provider.update_lead(str(uuid4()), {"status": "qualified"})
 
         assert result is False
@@ -89,7 +89,7 @@ class TestInternalCrmLiteProvider:
         mock_sb.table.return_value = table_mock
 
         provider = InternalCrmLiteProvider()
-        with patch.object(provider, "_get_supabase", return_value=mock_sb):
+        with patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
             task = CrmTask(id="", title="Follow up", status="pending")
             task_id = provider.create_task(uuid4(), task)
 

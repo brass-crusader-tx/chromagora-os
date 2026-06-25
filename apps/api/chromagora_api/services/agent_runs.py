@@ -21,6 +21,14 @@ def _get_supabase():
     return get_supabase()
 
 
+def _table_admin(name: str):
+    from chromagora_api.db import get_supabase_admin
+    sb = get_supabase_admin()
+    if not sb:
+        raise RuntimeError("Database not configured")
+    return sb.table(name)
+
+
 def start_agent_run(
     tenant_id: UUID,
     data: AgentRunCreate,
@@ -43,7 +51,7 @@ def start_agent_run(
         "input_json": data.input_json,
         "trace_id": trace_id,
     }
-    resp = sb.table("agent_runs").insert(payload).execute()
+    resp = _table_admin("agent_runs").insert(payload).execute()
     if not resp.data:
         return None
     return AgentRunResponse(**resp.data[0])
@@ -57,10 +65,6 @@ def complete_agent_run(
     model_tier: Optional[int] = None,
 ) -> Optional[AgentRunResponse]:
     """Mark an agent run as completed."""
-    sb = _get_supabase()
-    if not sb:
-        return None
-
     update_data: dict[str, Any] = {
         "status": AgentRunStatus.COMPLETED.value,
         "completed_at": datetime.now(timezone.utc).isoformat(),
@@ -75,7 +79,7 @@ def complete_agent_run(
         update_data["model_tier"] = model_tier
 
     resp = (
-        sb.table("agent_runs")
+        _table_admin("agent_runs")
         .update(update_data)
         .eq("id", str(run_id))
         .execute()
@@ -90,10 +94,6 @@ def fail_agent_run(
     error_message: str = "Unknown error",
 ) -> Optional[AgentRunResponse]:
     """Mark an agent run as failed."""
-    sb = _get_supabase()
-    if not sb:
-        return None
-
     update_data: dict[str, Any] = {
         "status": AgentRunStatus.FAILED.value,
         "error_message": error_message,
@@ -101,7 +101,7 @@ def fail_agent_run(
     }
 
     resp = (
-        sb.table("agent_runs")
+        _table_admin("agent_runs")
         .update(update_data)
         .eq("id", str(run_id))
         .execute()

@@ -171,7 +171,8 @@ async def test_mobile_approve_updates_status():
     table_mock.eq.return_value = table_mock
     table_mock.execute.return_value = MagicMock(data=[updated])
 
-    with patch("chromagora_api.services.mobile_service.get_supabase", return_value=mock_sb):
+    with patch("chromagora_api.services.mobile_service.get_supabase", return_value=mock_sb), \
+         patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/mobile/approvals/a1234567-1234-5678-1234-567812345678/approve")
 
@@ -188,7 +189,8 @@ async def test_mobile_approve_not_found_returns_404():
     table_mock.eq.return_value = table_mock
     table_mock.execute.return_value = MagicMock(data=[])
 
-    with patch("chromagora_api.services.mobile_service.get_supabase", return_value=mock_sb):
+    with patch("chromagora_api.services.mobile_service.get_supabase", return_value=mock_sb), \
+         patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post("/mobile/approvals/a1234567-1234-5678-1234-567812345678/approve")
 
@@ -214,7 +216,8 @@ async def test_mobile_reject_updates_status():
     table_mock.eq.return_value = table_mock
     table_mock.execute.return_value = MagicMock(data=[updated])
 
-    with patch("chromagora_api.services.mobile_service.get_supabase", return_value=mock_sb):
+    with patch("chromagora_api.services.mobile_service.get_supabase", return_value=mock_sb), \
+         patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/mobile/approvals/a1234567-1234-5678-1234-567812345678/reject?notes=Not%20ready%20yet"
@@ -279,7 +282,8 @@ async def test_mobile_capture_note_creates_event():
     table_mock.insert.return_value = table_mock
     table_mock.execute.return_value = MagicMock(data=[inserted])
 
-    with patch("chromagora_api.services.mobile_service.get_supabase", return_value=mock_sb):
+    with patch("chromagora_api.services.mobile_service.get_supabase", return_value=mock_sb), \
+         patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/mobile/capture/note",
@@ -314,7 +318,8 @@ async def test_mobile_capture_photo_creates_event():
     table_mock.insert.return_value = table_mock
     table_mock.execute.return_value = MagicMock(data=[inserted])
 
-    with patch("chromagora_api.services.mobile_service.get_supabase", return_value=mock_sb):
+    with patch("chromagora_api.services.mobile_service.get_supabase", return_value=mock_sb), \
+         patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/mobile/capture/photo-metadata",
@@ -361,7 +366,8 @@ def test_capture_note_service():
     table_mock.execute.return_value = MagicMock(data=[inserted])
     mock_sb.table.return_value = table_mock
 
-    with patch("chromagora_api.services.mobile_service.get_supabase", return_value=mock_sb):
+    with patch("chromagora_api.services.mobile_service.get_supabase", return_value=mock_sb), \
+         patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
         from uuid import uuid4
         result = mobile_service.capture_note(uuid4(), "Test note")
 
@@ -378,7 +384,8 @@ def test_capture_photo_metadata_service():
     table_mock.execute.return_value = MagicMock(data=[inserted])
     mock_sb.table.return_value = table_mock
 
-    with patch("chromagora_api.services.mobile_service.get_supabase", return_value=mock_sb):
+    with patch("chromagora_api.services.mobile_service.get_supabase", return_value=mock_sb), \
+         patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
         from uuid import uuid4
         result = mobile_service.capture_photo_metadata(uuid4(), photo_url="https://example.com/1.jpg")
 

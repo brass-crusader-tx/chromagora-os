@@ -24,16 +24,20 @@ logger = logging.getLogger(__name__)
 
 
 def _get_supabase():
-    from chromagora_api.db.base import get_supabase
+    from chromagora_api.db.base import get_supabase, get_supabase_admin
     return get_supabase()
+
+
+def _table_admin(name: str):
+    from chromagora_api.db.base import get_supabase_admin
+    sb = get_supabase_admin()
+    if not sb:
+        raise RuntimeError("Database not configured")
+    return sb.table(name)
 
 
 def create_call_record(business_id: UUID, data: CallRecordCreate) -> Optional[CallRecordResponse]:
     """Create a call record."""
-    sb = _get_supabase()
-    if not sb:
-        raise RuntimeError("Database not configured")
-
     payload = {
         "business_id": str(business_id),
         "caller_phone": data.caller_phone,
@@ -45,7 +49,7 @@ def create_call_record(business_id: UUID, data: CallRecordCreate) -> Optional[Ca
         "consent_recorded": data.consent_recorded,
         "trace_id": data.trace_id,
     }
-    resp = sb.table("call_records").insert(payload).execute()
+    resp = _table_admin("call_records").insert(payload).execute()
     if not resp.data:
         return None
     return CallRecordResponse(**resp.data[0])
@@ -82,12 +86,8 @@ def list_call_records(business_id: UUID, limit: int = 50) -> list[CallRecordResp
 
 def update_transcript(call_record_id: UUID, transcript_text: str) -> Optional[CallRecordResponse]:
     """Update the transcript text for a call record."""
-    sb = _get_supabase()
-    if not sb:
-        raise RuntimeError("Database not configured")
-
     resp = (
-        sb.table("call_records")
+        _table_admin("call_records")
         .update({"transcript_text": transcript_text, "updated_at": datetime.now(timezone.utc).isoformat()})
         .eq("id", str(call_record_id))
         .execute()
@@ -99,10 +99,6 @@ def update_transcript(call_record_id: UUID, transcript_text: str) -> Optional[Ca
 
 def create_call_summary(data: CallSummaryCreate) -> Optional[CallSummaryResponse]:
     """Create a call summary."""
-    sb = _get_supabase()
-    if not sb:
-        raise RuntimeError("Database not configured")
-
     payload = {
         "call_record_id": str(data.call_record_id),
         "intent": data.intent,
@@ -115,7 +111,7 @@ def create_call_summary(data: CallSummaryCreate) -> Optional[CallSummaryResponse
         "structured_notes": data.structured_notes or {},
         "confidence": data.confidence,
     }
-    resp = sb.table("call_summaries").insert(payload).execute()
+    resp = _table_admin("call_summaries").insert(payload).execute()
     if not resp.data:
         return None
     return CallSummaryResponse(**resp.data[0])

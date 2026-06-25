@@ -44,7 +44,8 @@ class TestVoiceService:
         }])
         mock_sb.table.return_value = table_mock
 
-        with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb):
+        with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb), \
+             patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
             data = CallRecordCreate(
                 business_id=uuid4(),
                 caller_phone="+15551234567",
@@ -90,7 +91,8 @@ class TestVoiceService:
         }])
         mock_sb.table.return_value = table_mock
 
-        with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb):
+        with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb), \
+             patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
             data = CallSummaryCreate(
                 call_record_id=uuid4(),
                 intent="estimate_request",
@@ -175,7 +177,8 @@ async def test_create_call_route(transport):
     }])
     mock_sb.table.return_value = table_mock
 
-    with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb):
+    with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb), \
+         patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
         async with AsyncClient(transport=transport, base_url="http://test") as client:
             response = await client.post("/voice/calls", json={
                 "business_id": "b1234567-1234-5678-1234-567812345678",
@@ -246,7 +249,8 @@ async def test_create_summary_route(transport):
     }])
     mock_sb.table.return_value = table_mock
 
-    with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb):
+    with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb), \
+         patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
         async with AsyncClient(transport=transport, base_url="http://test") as client:
             response = await client.post("/voice/summaries", json={
                 "call_record_id": "c1234567-1234-5678-1234-567812345678",

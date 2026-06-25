@@ -16,6 +16,14 @@ from uuid import UUID, uuid4
 logger = logging.getLogger(__name__)
 
 
+def _table_admin(name: str):
+    from chromagora_api.db.base import get_supabase_admin
+    sb = get_supabase_admin()
+    if not sb:
+        raise RuntimeError("Database not configured")
+    return sb.table(name)
+
+
 def ensure_trace_id(trace_id: Optional[str] = None) -> str:
     """Return the given trace_id or generate a new one."""
     return trace_id or str(uuid4())
@@ -35,11 +43,6 @@ def log_structured_event(
     Best-effort: never raises. Logs locally on DB failure.
     """
     try:
-        from chromagora_api.db.base import get_supabase
-        sb = get_supabase()
-        if not sb:
-            return
-
         payload = {
             "tenant_id": str(tenant_id),
             "trace_id": trace_id,
@@ -50,7 +53,7 @@ def log_structured_event(
             "context_json": context or {},
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
-        sb.table("structured_logs").insert(payload).execute()
+        _table_admin("structured_logs").insert(payload).execute()
     except Exception:
         logger.debug(
             "Failed to write structured log: trace_id=%s service=%s event=%s",
@@ -67,12 +70,7 @@ def propagate_trace_to_workflow_step(
 ) -> None:
     """Ensure a workflow step log inherits the parent workflow's trace_id."""
     try:
-        from chromagora_api.db.base import get_supabase
-        sb = get_supabase()
-        if not sb:
-            return
-
-        sb.table("workflow_step_logs").update({"trace_id": trace_id}).eq(
+        _table_admin("workflow_step_logs").update({"trace_id": trace_id}).eq(
             "workflow_run_id", str(workflow_run_id)
         ).eq("trace_id", None).execute()
     except Exception:
@@ -89,12 +87,7 @@ def propagate_trace_to_agent_run(
 ) -> None:
     """Ensure an agent run record carries the trace_id."""
     try:
-        from chromagora_api.db.base import get_supabase
-        sb = get_supabase()
-        if not sb:
-            return
-
-        sb.table("agent_runs").update({"trace_id": trace_id}).eq(
+        _table_admin("agent_runs").update({"trace_id": trace_id}).eq(
             "id", str(agent_run_id)
         ).eq("trace_id", None).execute()
     except Exception:
@@ -111,7 +104,7 @@ def get_records_by_trace(trace_id: str) -> dict[str, list[dict]]:
     Returns a dict of table_name -> list of matching records.
     Useful for debugging and observability.
     """
-    from chromagora_api.db.base import get_supabase
+    from chromagora_api.db.base import get_supabase, get_supabase_admin
     sb = get_supabase()
     if not sb:
         return {}

@@ -77,7 +77,8 @@ def test_create_artifact_inserts_record():
     inserted = {"id": str(uuid4()), "artifact_type": "note", "title": "Test"}
     mock_sb, table_mock = _mock_supabase(insert_data=[inserted])
 
-    with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb):
+    with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb), \
+         patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
         with patch.object(vm_module, "_get_supabase", return_value=mock_sb):
             result = vm_module.create_artifact(
                 business_id=uuid4(),
@@ -124,7 +125,8 @@ def test_delete_artifact_deletes_record():
     mock_execute = MagicMock(data=[{"id": str(uuid4())}])
     table_mock.execute.return_value = mock_execute
 
-    with patch.object(vm_module, "_get_supabase", return_value=mock_sb):
+    with patch.object(vm_module, "_get_supabase", return_value=mock_sb), \
+         patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
         result = vm_module.delete_artifact(uuid4())
 
     assert result is True
@@ -151,7 +153,8 @@ def test_delete_artifact_with_vector_enabled_also_deletes_embeddings():
 
         mock_sb.table.side_effect = table_router
 
-        with patch.object(vm_module, "_get_supabase", return_value=mock_sb):
+        with patch.object(vm_module, "_get_supabase", return_value=mock_sb), \
+             patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
             result = vm_module.delete_artifact(uuid4())
 
         mock_sb.table.assert_any_call("memory_embeddings")
@@ -171,7 +174,8 @@ def test_store_embedding_when_enabled():
         inserted = {"id": str(uuid4()), "embedding_model": "text-embedding-3-small"}
         mock_sb, table_mock = _mock_supabase(insert_data=[inserted])
 
-        with patch.object(vm_module, "_get_supabase", return_value=mock_sb):
+        with patch.object(vm_module, "_get_supabase", return_value=mock_sb), \
+             patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
             result = vm_module.store_embedding(
                 artifact_fk=uuid4(),
                 embedding_vector=[0.1] * 1536,

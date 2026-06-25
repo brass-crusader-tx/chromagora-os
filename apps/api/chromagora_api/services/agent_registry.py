@@ -22,6 +22,14 @@ def _get_supabase():
     return get_supabase()
 
 
+def _table_admin(name: str):
+    from chromagora_api.db import get_supabase_admin
+    sb = get_supabase_admin()
+    if not sb:
+        raise RuntimeError("Database not configured")
+    return sb.table(name)
+
+
 def create_agent_definition(data: AgentDefinitionCreate) -> Optional[AgentDefinitionResponse]:
     """Create a new agent definition."""
     sb = _get_supabase()
@@ -38,7 +46,7 @@ def create_agent_definition(data: AgentDefinitionCreate) -> Optional[AgentDefini
         "default_authority_level": data.default_authority_level,
         "default_model_tier": data.default_model_tier,
     }
-    resp = sb.table("agent_definitions").insert(payload).execute()
+    resp = _table_admin("agent_definitions").insert(payload).execute()
     if not resp.data:
         return None
     return AgentDefinitionResponse(**resp.data[0])
@@ -74,7 +82,7 @@ def create_business_agent_instance(
         "config_json": data.config_json,
         "authority_envelope_id": str(data.authority_envelope_id) if data.authority_envelope_id else None,
     }
-    resp = sb.table("business_agent_instances").insert(payload).execute()
+    resp = _table_admin("business_agent_instances").insert(payload).execute()
     if not resp.data:
         return None
     return BusinessAgentInstanceResponse(**resp.data[0])
