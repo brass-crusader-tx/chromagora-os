@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "Chromagora OS",
@@ -15,8 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="flex">
-        <Sidebar />
-        <main className="flex-1 overflow-auto">{children}</main>
+        <ThemeProvider>
+          <Sidebar />
+          <main className="flex-1 overflow-auto">{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   );

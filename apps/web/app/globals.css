@@ -6,10 +6,26 @@
   color-scheme: dark;
 }
 
+:root.light {
+  color-scheme: light;
+}
+
 body {
   @apply bg-bg text-text antialiased;
   font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
+
+/* Light mode overrides */
+.light .bg-bg { background-color: #f5f5f7; }
+.light .bg-bg-card { background-color: #ffffff; }
+.light .bg-bg-elevated { background-color: #eeeef2; }
+.light .border-bg-border { border-color: #d4d4dc; }
+.light .text-text { color: #1a1a2e; }
+.light .text-text-muted { color: #4a4a68; }
+.light .text-text-dim { color: #6b6b8a; }
+.light .bg-bg\/80 { background-color: rgba(245, 245, 247, 0.8); }
+.light .hover\:bg-bg-elevated:hover { background-color: #eeeef2; }
+.light .hover\:bg-bg-card:hover { background-color: #ffffff; }
 
 /* Scrollbar */
 ::-webkit-scrollbar {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { useState } from "react";
+import { useTheme } from "@/components/ThemeProvider";
 
 const navSections = [
   {
@@ -42,6 +43,7 @@ const navSections = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { theme } = useTheme();
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
@@ -114,7 +116,7 @@ export default function Sidebar() {
         </nav>
 
         <div className="p-3 border-t border-bg-border text-xs text-text-dim">
-          v0.1 — Dark Mode
+          v0.1 — {theme === "dark" ? "Dark" : "Light"} Mode
         </div>
       </aside>
     </>
