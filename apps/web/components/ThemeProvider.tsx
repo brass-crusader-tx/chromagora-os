@@ -21,13 +21,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem("chromagora-theme") as Theme | null;
     const initial = stored ?? "dark";
     setTheme(initial);
-    document.documentElement.classList.toggle("dark", initial === "dark");
+    document.documentElement.classList.toggle("light", initial === "light");
   }, []);
 
   function toggle() {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
-    document.documentElement.classList.toggle("dark", next === "dark");
+    document.documentElement.classList.toggle("light", next === "light");
     localStorage.setItem("chromagora-theme", next);
   }
 
