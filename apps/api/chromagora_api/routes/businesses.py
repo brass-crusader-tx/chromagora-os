@@ -1,4 +1,4 @@
-"""Business listing route."""
+"""Business listing and creation routes."""
 
 from __future__ import annotations
 
@@ -17,6 +17,26 @@ async def list_businesses():
         raise HTTPException(status_code=503, detail="Database not configured")
     resp = sb.table("businesses").select("id, name, created_at").execute()
     return resp.data or []
+
+
+@router.post("")
+async def create_business(body: dict):
+    """Create a new business."""
+    sb = get_supabase()
+    if not sb:
+        raise HTTPException(status_code=503, detail="Database not configured")
+    name = body.get("name", "")
+    if not name:
+        raise HTTPException(status_code=400, detail="name is required")
+    data = {
+        "name": name,
+        "slug": body.get("slug", name.lower().replace(" ", "-")),
+        "status": body.get("status", "active"),
+    }
+    resp = sb.table("businesses").insert(data).execute()
+    if not resp.data:
+        raise HTTPException(status_code=500, detail="Failed to create business")
+    return resp.data[0]
 
 
 @router.get("/{business_id}")

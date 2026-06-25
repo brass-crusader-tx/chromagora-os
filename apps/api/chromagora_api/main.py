@@ -80,3 +80,12 @@ app.include_router(voice_router)
 
 from chromagora_api.routes.autonomy import router as autonomy_router
 app.include_router(autonomy_router)
+
+from chromagora_api.routes.ledger import router as ledger_router
+app.include_router(ledger_router)
+
+from chromagora_api.routes.memory import router as memory_router
+app.include_router(memory_router)
+
+from chromagora_api.routes.opportunities import router as opportunities_router
+app.include_router(opportunities_router)

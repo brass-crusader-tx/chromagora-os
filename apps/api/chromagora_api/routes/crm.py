@@ -152,3 +152,22 @@ async def update_message_draft_endpoint(draft_id: UUID, data: MessageDraftUpdate
     if not result:
         raise HTTPException(status_code=404, detail="Message draft not found")
     return result
+
+
+# ---------------------------------------------------------------------------
+# Contacts (alias for leads)
+# ---------------------------------------------------------------------------
+
+@router.get("/contacts")
+async def list_contacts_endpoint(business_id: UUID, status: str | None = None):
+    """List contacts (alias for leads)."""
+    return list_leads(business_id, status)
+
+
+@router.post("/contacts", status_code=status.HTTP_201_CREATED)
+async def create_contact_endpoint(data: LeadCreate):
+    """Create a contact (alias for creating a lead)."""
+    result = create_lead(data)
+    if not result:
+        raise HTTPException(status_code=500, detail="Failed to create contact")
+    return result

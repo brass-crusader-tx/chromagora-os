@@ -28,6 +28,51 @@ from chromagora_schemas.agents import (
 router = APIRouter(tags=["agents"])
 
 
+# --- Frontend-facing Agent CRUD ---
+
+@router.get("/agents")
+async def list_agents(business_id: UUID | None = None):
+    """List agent instances (optionally filtered by business)."""
+    sb = get_supabase()
+    if not sb:
+        raise HTTPException(status_code=503, detail="Database not configured")
+    query = sb.table("business_agent_instances").select("*, agent_definitions(*)")
+    if business_id:
+        query = query.eq("business_id", str(business_id))
+    resp = query.execute()
+    return resp.data or []
+
+
+@router.post("/agents")
+async def create_agent(body: AgentDefinitionCreate):
+    """Create a new agent definition (simplified — creates definition only)."""
+    sb = get_supabase()
+    if not sb:
+        raise HTTPException(status_code=503, detail="Database not configured")
+    data = body.model_dump()
+    resp = sb.table("agent_definitions").insert(data).execute()
+    if not resp.data:
+        raise HTTPException(status_code=500, detail="Failed to create agent")
+    return resp.data[0]
+
+
+@router.get("/agents/{agent_id}")
+async def get_agent(agent_id: str):
+    """Get a single agent instance by ID."""
+    sb = get_supabase()
+    if not sb:
+        raise HTTPException(status_code=503, detail="Database not configured")
+    resp = (
+        sb.table("business_agent_instances")
+        .select("*, agent_definitions(*)")
+        .eq("id", agent_id)
+        .execute()
+    )
+    if not resp.data:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    return resp.data[0]
+
+
 # --- Agent Definitions ---
 
 @router.get("/agents/definitions")
