@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     api_host: str = "127.0.0.1"
     api_port: int = 8000
     chromagora_env: str = "development"
+    chromagora_tenant_id: str = ""
     version: str = "0.1.0"
 
     # Supabase

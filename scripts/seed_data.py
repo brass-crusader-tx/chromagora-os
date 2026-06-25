@@ -33,6 +33,22 @@ def days_ago(n):
     return (datetime.now(timezone.utc) - timedelta(days=n)).isoformat()
 
 
+def _strip_contact_columns_for_legacy_leads(payload):
+    metadata = {
+        "email": payload.pop("contact_email", None),
+        "phone": payload.pop("contact_phone", None),
+        "company": payload.pop("company_name", None),
+        "title": payload.pop("contact_title", None),
+    }
+    metadata = {k: v for k, v in metadata.items() if v}
+    if metadata:
+        payload["notes"] = (
+            f"{payload.get('notes', '')}\n\n"
+            f"[contact_metadata]{json.dumps(metadata, sort_keys=True)}"
+        ).strip()
+    return payload
+
+
 def seed():
     sb = get_supabase_admin()
     if not sb:
@@ -158,7 +174,7 @@ def seed():
             "description": f"Spending authority for {businesses_data[biz_idx]['legal_name']}",
             "max_dollar_exposure": amounts[biz_idx],
             "requires_approval": True,
-            "conditions_json": json.dumps({"max_single_tx": amounts[biz_idx]}),
+            "conditions_json": {"max_single_tx": amounts[biz_idx]},
             "is_active": True,
             "created_at": now_iso(),
             "updated_at": now_iso(),
@@ -298,18 +314,28 @@ def seed():
     statuses_lead = ["new", "contacted", "qualified", "new", "contacted", "qualified", "lost"]
     for i, (name, email, phone, source, svc) in enumerate(leads_data):
         biz_idx = i % len(biz_ids)
-        sb.table("leads").insert({
+        lead_payload = {
             "id": str(uuid4()),
             "business_id": biz_ids[biz_idx],
             "customer_name": name,
             "customer_contact": email,
+            "contact_email": email,
+            "contact_phone": phone,
+            "company_name": email.split("@", 1)[1].split(".", 1)[0].title(),
+            "contact_title": ["COO", "Lab Manager", "Property Lead", "Founder"][i % 4],
             "source": source,
             "service_type": svc,
             "status": statuses_lead[i],
             "notes": f"Lead #{i + 1} - interested in automation services.",
             "created_at": days_ago(i * 2 + 1),
             "updated_at": days_ago(i),
-        }).execute()
+        }
+        try:
+            sb.table("leads").insert(lead_payload).execute()
+        except Exception:
+            sb.table("leads").insert(
+                _strip_contact_columns_for_legacy_leads(lead_payload)
+            ).execute()
     print(f"  {len(leads_data)} leads created")
 
     # 11. Memory Artifacts
@@ -340,8 +366,9 @@ def seed():
     print("\n[12] Creating call records...")
     callers = ["+15551234567", "+15559876543", "+15555551234", "+15554443333", "+15552221111"]
     statuses_call = ["inbound", "outbound", "missed", "inbound", "voicemail", "inbound", "outbound", "missed", "inbound", "voicemail"]
+    call_ids = []
     for i in range(10):
-        sb.table("call_records").insert({
+        resp = sb.table("call_records").insert({
             "id": str(uuid4()),
             "business_id": biz_ids[i % len(biz_ids)],
             "caller_phone": callers[i % 5],
@@ -354,7 +381,30 @@ def seed():
             "created_at": days_ago(i),
             "updated_at": now_iso(),
         }).execute()
+        call_ids.append(resp.data[0]["id"])
     print("  10 call records created")
+
+    print("\n[12b] Creating call summaries...")
+    for i, call_id in enumerate(call_ids[:6]):
+        sb.table("call_summaries").insert({
+            "id": str(uuid4()),
+            "call_record_id": call_id,
+            "intent": ["estimate_request", "booking", "information", "schedule_change", "unknown", "estimate_request"][i],
+            "service_type": ["logistics", "analysis", "property", "robotics", None, "consulting"][i],
+            "address_or_area": ["Denver", "San Francisco", "New York", "Austin", None, "Remote"][i],
+            "urgency": ["normal", "high", "low", "normal", "normal", "high"][i],
+            "lead_quality": ["warm", "hot", "cold", "warm", "unknown", "hot"][i],
+            "escalation_required": i in (1, 5),
+            "escalation_reason": "High-intent caller requested same-week follow-up" if i in (1, 5) else None,
+            "structured_notes": {
+                "summary": f"Caller {i + 1} asked about pricing, timing, and next steps.",
+                "key_points": ["pricing discussed", "availability requested", "follow-up needed"],
+                "action_items": ["Create CRM follow-up task"] if i in (1, 5) else [],
+            },
+            "confidence": 0.72 + i * 0.03,
+            "created_at": days_ago(i),
+        }).execute()
+    print("  6 call summaries created")
 
     # 13. Workflow Definitions
     print("\n[13] Creating workflow definitions...")
@@ -428,6 +478,7 @@ def seed():
     print(f"  Leads:          {len(leads_data)}")
     print(f"  Memory:         {len(mem_data)}")
     print(f"  Calls:          10")
+    print("  Call summaries: 6")
     print(f"  Workflows:      {len(wf_data)}")
     print(f"  Quotes:         4")
 

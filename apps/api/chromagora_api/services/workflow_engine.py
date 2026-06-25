@@ -20,16 +20,43 @@ logger = logging.getLogger(__name__)
 
 
 def _get_supabase():
-    from chromagora_api.db import get_supabase
-    return get_supabase()
+    from chromagora_api.db.tenant import get_backend_supabase
+    return get_backend_supabase()
 
 
 def _table_admin(name: str):
-    from chromagora_api.db import get_supabase_admin
-    sb = get_supabase_admin()
-    if not sb:
-        raise RuntimeError("Database not configured")
-    return sb.table(name)
+    return _get_supabase().table(name)
+
+
+def _active_tenant_id(sb) -> str:
+    from chromagora_api.db.tenant import get_active_tenant_id
+
+    return get_active_tenant_id(sb)
+
+
+def _ensure_business_scope(sb, business_id: UUID, tenant_id: UUID | None = None) -> str:
+    from chromagora_api.db.tenant import get_business_tenant_id
+
+    scoped_tenant_id = get_business_tenant_id(str(business_id), sb)
+    if not scoped_tenant_id:
+        raise RuntimeError("Business not found")
+    if tenant_id and scoped_tenant_id != str(tenant_id):
+        raise RuntimeError("Business not found")
+    return scoped_tenant_id
+
+
+def _ensure_workflow_run_scope(sb, workflow_run_id: UUID) -> str:
+    tenant_id = _active_tenant_id(sb)
+    resp = (
+        sb.table("workflow_runs")
+        .select("tenant_id")
+        .eq("id", str(workflow_run_id))
+        .eq("tenant_id", tenant_id)
+        .execute()
+    )
+    if not resp.data:
+        raise RuntimeError("Workflow not found")
+    return tenant_id
 
 
 # ---------------------------------------------------------------------------
@@ -41,6 +68,8 @@ def create_workflow_run(
     data: WorkflowRunCreate,
 ) -> Optional[WorkflowRunResponse]:
     """Create a new workflow run."""
+    sb = _get_supabase()
+    _ensure_business_scope(sb, data.business_id, tenant_id)
     payload = {
         "tenant_id": str(tenant_id),
         "business_id": str(data.business_id),
@@ -51,7 +80,7 @@ def create_workflow_run(
         "trace_id": data.trace_id or str(uuid4()),
         "status": WorkflowStatus.PENDING.value,
     }
-    resp = _table_admin("workflow_runs").insert(payload).execute()
+    resp = sb.table("workflow_runs").insert(payload).execute()
     if not resp.data:
         return None
     return WorkflowRunResponse(**resp.data[0])
@@ -62,6 +91,8 @@ def log_workflow_step(
     data: WorkflowStepLogCreate,
 ) -> Optional[WorkflowStepLogResponse]:
     """Log a workflow step execution."""
+    sb = _get_supabase()
+    _ensure_workflow_run_scope(sb, workflow_run_id)
     payload = {
         "workflow_run_id": str(workflow_run_id),
         "step_name": data.step_name,
@@ -70,7 +101,7 @@ def log_workflow_step(
         "output_json": data.output_json,
         "error_message": data.error_message,
     }
-    resp = _table_admin("workflow_step_logs").insert(payload).execute()
+    resp = sb.table("workflow_step_logs").insert(payload).execute()
     if not resp.data:
         return None
     return WorkflowStepLogResponse(**resp.data[0])
@@ -84,6 +115,8 @@ def update_workflow_state(
     result_json: Optional[dict] = None,
 ) -> Optional[WorkflowRunResponse]:
     """Update workflow run status and state."""
+    sb = _get_supabase()
+    tenant_id = _ensure_workflow_run_scope(sb, workflow_run_id)
     update_data: dict[str, Any] = {
         "status": status.value,
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -96,9 +129,10 @@ def update_workflow_state(
         update_data["result_json"] = result_json
 
     resp = (
-        _table_admin("workflow_runs")
+        sb.table("workflow_runs")
         .update(update_data)
         .eq("id", str(workflow_run_id))
+        .eq("tenant_id", tenant_id)
         .execute()
     )
     if not resp.data:
@@ -116,6 +150,8 @@ def complete_workflow(
     result_json: Optional[dict] = None,
 ) -> Optional[WorkflowRunResponse]:
     """Mark a workflow as completed."""
+    sb = _get_supabase()
+    tenant_id = _ensure_workflow_run_scope(sb, workflow_run_id)
     update_data: dict[str, Any] = {
         "status": WorkflowStatus.COMPLETED.value,
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -125,9 +161,10 @@ def complete_workflow(
         update_data["result_json"] = result_json
 
     resp = (
-        _table_admin("workflow_runs")
+        sb.table("workflow_runs")
         .update(update_data)
         .eq("id", str(workflow_run_id))
+        .eq("tenant_id", tenant_id)
         .execute()
     )
     if not resp.data:
@@ -140,6 +177,8 @@ def fail_workflow(
     error_message: str = "Unknown error",
 ) -> Optional[WorkflowRunResponse]:
     """Mark a workflow as failed."""
+    sb = _get_supabase()
+    tenant_id = _ensure_workflow_run_scope(sb, workflow_run_id)
     update_data: dict[str, Any] = {
         "status": WorkflowStatus.FAILED.value,
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -148,9 +187,10 @@ def fail_workflow(
     }
 
     resp = (
-        _table_admin("workflow_runs")
+        sb.table("workflow_runs")
         .update(update_data)
         .eq("id", str(workflow_run_id))
+        .eq("tenant_id", tenant_id)
         .execute()
     )
     if not resp.data:

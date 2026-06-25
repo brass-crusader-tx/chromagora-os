@@ -17,16 +17,22 @@ logger = logging.getLogger(__name__)
 
 
 def _get_supabase():
-    from chromagora_api.db import get_supabase
-    return get_supabase()
+    from chromagora_api.db.tenant import get_backend_supabase
+    return get_backend_supabase()
 
 
 def _table_admin(name: str):
-    from chromagora_api.db import get_supabase_admin
-    sb = get_supabase_admin()
-    if not sb:
-        raise RuntimeError("Database not configured")
-    return sb.table(name)
+    return _get_supabase().table(name)
+
+
+def _ensure_business_scope(sb, business_id: UUID, tenant_id: UUID | None = None) -> None:
+    from chromagora_api.db.tenant import get_business_tenant_id
+
+    scoped_tenant_id = get_business_tenant_id(str(business_id), sb)
+    if not scoped_tenant_id:
+        raise RuntimeError("Business not found")
+    if tenant_id and scoped_tenant_id != str(tenant_id):
+        raise RuntimeError("Business not found")
 
 
 def start_agent_run(
@@ -37,6 +43,7 @@ def start_agent_run(
     sb = _get_supabase()
     if not sb:
         return None
+    _ensure_business_scope(sb, data.business_id, tenant_id)
 
     trace_id = str(uuid4())
     payload = {
@@ -116,6 +123,7 @@ def list_agent_runs(business_id: UUID) -> list[dict]:
     sb = _get_supabase()
     if not sb:
         return []
+    _ensure_business_scope(sb, business_id)
     resp = (
         sb.table("agent_runs")
         .select("*")

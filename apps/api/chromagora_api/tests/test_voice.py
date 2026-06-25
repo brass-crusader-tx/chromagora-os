@@ -72,29 +72,38 @@ class TestVoiceService:
         assert result is None
 
     def test_create_call_summary(self):
+        call_record_id = uuid4()
         mock_sb = MagicMock()
         table_mock = MagicMock()
+        table_mock.select.return_value = table_mock
+        table_mock.eq.return_value = table_mock
         table_mock.insert.return_value = table_mock
-        table_mock.execute.return_value = MagicMock(data=[{
-            "id": str(uuid4()),
-            "call_record_id": str(uuid4()),
-            "intent": "estimate_request",
-            "service_type": None,
-            "address_or_area": None,
-            "urgency": "normal",
-            "lead_quality": "unknown",
-            "escalation_required": False,
-            "escalation_reason": None,
-            "structured_notes": {},
-            "confidence": 0.8,
-            "created_at": "2026-06-24T10:00:00Z",
-        }])
+        table_mock.execute.side_effect = [
+            MagicMock(data=[{
+                "id": str(call_record_id),
+                "business_id": str(uuid4()),
+            }]),
+            MagicMock(data=[{
+                "id": str(uuid4()),
+                "call_record_id": str(call_record_id),
+                "intent": "estimate_request",
+                "service_type": None,
+                "address_or_area": None,
+                "urgency": "normal",
+                "lead_quality": "unknown",
+                "escalation_required": False,
+                "escalation_reason": None,
+                "structured_notes": {},
+                "confidence": 0.8,
+                "created_at": "2026-06-24T10:00:00Z",
+            }]),
+        ]
         mock_sb.table.return_value = table_mock
 
         with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb), \
              patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
             data = CallSummaryCreate(
-                call_record_id=uuid4(),
+                call_record_id=call_record_id,
                 intent="estimate_request",
                 urgency="normal",
                 lead_quality="warm",
@@ -230,30 +239,39 @@ async def test_get_summary_not_found(transport):
 @pytest.mark.asyncio
 async def test_create_summary_route(transport):
     """POST /voice/summaries creates a call summary."""
+    call_record_id = "c1234567-1234-5678-1234-567812345678"
     mock_sb = MagicMock()
     table_mock = MagicMock()
+    table_mock.select.return_value = table_mock
+    table_mock.eq.return_value = table_mock
     table_mock.insert.return_value = table_mock
-    table_mock.execute.return_value = MagicMock(data=[{
-        "id": str(uuid4()),
-        "call_record_id": "c1234567-1234-5678-1234-567812345678",
-        "intent": "estimate_request",
-        "service_type": "lawn_care",
-        "address_or_area": None,
-        "urgency": "normal",
-        "lead_quality": "warm",
-        "escalation_required": False,
-        "escalation_reason": None,
-        "structured_notes": {},
-        "confidence": 0.7,
-        "created_at": "2026-06-24T10:00:00Z",
-    }])
+    table_mock.execute.side_effect = [
+        MagicMock(data=[{
+            "id": call_record_id,
+            "business_id": str(uuid4()),
+        }]),
+        MagicMock(data=[{
+            "id": str(uuid4()),
+            "call_record_id": call_record_id,
+            "intent": "estimate_request",
+            "service_type": "lawn_care",
+            "address_or_area": None,
+            "urgency": "normal",
+            "lead_quality": "warm",
+            "escalation_required": False,
+            "escalation_reason": None,
+            "structured_notes": {},
+            "confidence": 0.7,
+            "created_at": "2026-06-24T10:00:00Z",
+        }]),
+    ]
     mock_sb.table.return_value = table_mock
 
     with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb), \
          patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
         async with AsyncClient(transport=transport, base_url="http://test") as client:
             response = await client.post("/voice/summaries", json={
-                "call_record_id": "c1234567-1234-5678-1234-567812345678",
+                "call_record_id": call_record_id,
                 "intent": "estimate_request",
                 "service_type": "lawn_care",
                 "urgency": "normal",

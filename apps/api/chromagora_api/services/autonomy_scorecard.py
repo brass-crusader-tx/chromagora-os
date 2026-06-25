@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from typing import Any, Optional
 from uuid import UUID
 
-from chromagora_api.db.base import get_supabase
+from chromagora_api.db.tenant import get_backend_supabase, get_business_tenant_id
 
 
 @dataclass
@@ -34,18 +34,36 @@ class AutonomyScorecard:
     autonomy_level_current: int = 1
     autonomy_level_recommended: int = 1
     escalation_rate: float = 0.0
+    total_envelopes: int = 0
+    avg_autonomy: float = 0.0
+    max_autonomy: int = 0
+    active_tools: int = 0
+    total_tools: int = 0
     notes: list[str] = field(default_factory=list)
+
+
+def get_supabase():
+    """Compatibility seam for tests; production uses the backend admin client."""
+    return get_backend_supabase()
 
 
 def get_autonomy_scorecard(business_id: UUID) -> AutonomyScorecard:
     """Generate autonomy scorecard for a business by querying Supabase."""
-    sb = get_supabase()
+    try:
+        sb = get_supabase()
+    except RuntimeError:
+        scorecard = AutonomyScorecard(business_id=str(business_id))
+        scorecard.notes.append("Database not available")
+        return scorecard
     if not sb:
         scorecard = AutonomyScorecard(business_id=str(business_id))
         scorecard.notes.append("Database not available")
         return scorecard
 
     bid = str(business_id)
+    if not get_business_tenant_id(bid, sb):
+        raise RuntimeError("Business not found")
+
     now = datetime.now(timezone.utc).isoformat()
     scorecard = AutonomyScorecard(
         business_id=bid,
@@ -111,6 +129,7 @@ def get_autonomy_scorecard(business_id: UUID) -> AutonomyScorecard:
 
     # Autonomy level recommendation
     scorecard.autonomy_level_current = _get_current_autonomy_level(sb, bid)
+    _populate_frontend_summary(sb, bid, scorecard)
     scorecard.autonomy_level_recommended = _recommend_autonomy_level(scorecard)
     scorecard.notes = _generate_notes(scorecard)
 
@@ -130,6 +149,35 @@ def _get_current_autonomy_level(sb, bid: str) -> int:
     if not envelopes:
         return 1
     return max(e["autonomy_level"] for e in envelopes)
+
+
+def _populate_frontend_summary(sb, bid: str, sc: AutonomyScorecard) -> None:
+    """Populate the compact metrics used by the business detail UI."""
+    env_resp = (
+        sb.table("authority_envelopes")
+        .select("autonomy_level, is_active")
+        .eq("business_id", bid)
+        .execute()
+    )
+    envelopes = env_resp.data or []
+    active_levels = [
+        int(env.get("autonomy_level") or 0)
+        for env in envelopes
+        if env.get("is_active", True)
+    ]
+    sc.total_envelopes = len(envelopes)
+    sc.max_autonomy = max(active_levels, default=0)
+    sc.avg_autonomy = round(sum(active_levels) / len(active_levels), 1) if active_levels else 0.0
+
+    tools_resp = (
+        sb.table("business_tool_permissions")
+        .select("id, is_enabled")
+        .eq("business_id", bid)
+        .execute()
+    )
+    tools = tools_resp.data or []
+    sc.total_tools = len(tools)
+    sc.active_tools = len([tool for tool in tools if tool.get("is_enabled")])
 
 
 def _recommend_autonomy_level(sc: AutonomyScorecard) -> int:
@@ -224,5 +272,10 @@ def scorecard_to_dict(sc: AutonomyScorecard) -> dict[str, Any]:
         "autonomy_level_current": sc.autonomy_level_current,
         "autonomy_level_recommended": sc.autonomy_level_recommended,
         "escalation_rate": sc.escalation_rate,
+        "total_envelopes": sc.total_envelopes,
+        "avg_autonomy": sc.avg_autonomy,
+        "max_autonomy": sc.max_autonomy,
+        "active_tools": sc.active_tools,
+        "total_tools": sc.total_tools,
         "notes": sc.notes,
     }

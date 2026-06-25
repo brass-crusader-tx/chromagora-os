@@ -17,6 +17,10 @@ class LeadBase(BaseModel):
     business_id: UUID
     customer_name: str
     customer_contact: str
+    contact_email: Optional[str] = None
+    contact_phone: Optional[str] = None
+    company_name: Optional[str] = None
+    contact_title: Optional[str] = None
     source: Optional[str] = None
     service_type: Optional[str] = None
     status: str = "new"
@@ -30,6 +34,10 @@ class LeadCreate(LeadBase):
 class LeadUpdate(BaseModel):
     customer_name: Optional[str] = None
     customer_contact: Optional[str] = None
+    contact_email: Optional[str] = None
+    contact_phone: Optional[str] = None
+    company_name: Optional[str] = None
+    contact_title: Optional[str] = None
     source: Optional[str] = None
     service_type: Optional[str] = None
     status: Optional[str] = None

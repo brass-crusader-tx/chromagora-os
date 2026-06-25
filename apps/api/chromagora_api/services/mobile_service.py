@@ -6,22 +6,31 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 from uuid import UUID
 
-from chromagora_api.db.base import get_supabase, get_supabase_admin
+from chromagora_api.db.tenant import (
+    get_active_tenant_id,
+    get_backend_supabase,
+    get_business_tenant_id,
+)
+
+
+def get_supabase():
+    """Compatibility seam for tests; production uses the backend admin client."""
+    return get_backend_supabase()
 
 
 def _table(name: str):
-    sb = get_supabase()
-    if not sb:
-        raise RuntimeError("Database not configured")
-    return sb.table(name)
+    return get_supabase().table(name)
 
 
 def _table_admin(name: str):
-    from chromagora_api.db.base import get_supabase_admin
-    sb = get_supabase_admin()
-    if not sb:
-        raise RuntimeError("Database not configured")
-    return sb.table(name)
+    return get_supabase().table(name)
+
+
+def _ensure_business_scope(sb, business_id: UUID) -> str:
+    tenant_id = get_business_tenant_id(str(business_id), sb)
+    if not tenant_id:
+        raise RuntimeError("Business not found")
+    return tenant_id
 
 
 # ---------------------------------------------------------------------------
@@ -37,6 +46,7 @@ def get_mobile_today(business_id: UUID) -> dict[str, Any]:
     sb = get_supabase()
     if not sb:
         raise RuntimeError("Database not configured")
+    _ensure_business_scope(sb, business_id)
 
     bid = str(business_id)
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -140,6 +150,7 @@ def list_mobile_approvals(business_id: UUID, status: str = "pending") -> list[di
     sb = get_supabase()
     if not sb:
         raise RuntimeError("Database not configured")
+    _ensure_business_scope(sb, business_id)
 
     bid = str(business_id)
 
@@ -185,6 +196,10 @@ def list_mobile_approvals(business_id: UUID, status: str = "pending") -> list[di
 
 def mobile_approve(approval_id: UUID, decided_by: str = "operator") -> Optional[dict]:
     """Approve an approval request from mobile."""
+    sb = get_supabase()
+    if not sb:
+        raise RuntimeError("Database not configured")
+    tenant_id = get_active_tenant_id(sb)
     now = datetime.now(timezone.utc).isoformat()
     update_data = {
         "status": "approved",
@@ -193,9 +208,11 @@ def mobile_approve(approval_id: UUID, decided_by: str = "operator") -> Optional[
         "updated_at": now,
     }
     resp = (
-        _table_admin("approval_requests")
+        sb.table("approval_requests")
         .update(update_data)
         .eq("id", str(approval_id))
+        .eq("tenant_id", tenant_id)
+        .eq("status", "pending")
         .execute()
     )
     return resp.data[0] if resp.data else None
@@ -203,6 +220,10 @@ def mobile_approve(approval_id: UUID, decided_by: str = "operator") -> Optional[
 
 def mobile_reject(approval_id: UUID, decided_by: str = "operator", notes: str | None = None) -> Optional[dict]:
     """Reject an approval request from mobile."""
+    sb = get_supabase()
+    if not sb:
+        raise RuntimeError("Database not configured")
+    tenant_id = get_active_tenant_id(sb)
     now = datetime.now(timezone.utc).isoformat()
     update_data = {
         "status": "rejected",
@@ -212,9 +233,11 @@ def mobile_reject(approval_id: UUID, decided_by: str = "operator", notes: str | 
         "updated_at": now,
     }
     resp = (
-        _table_admin("approval_requests")
+        sb.table("approval_requests")
         .update(update_data)
         .eq("id", str(approval_id))
+        .eq("tenant_id", tenant_id)
+        .eq("status", "pending")
         .execute()
     )
     return resp.data[0] if resp.data else None
@@ -229,6 +252,7 @@ def get_mobile_command_feed(business_id: UUID, limit: int = 30) -> list[dict]:
     sb = get_supabase()
     if not sb:
         raise RuntimeError("Database not configured")
+    _ensure_business_scope(sb, business_id)
 
     resp = (
         sb.table("events")
@@ -250,6 +274,7 @@ def get_mobile_jobs_today(business_id: UUID) -> list[dict]:
     sb = get_supabase()
     if not sb:
         raise RuntimeError("Database not configured")
+    _ensure_business_scope(sb, business_id)
 
     now = datetime.now(timezone.utc)
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
@@ -279,8 +304,13 @@ def capture_note(
     note_type: str = "field_note",
 ) -> dict[str, Any]:
     """Capture a field note. Stores as an event record."""
+    sb = get_supabase()
+    if not sb:
+        raise RuntimeError("Database not configured")
+    tenant_id = _ensure_business_scope(sb, business_id)
     now = datetime.now(timezone.utc).isoformat()
     payload = {
+        "tenant_id": tenant_id,
         "business_id": str(business_id),
         "event_type": "mobile.note_captured",
         "source_type": "mobile_capture",
@@ -294,7 +324,7 @@ def capture_note(
         "occurred_at": now,
         "created_at": now,
     }
-    resp = _table_admin("events").insert(payload).execute()
+    resp = sb.table("events").insert(payload).execute()
     return resp.data[0] if resp.data else {}
 
 
@@ -311,8 +341,13 @@ def capture_photo_metadata(
     taken_at: datetime | None = None,
 ) -> dict[str, Any]:
     """Capture photo metadata from mobile. No actual file upload — just a reference."""
+    sb = get_supabase()
+    if not sb:
+        raise RuntimeError("Database not configured")
+    tenant_id = _ensure_business_scope(sb, business_id)
     now = datetime.now(timezone.utc).isoformat()
     payload = {
+        "tenant_id": tenant_id,
         "business_id": str(business_id),
         "event_type": "mobile.photo_captured",
         "source_type": "mobile_capture",
@@ -327,5 +362,5 @@ def capture_photo_metadata(
         "occurred_at": now,
         "created_at": now,
     }
-    resp = _table_admin("events").insert(payload).execute()
+    resp = sb.table("events").insert(payload).execute()
     return resp.data[0] if resp.data else {}

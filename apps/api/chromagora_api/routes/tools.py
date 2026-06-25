@@ -8,9 +8,26 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 from typing import Any, Optional
 
-from chromagora_api.db.base import get_supabase
+from chromagora_api.db.tenant import get_backend_supabase, get_business_tenant_id
 
 router = APIRouter(prefix="/businesses/{business_id}/tools", tags=["tools"])
+
+
+def get_supabase():
+    """Compatibility seam for tests; production uses the backend admin client."""
+    return get_backend_supabase()
+
+
+def _scoped_client(business_id: UUID):
+    try:
+        sb = get_supabase()
+        if not sb:
+            raise RuntimeError("Database not configured")
+        if not get_business_tenant_id(str(business_id), sb):
+            raise HTTPException(status_code=404, detail="Business not found")
+        return sb
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
 
 # ---------------------------------------------------------------------------
@@ -53,9 +70,7 @@ class BusinessToolPermissionResponse(BaseModel):
 @router.get("/definitions", response_model=list[dict])
 async def list_tool_definitions(business_id: UUID):
     """List all available tool definitions."""
-    sb = get_supabase()
-    if not sb:
-        raise HTTPException(status_code=503, detail="Database not configured")
+    sb = _scoped_client(business_id)
     resp = (
         sb.table("tool_definitions")
         .select("*")
@@ -72,9 +87,7 @@ async def list_tool_definitions(business_id: UUID):
 @router.get("", response_model=list[dict])
 async def list_business_tool_permissions(business_id: UUID):
     """List tool permissions for a business, joined with definitions."""
-    sb = get_supabase()
-    if not sb:
-        raise HTTPException(status_code=503, detail="Database not configured")
+    sb = _scoped_client(business_id)
     resp = (
         sb.table("business_tool_permissions")
         .select("*, tool_definitions(*)")
@@ -87,9 +100,7 @@ async def list_business_tool_permissions(business_id: UUID):
 @router.post("/{tool_definition_id}/enable", status_code=status.HTTP_201_CREATED)
 async def enable_tool(business_id: UUID, tool_definition_id: UUID):
     """Enable a tool for a business."""
-    sb = get_supabase()
-    if not sb:
-        raise HTTPException(status_code=503, detail="Database not configured")
+    sb = _scoped_client(business_id)
 
     # Check tool definition exists
     tool_resp = (
@@ -120,9 +131,7 @@ async def enable_tool(business_id: UUID, tool_definition_id: UUID):
 @router.post("/{tool_definition_id}/disable", status_code=status.HTTP_200_OK)
 async def disable_tool(business_id: UUID, tool_definition_id: UUID):
     """Disable a tool for a business."""
-    sb = get_supabase()
-    if not sb:
-        raise HTTPException(status_code=503, detail="Database not configured")
+    sb = _scoped_client(business_id)
 
     resp = (
         sb.table("business_tool_permissions")
@@ -145,9 +154,7 @@ async def update_tool_permission(
     body: ToolPermissionUpdate,
 ):
     """Update tool permission settings for a business."""
-    sb = get_supabase()
-    if not sb:
-        raise HTTPException(status_code=503, detail="Database not configured")
+    sb = _scoped_client(business_id)
 
     update_data = {k: v for k, v in body.model_dump().items() if v is not None}
     if not update_data:

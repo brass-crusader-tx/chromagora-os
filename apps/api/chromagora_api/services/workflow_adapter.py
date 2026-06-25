@@ -110,16 +110,19 @@ class WorkflowLiteAdapter(WorkflowAdapter):
         return result is not None
 
     def get_workflow_status(self, workflow_id: str) -> dict[str, Any]:
-        from chromagora_api.db.base import get_supabase
+        from chromagora_api.db.tenant import get_active_tenant_id, get_backend_supabase
 
-        sb = get_supabase()
-        if not sb:
+        try:
+            sb = get_backend_supabase()
+            tenant_id = get_active_tenant_id(sb)
+        except RuntimeError:
             return {"error": "Database not configured"}
 
         resp = (
             sb.table("workflow_runs")
             .select("id, status, current_step, state_json, result_json, started_at, completed_at, updated_at")
             .eq("id", workflow_id)
+            .eq("tenant_id", tenant_id)
             .execute()
         )
         if not resp.data:

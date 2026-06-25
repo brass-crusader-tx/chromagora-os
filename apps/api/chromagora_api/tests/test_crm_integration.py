@@ -49,22 +49,36 @@ class TestInternalCrmLiteProvider:
         mock_sb.table.assert_called_with("leads")
 
     def test_update_lead(self):
+        lead_id = str(uuid4())
+        business_id = str(uuid4())
         mock_sb = MagicMock()
         table_mock = MagicMock()
+        table_mock.select.return_value = table_mock
         table_mock.update.return_value = table_mock
         table_mock.eq.return_value = table_mock
-        table_mock.execute.return_value = MagicMock(data=[{"id": str(uuid4())}])
+        table_mock.execute.side_effect = [
+            MagicMock(data=[{
+                "id": lead_id,
+                "business_id": business_id,
+                "customer_name": "John",
+                "customer_contact": "555-1234",
+                "source": "referral",
+                "status": "new",
+            }]),
+            MagicMock(data=[{"id": lead_id}]),
+        ]
         mock_sb.table.return_value = table_mock
 
         provider = InternalCrmLiteProvider()
         with patch("chromagora_api.db.base.get_supabase_admin", return_value=mock_sb):
-            result = provider.update_lead(str(uuid4()), {"status": "qualified"})
+            result = provider.update_lead(lead_id, {"status": "qualified"})
 
         assert result is True
 
     def test_update_lead_not_found(self):
         mock_sb = MagicMock()
         table_mock = MagicMock()
+        table_mock.select.return_value = table_mock
         table_mock.update.return_value = table_mock
         table_mock.eq.return_value = table_mock
         table_mock.execute.return_value = MagicMock(data=[])
@@ -103,6 +117,7 @@ class TestInternalCrmLiteProvider:
         table_mock.eq.return_value = table_mock
         table_mock.execute.return_value = MagicMock(data=[{
             "id": lead_id,
+            "business_id": str(uuid4()),
             "customer_name": "John",
             "customer_contact": "555-1234",
             "source": "referral",

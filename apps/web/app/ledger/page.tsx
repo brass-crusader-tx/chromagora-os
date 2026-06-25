@@ -14,7 +14,7 @@ interface LedgerEntry {
   actor: string;
   agent_id?: string;
   business_id?: string;
-  dollar_impact?: number;
+  dollar_impact?: number | null;
   status: string;
   created_at: string;
   metadata?: Record<string, unknown>;
@@ -116,7 +116,7 @@ export default function LedgerPage() {
                     <StatusBadge status={entry.status} />
                   </td>
                   <td className="py-3 px-4 text-right">
-                    {entry.dollar_impact ? (
+                    {typeof entry.dollar_impact === "number" ? (
                       <span className={entry.dollar_impact >= 0 ? "text-success" : "text-danger"}>
                         {entry.dollar_impact >= 0 ? "+" : ""}${entry.dollar_impact.toLocaleString()}
                       </span>

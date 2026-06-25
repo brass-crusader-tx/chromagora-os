@@ -94,17 +94,34 @@ class InternalCrmLiteProvider(CrmProvider):
     """Internal CRM using Supabase tables (leads, quotes, jobs)."""
 
     def _get_supabase(self):
-        from chromagora_api.db.base import get_supabase, get_supabase_admin
-        return get_supabase()
+        from chromagora_api.db.tenant import get_backend_supabase
+        return get_backend_supabase()
 
     def _table_admin(self, name: str):
-        from chromagora_api.db.base import get_supabase_admin
-        sb = get_supabase_admin()
-        if not sb:
-            raise RuntimeError("Database not configured")
-        return sb.table(name)
+        return self._get_supabase().table(name)
+
+    def _ensure_business_scope(self, business_id: UUID) -> None:
+        from chromagora_api.db.tenant import get_business_tenant_id
+
+        if not get_business_tenant_id(str(business_id), self._get_supabase()):
+            raise RuntimeError("Business not found")
+
+    def _ensure_lead_scope(self, lead_id: str) -> Optional[dict[str, Any]]:
+        sb = self._get_supabase()
+        resp = (
+            sb.table("leads")
+            .select("id, business_id, customer_name, customer_contact, source, status")
+            .eq("id", lead_id)
+            .execute()
+        )
+        if not resp.data:
+            return None
+        row = resp.data[0]
+        self._ensure_business_scope(UUID(row["business_id"]))
+        return row
 
     def create_lead(self, business_id: UUID, lead: CrmLead) -> str:
+        self._ensure_business_scope(business_id)
         data = {
             "business_id": str(business_id),
             "customer_name": lead.customer_name,
@@ -120,11 +137,14 @@ class InternalCrmLiteProvider(CrmProvider):
         return lead.id
 
     def update_lead(self, lead_id: str, updates: dict[str, Any]) -> bool:
+        if not self._ensure_lead_scope(lead_id):
+            return False
         updates["updated_at"] = "now()"
         resp = self._table_admin("leads").update(updates).eq("id", lead_id).execute()
         return bool(resp.data)
 
     def create_task(self, business_id: UUID, task: CrmTask) -> str:
+        self._ensure_business_scope(business_id)
         data = {
             "business_id": str(business_id),
             "title": task.title,
@@ -141,10 +161,9 @@ class InternalCrmLiteProvider(CrmProvider):
         if not sb:
             return None
 
-        resp = sb.table("leads").select("id, customer_name, customer_contact, source, status").eq("id", lead_id).execute()
-        if not resp.data:
+        row = self._ensure_lead_scope(lead_id)
+        if not row:
             return None
-        row = resp.data[0]
         return CrmLead(
             id=row["id"],
             customer_name=row["customer_name"],
@@ -157,6 +176,7 @@ class InternalCrmLiteProvider(CrmProvider):
         sb = self._get_supabase()
         if not sb:
             return []
+        self._ensure_business_scope(business_id)
 
         resp = (
             sb.table("leads")

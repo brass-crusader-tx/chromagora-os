@@ -17,11 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 def _table_admin(name: str):
-    from chromagora_api.db.base import get_supabase_admin
-    sb = get_supabase_admin()
-    if not sb:
-        raise RuntimeError("Database not configured")
-    return sb.table(name)
+    from chromagora_api.db.tenant import get_backend_supabase
+
+    return get_backend_supabase().table(name)
 
 
 def ensure_trace_id(trace_id: Optional[str] = None) -> str:
@@ -104,9 +102,16 @@ def get_records_by_trace(trace_id: str) -> dict[str, list[dict]]:
     Returns a dict of table_name -> list of matching records.
     Useful for debugging and observability.
     """
-    from chromagora_api.db.base import get_supabase, get_supabase_admin
-    sb = get_supabase()
-    if not sb:
+    from chromagora_api.db.tenant import (
+        get_active_business_ids,
+        get_active_tenant_id,
+        get_backend_supabase,
+    )
+    try:
+        sb = get_backend_supabase()
+        tenant_id = get_active_tenant_id(sb)
+        business_ids = get_active_business_ids(sb)
+    except RuntimeError:
         return {}
 
     tables = [
@@ -126,9 +131,46 @@ def get_records_by_trace(trace_id: str) -> dict[str, list[dict]]:
     ]
 
     results: dict[str, list[dict]] = {}
+    tenant_scoped_tables = {
+        "events",
+        "workflow_runs",
+        "action_proposals",
+        "approval_requests",
+        "action_executions",
+        "agent_runs",
+        "structured_logs",
+    }
+    business_scoped_tables = {"leads", "quotes", "jobs", "message_drafts", "spawn_contracts"}
     for table in tables:
         try:
-            resp = sb.table(table).select("*").eq("trace_id", trace_id).execute()
+            if table == "workflow_step_logs":
+                run_resp = (
+                    sb.table("workflow_runs")
+                    .select("id")
+                    .eq("tenant_id", tenant_id)
+                    .execute()
+                )
+                run_ids = [row["id"] for row in (run_resp.data or [])]
+                if not run_ids:
+                    continue
+                resp = (
+                    sb.table(table)
+                    .select("*")
+                    .eq("trace_id", trace_id)
+                    .in_("workflow_run_id", run_ids)
+                    .execute()
+                )
+                if resp.data:
+                    results[table] = resp.data
+                continue
+            query = sb.table(table).select("*").eq("trace_id", trace_id)
+            if table in tenant_scoped_tables:
+                query = query.eq("tenant_id", tenant_id)
+            elif table in business_scoped_tables:
+                if not business_ids:
+                    continue
+                query = query.in_("business_id", business_ids)
+            resp = query.execute()
             if resp.data:
                 results[table] = resp.data
         except Exception:

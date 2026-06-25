@@ -18,16 +18,19 @@ logger = logging.getLogger(__name__)
 
 
 def _get_supabase():
-    from chromagora_api.db import get_supabase
-    return get_supabase()
+    from chromagora_api.db.tenant import get_backend_supabase
+    return get_backend_supabase()
 
 
 def _table_admin(name: str):
-    from chromagora_api.db import get_supabase_admin
-    sb = get_supabase_admin()
-    if not sb:
-        raise RuntimeError("Database not configured")
-    return sb.table(name)
+    return _get_supabase().table(name)
+
+
+def _ensure_business_scope(sb, business_id: UUID) -> None:
+    from chromagora_api.db.tenant import get_business_tenant_id
+
+    if not get_business_tenant_id(str(business_id), sb):
+        raise RuntimeError("Business not found")
 
 
 def create_agent_definition(data: AgentDefinitionCreate) -> Optional[AgentDefinitionResponse]:
@@ -73,6 +76,7 @@ def create_business_agent_instance(
     sb = _get_supabase()
     if not sb:
         return None
+    _ensure_business_scope(sb, data.business_id)
 
     payload = {
         "business_id": str(data.business_id),
@@ -93,6 +97,7 @@ def list_business_agents(business_id: UUID) -> list[dict]:
     sb = _get_supabase()
     if not sb:
         return []
+    _ensure_business_scope(sb, business_id)
     resp = (
         sb.table("business_agent_instances")
         .select("*, agent_definitions(*)")

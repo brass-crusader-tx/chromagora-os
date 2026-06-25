@@ -16,21 +16,26 @@ logger = logging.getLogger(__name__)
 
 
 def _get_supabase():
-    from chromagora_api.db import get_supabase
-    return get_supabase()
+    from chromagora_api.db.tenant import get_backend_supabase
+    return get_backend_supabase()
 
 
 def _get_supabase_admin():
     """Get Supabase client using SERVICE_ROLE_KEY for admin operations (seed scripts)."""
-    from chromagora_api.db import get_supabase_admin
-    return get_supabase_admin()
+    return _get_supabase()
 
 
 def _table_admin(name: str):
-    sb = _get_supabase_admin()
-    if not sb:
-        raise RuntimeError("Database not configured")
-    return sb.table(name)
+    return _get_supabase().table(name)
+
+
+def _tenant_for_business(sb, business_id: UUID) -> str:
+    from chromagora_api.db.tenant import get_business_tenant_id
+
+    tenant_id = get_business_tenant_id(str(business_id), sb)
+    if not tenant_id:
+        raise RuntimeError("Business not found")
+    return tenant_id
 
 
 # ---------------------------------------------------------------------------
@@ -118,6 +123,7 @@ def request_tool_execution(
     9. Return structured result
     """
     sb = _get_supabase()
+    tenant_id = _tenant_for_business(sb, business_id)
     result: dict[str, Any] = {
         "tool_name": tool_name,
         "tool_action": tool_action,
@@ -155,10 +161,10 @@ def request_tool_execution(
 
     # 4. Evaluate policy
     tool_autonomy = tool_def.get("autonomy_level_required_default", 1)
-    permission_max = permission.get("max_autonomy_level", 1)
+    permission_max = permission.get("max_autonomy_level", tool_autonomy) if permission else tool_autonomy
     effective_autonomy = min(tool_autonomy, permission_max)
 
-    approval_override = permission.get("requires_approval_override")
+    approval_override = permission.get("requires_approval_override") if permission else None
     if approval_override is not None:
         requires_approval = approval_override
     else:
@@ -175,16 +181,33 @@ def request_tool_execution(
         risk_level=risk_level,
         confidence=confidence,
         compliance_sensitive=compliance_sensitive,
+        tenant_id=UUID(tenant_id),
     )
 
     result["policy_decision"] = policy.model_dump(mode="json")
+    _persist_proposal(
+        tenant_id=tenant_id,
+        business_id=business_id,
+        proposal_id=proposal_id,
+        tool_name=tool_name,
+        tool_action=tool_action,
+        tool_args=tool_args_json,
+        actor_type=actor_type,
+        actor_id=actor_id,
+        risk_level=risk_level,
+        autonomy_level=effective_autonomy,
+        status="blocked" if policy.denied else (
+            "approval_required" if policy.requires_approval or requires_approval else "approved"
+        ),
+        policy=policy,
+    )
 
     # 5. If denied -> blocked
     if policy.denied:
         result["status"] = "blocked"
         if sb:
             _persist_execution(
-                business_id, proposal_id, None, tool_name, tool_action,
+                tenant_id, business_id, proposal_id, None, tool_name, tool_action,
                 tool_args_json, "blocked", policy.decision_notes, actor_type, actor_id,
             )
         return result
@@ -194,7 +217,7 @@ def request_tool_execution(
         result["status"] = "approval_required"
         if sb:
             _persist_execution(
-                business_id, proposal_id, None, tool_name, tool_action,
+                tenant_id, business_id, proposal_id, None, tool_name, tool_action,
                 tool_args_json, "approval_required", policy.decision_notes, actor_type, actor_id,
             )
         return result
@@ -216,7 +239,7 @@ def request_tool_execution(
         ]
         if sb:
             _persist_execution(
-                business_id, proposal_id, None, tool_name, tool_action,
+                tenant_id, business_id, proposal_id, None, tool_name, tool_action,
                 tool_args_json, "dry_run", "Dry run executed successfully",
                 actor_type, actor_id,
             )
@@ -228,7 +251,46 @@ def request_tool_execution(
     return result
 
 
+def _persist_proposal(
+    tenant_id: str,
+    business_id: UUID,
+    proposal_id: UUID,
+    tool_name: str,
+    tool_action: str,
+    tool_args: dict,
+    actor_type: str,
+    actor_id: Optional[UUID],
+    risk_level: str,
+    autonomy_level: int,
+    status: str,
+    policy: PolicyDecision,
+) -> None:
+    """Persist the action proposal that ledger entries reference."""
+    try:
+        _table_admin("action_proposals").insert({
+            "id": str(proposal_id),
+            "tenant_id": tenant_id,
+            "business_id": str(business_id),
+            "proposed_by_type": actor_type,
+            "proposed_by_id": str(actor_id) if actor_id else None,
+            "action_type": tool_action,
+            "title": f"{tool_name}.{tool_action}",
+            "description": f"Tool execution request for {tool_name}/{tool_action}",
+            "target_system": tool_name,
+            "proposed_payload": _redact_args(tool_args),
+            "confidence": None,
+            "risk_level": risk_level,
+            "autonomy_level_required": autonomy_level,
+            "status": status,
+            "policy_decision_json": policy.model_dump(mode="json"),
+            "trace_id": str(proposal_id),
+        }).execute()
+    except Exception as exc:
+        logger.warning("Failed to persist action proposal: %s", exc)
+
+
 def _persist_execution(
+    tenant_id: str,
     business_id: UUID,
     proposal_id: UUID,
     approval_id: Optional[UUID],
@@ -243,12 +305,13 @@ def _persist_execution(
     """Persist action execution to the ledger."""
     try:
         _table_admin("action_executions").insert({
-            "tenant_id": "00000000-0000-0000-0000-000000000000",
+            "tenant_id": tenant_id,
             "business_id": str(business_id),
             "action_proposal_id": str(proposal_id),
             "approval_request_id": str(approval_id) if approval_id else None,
             "tool_name": tool_name,
             "tool_action": tool_action,
+            "tool_args_hash": _hash_args(tool_args),
             "tool_args_redacted": _redact_args(tool_args),
             "result_status": result_status,
             "error_message": notes if result_status == "blocked" else None,

@@ -6,35 +6,48 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
-from chromagora_api.db.base import get_supabase
+from chromagora_api.db.tenant import get_active_tenant_id, get_backend_supabase
 
 router = APIRouter(prefix="/approvals", tags=["approvals"])
 
 
 @router.get("")
-async def list_approvals(status: str = "pending"):
+async def list_approvals(status: str | None = None):
     """List approval requests, filtered by status."""
-    sb = get_supabase()
-    if not sb:
-        raise HTTPException(status_code=503, detail="Database not configured")
+    try:
+        sb = get_backend_supabase()
+        tenant_id = get_active_tenant_id(sb)
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
     query = (
         sb.table("approval_requests")
         .select("*, action_proposals(*)")
+        .eq("tenant_id", tenant_id)
+        .order("requested_at", desc=True)
     )
     if status:
         query = query.eq("status", status)
 
     resp = query.execute()
+    for row in (resp.data or []):
+        proposal = row.get("action_proposals") or {}
+        row["action_type"] = proposal.get("action_type") or proposal.get("title") or "approval"
+        row["description"] = proposal.get("description")
+        row["dollar_amount"] = proposal.get("expected_value")
+        row["created_at"] = row.get("requested_at") or row.get("created_at", "")
+        row["resolved_at"] = row.get("decided_at")
     return resp.data or []
 
 
 @router.post("/{approval_id}/approve")
 async def approve_request(approval_id: UUID, decision_notes: str = ""):
     """Approve an approval request."""
-    sb = get_supabase()
-    if not sb:
-        raise HTTPException(status_code=503, detail="Database not configured")
+    try:
+        sb = get_backend_supabase()
+        tenant_id = get_active_tenant_id(sb)
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
     resp = (
         sb.table("approval_requests")
@@ -45,6 +58,7 @@ async def approve_request(approval_id: UUID, decision_notes: str = ""):
             "decision_notes": decision_notes,
         })
         .eq("id", str(approval_id))
+        .eq("tenant_id", tenant_id)
         .eq("status", "pending")
         .execute()
     )
@@ -67,9 +81,11 @@ async def approve_request(approval_id: UUID, decision_notes: str = ""):
 @router.post("/{approval_id}/reject")
 async def reject_request(approval_id: UUID, decision_notes: str = ""):
     """Reject an approval request."""
-    sb = get_supabase()
-    if not sb:
-        raise HTTPException(status_code=503, detail="Database not configured")
+    try:
+        sb = get_backend_supabase()
+        tenant_id = get_active_tenant_id(sb)
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
     resp = (
         sb.table("approval_requests")
@@ -80,6 +96,7 @@ async def reject_request(approval_id: UUID, decision_notes: str = ""):
             "decision_notes": decision_notes,
         })
         .eq("id", str(approval_id))
+        .eq("tenant_id", tenant_id)
         .eq("status", "pending")
         .execute()
     )

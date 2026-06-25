@@ -76,8 +76,8 @@ _DEFAULT_BUDGETS: dict[TaskType, ContextBudget] = {
 def _get_supabase():
     """Get Supabase client from app state."""
     # Import lazily to avoid circular imports
-    from chromagora_api.db import get_supabase
-    return get_supabase()
+    from chromagora_api.db.tenant import get_backend_supabase
+    return get_backend_supabase()
 
 
 def _truncate_events(events: list[dict], budget: ContextBudget) -> list[dict]:
@@ -144,21 +144,25 @@ async def build_context_packet(
 
     budget = _DEFAULT_BUDGETS.get(task_type, ContextBudget())
     sb = _get_supabase()
+    from chromagora_api.db.tenant import get_business_tenant_id
+
+    tenant_id = get_business_tenant_id(str(business_id), sb)
+    if not tenant_id:
+        raise RuntimeError("Business not found")
 
     # 1. Load business twin slice
     twin_slice: dict[str, Any] = {}
     try:
         resp = (
-            sb.table("business_twin")
-            .select("status, current_phase, capacity_score, active_claims_count, "
-                    "lifetime_value, churn_risk, last_activity_at")
+            sb.table("business_twins")
+            .select("status, summary, updated_at")
             .eq("business_id", str(business_id))
             .execute()
         )
         if resp.data:
             twin_slice = resp.data[0]
     except Exception as exc:
-        logger.warning("Failed to load business_twin: %s", exc)
+        logger.warning("Failed to load business_twins: %s", exc)
 
     # 2. Load active claims (approved + forbidden)
     approved_claims: list[dict] = []
@@ -202,7 +206,7 @@ async def build_context_packet(
     # 5. Assemble packet
     return ContextPacket(
         packet_id=uuid4(),
-        tenant_id=UUID(twin_slice.get("tenant_id", "00000000-0000-0000-0000-000000000000")),
+        tenant_id=UUID(tenant_id),
         business_id=business_id,
         task_type=task_type,
         actor_type=actor_type,

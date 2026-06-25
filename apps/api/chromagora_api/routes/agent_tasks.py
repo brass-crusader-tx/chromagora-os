@@ -6,11 +6,22 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
-from chromagora_api.db.base import get_supabase
+from chromagora_api.db.tenant import get_backend_supabase, get_business_tenant_id
 from chromagora_api.services.reputation_agent import run_review_request
 from chromagora_api.services.sales_agent import run_stale_quote_followup
 
 router = APIRouter(prefix="/agents", tags=["agents"])
+
+
+def _tenant_for_business(business_id: UUID) -> UUID:
+    try:
+        sb = get_backend_supabase()
+        tenant_id = get_business_tenant_id(str(business_id), sb)
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    if not tenant_id:
+        raise HTTPException(status_code=404, detail="Business not found")
+    return UUID(tenant_id)
 
 
 @router.post("/reputation/run-review-request-dry-run")
@@ -22,20 +33,7 @@ async def reputation_review_request(
     completed_at: str,
 ):
     """Execute the Reputation Agent review request workflow (dry-run)."""
-    sb = get_supabase()
-    if not sb:
-        raise HTTPException(status_code=503, detail="Database not configured")
-
-    biz_resp = (
-        sb.table("businesses")
-        .select("tenant_id")
-        .eq("id", str(business_id))
-        .execute()
-    )
-    if not biz_resp.data:
-        raise HTTPException(status_code=404, detail="Business not found")
-
-    tenant_id = UUID(biz_resp.data[0]["tenant_id"])
+    tenant_id = _tenant_for_business(business_id)
     result = run_review_request(
         tenant_id=tenant_id,
         business_id=business_id,
@@ -59,20 +57,7 @@ async def sales_stale_quote(
     last_contact_at: str | None = None,
 ):
     """Execute the Sales Agent stale quote follow-up workflow (dry-run)."""
-    sb = get_supabase()
-    if not sb:
-        raise HTTPException(status_code=503, detail="Database not configured")
-
-    biz_resp = (
-        sb.table("businesses")
-        .select("tenant_id")
-        .eq("id", str(business_id))
-        .execute()
-    )
-    if not biz_resp.data:
-        raise HTTPException(status_code=404, detail="Business not found")
-
-    tenant_id = UUID(biz_resp.data[0]["tenant_id"])
+    tenant_id = _tenant_for_business(business_id)
     result = run_stale_quote_followup(
         tenant_id=tenant_id,
         business_id=business_id,

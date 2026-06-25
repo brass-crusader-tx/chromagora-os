@@ -30,4 +30,6 @@ async def get_scorecard(business_id: UUID):
         scorecard = get_autonomy_scorecard(business_id)
         return scorecard_to_dict(scorecard)
     except RuntimeError as e:
+        if str(e) == "Business not found":
+            raise HTTPException(status_code=404, detail=str(e))
         raise HTTPException(status_code=503, detail=str(e))

@@ -17,14 +17,18 @@ logger = logging.getLogger(__name__)
 
 
 def _get_supabase():
-    from chromagora_api.db.base import get_supabase
-    return get_supabase()
+    from chromagora_api.db.tenant import get_backend_supabase
+    return get_backend_supabase()
 
 
 def _load_active_envelopes(business_id: UUID) -> list[dict]:
     """Load active authority envelopes for a business."""
     sb = _get_supabase()
     try:
+        from chromagora_api.db.tenant import get_business_tenant_id
+
+        if not get_business_tenant_id(str(business_id), sb):
+            return []
         resp = (
             sb.table("authority_envelopes")
             .select("*")
@@ -185,6 +189,14 @@ def evaluate_action_policy(
 
     # Load compliance rules
     compliance_ids: list[UUID] = []
+    if tenant_id is None:
+        try:
+            from chromagora_api.db.tenant import get_business_tenant_id
+
+            scoped_tenant_id = get_business_tenant_id(str(business_id), _get_supabase())
+            tenant_id = UUID(scoped_tenant_id) if scoped_tenant_id else None
+        except Exception:
+            tenant_id = None
     if tenant_id:
         rules = _load_active_compliance_rules(tenant_id, business_id, action_type)
         for rule in rules:

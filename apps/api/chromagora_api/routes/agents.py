@@ -6,7 +6,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
-from chromagora_api.db.base import get_supabase, get_supabase_admin
+from chromagora_api.db.tenant import (
+    get_active_business_ids,
+    get_backend_supabase,
+    get_business_tenant_id,
+)
 from chromagora_api.services.agent_registry import (
     create_agent_definition,
     list_agent_definitions,
@@ -33,12 +37,19 @@ router = APIRouter(tags=["agents"])
 @router.get("/agents")
 async def list_agents(business_id: UUID | None = None):
     """List agent instances (optionally filtered by business)."""
-    sb = get_supabase()
-    if not sb:
-        raise HTTPException(status_code=503, detail="Database not configured")
-    query = sb.table("business_agent_instances").select("*, agent_definitions(*)")
+    try:
+        sb = get_backend_supabase()
+        active_business_ids = get_active_business_ids(sb)
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
     if business_id:
-        query = query.eq("business_id", str(business_id))
+        if str(business_id) not in active_business_ids:
+            raise HTTPException(status_code=404, detail="Business not found")
+        active_business_ids = [str(business_id)]
+    if not active_business_ids:
+        return []
+    query = sb.table("business_agent_instances").select("*, agent_definitions(*)")
+    query = query.in_("business_id", active_business_ids)
     resp = query.execute()
     # Flatten joined data for frontend
     results = []
@@ -58,9 +69,10 @@ async def list_agents(business_id: UUID | None = None):
 @router.post("/agents")
 async def create_agent(body: AgentDefinitionCreate):
     """Create a new agent definition (simplified — creates definition only)."""
-    sb = get_supabase_admin()
-    if not sb:
-        raise HTTPException(status_code=503, detail="Database not configured")
+    try:
+        sb = get_backend_supabase()
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
     data = body.model_dump()
     resp = sb.table("agent_definitions").insert(data).execute()
     if not resp.data:
@@ -71,13 +83,18 @@ async def create_agent(body: AgentDefinitionCreate):
 @router.get("/agents/{agent_id}")
 async def get_agent(agent_id: str):
     """Get a single agent instance by ID."""
-    sb = get_supabase()
-    if not sb:
-        raise HTTPException(status_code=503, detail="Database not configured")
+    try:
+        sb = get_backend_supabase()
+        active_business_ids = get_active_business_ids(sb)
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    if not active_business_ids:
+        raise HTTPException(status_code=404, detail="Agent not found")
     resp = (
         sb.table("business_agent_instances")
         .select("*, agent_definitions(*)")
         .eq("id", agent_id)
+        .in_("business_id", active_business_ids)
         .execute()
     )
     if not resp.data:
@@ -116,12 +133,24 @@ async def post_agent_definition(body: AgentDefinitionCreate):
 @router.get("/businesses/{business_id}/agents")
 async def get_business_agents(business_id: UUID):
     """List agent instances for a business."""
+    try:
+        sb = get_backend_supabase()
+        if not get_business_tenant_id(str(business_id), sb):
+            raise HTTPException(status_code=404, detail="Business not found")
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
     return list_business_agents(business_id)
 
 
 @router.post("/businesses/{business_id}/agents")
 async def post_business_agent(business_id: UUID, body: BusinessAgentInstanceCreate):
     """Create a new business agent instance."""
+    try:
+        sb = get_backend_supabase()
+        if not get_business_tenant_id(str(business_id), sb):
+            raise HTTPException(status_code=404, detail="Business not found")
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
     # Ensure business_id in path matches body
     body.business_id = business_id
     result = create_business_agent_instance(body)
@@ -135,4 +164,10 @@ async def post_business_agent(business_id: UUID, body: BusinessAgentInstanceCrea
 @router.get("/agent-runs")
 async def get_agent_runs(business_id: UUID):
     """List agent runs for a business."""
+    try:
+        sb = get_backend_supabase()
+        if not get_business_tenant_id(str(business_id), sb):
+            raise HTTPException(status_code=404, detail="Business not found")
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
     return list_agent_runs(business_id)

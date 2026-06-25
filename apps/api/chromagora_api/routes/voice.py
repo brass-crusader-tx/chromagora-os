@@ -11,6 +11,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
+from chromagora_api.db.tenant import get_active_business_ids, get_backend_supabase
 from chromagora_schemas.voice import (
     CallRecordCreate,
     CallRecordResponse,
@@ -59,13 +60,19 @@ async def get_call(call_id: UUID):
 @router.get("/list")
 async def list_all_calls(business_id: UUID = None, limit: int = 50):
     """List all call records (optionally filtered by business). Maps DB fields to frontend-friendly names."""
-    from chromagora_api.db.base import get_supabase
-    sb = get_supabase()
-    if not sb:
+    try:
+        sb = get_backend_supabase()
+        active_business_ids = get_active_business_ids(sb)
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    if business_id:
+        if str(business_id) not in active_business_ids:
+            raise HTTPException(status_code=404, detail="Business not found")
+        active_business_ids = [str(business_id)]
+    if not active_business_ids:
         return []
     query = sb.table("call_records").select("*").order("started_at", desc=True).limit(limit)
-    if business_id:
-        query = query.eq("business_id", str(business_id))
+    query = query.in_("business_id", active_business_ids)
     resp = query.execute()
     results = []
     for row in (resp.data or []):
@@ -83,12 +90,76 @@ async def list_all_calls(business_id: UUID = None, limit: int = 50):
         results.append({
             "id": row["id"],
             "caller_number": row.get("caller_phone", ""),
-            "recipient_number": row.get("caller_name", ""),
+            "recipient_number": None,
+            "direction": row.get("call_status", ""),
             "status": row.get("call_status", ""),
             "duration_seconds": duration,
             "created_at": row.get("created_at", started or ""),
             "transcript": row.get("transcript_text"),
             "business_id": row.get("business_id"),
+        })
+    return results
+
+
+@router.get("/summaries")
+async def list_summaries(business_id: UUID = None, limit: int = 50):
+    """List summaries for active-tenant calls in frontend-friendly shape."""
+    try:
+        sb = get_backend_supabase()
+        active_business_ids = get_active_business_ids(sb)
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    if business_id:
+        if str(business_id) not in active_business_ids:
+            raise HTTPException(status_code=404, detail="Business not found")
+        active_business_ids = [str(business_id)]
+    if not active_business_ids:
+        return []
+
+    calls_resp = (
+        sb.table("call_records")
+        .select("id")
+        .in_("business_id", active_business_ids)
+        .order("started_at", desc=True)
+        .limit(limit)
+        .execute()
+    )
+    call_ids = [row["id"] for row in (calls_resp.data or [])]
+    if not call_ids:
+        return []
+
+    resp = (
+        sb.table("call_summaries")
+        .select("*")
+        .in_("call_record_id", call_ids)
+        .order("created_at", desc=True)
+        .limit(limit)
+        .execute()
+    )
+    results = []
+    for row in (resp.data or []):
+        notes = row.get("structured_notes") or {}
+        if not isinstance(notes, dict):
+            notes = {}
+        key_points = notes.get("key_points") or [
+            value for value in [
+                row.get("intent"),
+                row.get("service_type"),
+                row.get("urgency"),
+                row.get("lead_quality"),
+            ] if value
+        ]
+        action_items = notes.get("action_items") or []
+        summary = notes.get("summary") or row.get("escalation_reason") or (
+            f"{row.get('intent', 'unknown')} call, {row.get('lead_quality', 'unknown')} lead"
+        )
+        results.append({
+            "id": row["id"],
+            "call_id": row.get("call_record_id"),
+            "summary": summary,
+            "key_points": key_points,
+            "action_items": action_items,
+            "created_at": row.get("created_at", ""),
         })
     return results
 
