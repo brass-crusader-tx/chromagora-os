@@ -15,7 +15,7 @@ async def list_businesses():
     sb = get_supabase()
     if not sb:
         raise HTTPException(status_code=503, detail="Database not configured")
-    resp = sb.table("businesses").select("id, name, created_at").execute()
+    resp = sb.table("businesses").select("id, legal_name, created_at").execute()
     return resp.data or []
 
 
