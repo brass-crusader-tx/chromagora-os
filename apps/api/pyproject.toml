@@ -28,3 +28,5 @@ packages = ["chromagora_api"]
 
 [tool.pytest.ini_options]
 testpaths = ["chromagora_api/tests"]
+pythonpath = [".", "../../packages/schemas", "../../apps/workers"]
+addopts = "--import-mode=importlib"
