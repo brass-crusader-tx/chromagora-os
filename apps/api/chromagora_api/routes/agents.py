@@ -6,7 +6,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
-from chromagora_api.db.base import get_supabase
+from chromagora_api.db.base import get_supabase, get_supabase_admin
 from chromagora_api.services.agent_registry import (
     create_agent_definition,
     list_agent_definitions,
@@ -40,13 +40,25 @@ async def list_agents(business_id: UUID | None = None):
     if business_id:
         query = query.eq("business_id", str(business_id))
     resp = query.execute()
-    return resp.data or []
+    # Flatten joined data for frontend
+    results = []
+    for row in (resp.data or []):
+        defs = row.get("agent_definitions") or {}
+        results.append({
+            "id": row["id"],
+            "name": defs.get("name", row.get("display_name", "")),
+            "status": row.get("status", "active"),
+            "description": defs.get("description"),
+            "agent_type": defs.get("agent_type"),
+            "created_at": row.get("created_at", ""),
+        })
+    return results
 
 
 @router.post("/agents")
 async def create_agent(body: AgentDefinitionCreate):
     """Create a new agent definition (simplified — creates definition only)."""
-    sb = get_supabase()
+    sb = get_supabase_admin()
     if not sb:
         raise HTTPException(status_code=503, detail="Database not configured")
     data = body.model_dump()
@@ -70,7 +82,16 @@ async def get_agent(agent_id: str):
     )
     if not resp.data:
         raise HTTPException(status_code=404, detail="Agent not found")
-    return resp.data[0]
+    row = resp.data[0]
+    defs = row.get("agent_definitions") or {}
+    return {
+        "id": row["id"],
+        "name": defs.get("name", row.get("display_name", "")),
+        "status": row.get("status", "active"),
+        "description": defs.get("description"),
+        "agent_type": defs.get("agent_type"),
+        "created_at": row.get("created_at", ""),
+    }
 
 
 # --- Agent Definitions ---

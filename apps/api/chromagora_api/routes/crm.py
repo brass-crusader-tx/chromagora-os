@@ -160,8 +160,24 @@ async def update_message_draft_endpoint(draft_id: UUID, data: MessageDraftUpdate
 
 @router.get("/contacts")
 async def list_contacts_endpoint(business_id: UUID, status: str | None = None):
-    """List contacts (alias for leads)."""
-    return list_leads(business_id, status)
+    """List contacts (alias for leads). Maps DB fields to frontend-friendly names."""
+    leads = list_leads(business_id, status)
+    results = []
+    for row in leads:
+        results.append({
+            "id": row["id"],
+            "name": row.get("customer_name", ""),
+            "email": None,
+            "phone": row.get("customer_contact"),
+            "company": None,
+            "status": row.get("status", "new"),
+            "source": row.get("source"),
+            "service_type": row.get("service_type"),
+            "notes": row.get("notes"),
+            "created_at": row.get("created_at", ""),
+            "business_id": row.get("business_id"),
+        })
+    return results
 
 
 @router.post("/contacts", status_code=status.HTTP_201_CREATED)

@@ -6,7 +6,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
-from chromagora_api.db.base import get_supabase
+from chromagora_api.db.base import get_supabase, get_supabase_admin
 from chromagora_api.services.workflows import (
     run_review_request_workflow,
     run_stale_quote_followup_workflow,
@@ -28,7 +28,7 @@ async def list_workflow_definitions():
 @router.post("")
 async def create_workflow_definition(body: dict):
     """Create a new workflow definition."""
-    sb = get_supabase()
+    sb = get_supabase_admin()
     if not sb:
         raise HTTPException(status_code=503, detail="Database not configured")
     name = body.get("name", "")
@@ -37,8 +37,8 @@ async def create_workflow_definition(body: dict):
     data = {
         "name": name,
         "description": body.get("description"),
-        "status": body.get("status", "draft"),
-        "definition": body.get("definition", {}),
+        "workflow_type": body.get("workflow_type", "custom"),
+        "config_json": body.get("definition", {}),
     }
     resp = sb.table("workflow_definitions").insert(data).execute()
     if not resp.data:

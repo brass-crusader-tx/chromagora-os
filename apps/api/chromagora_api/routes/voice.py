@@ -56,6 +56,43 @@ async def get_call(call_id: UUID):
     return result
 
 
+@router.get("/list")
+async def list_all_calls(business_id: UUID = None, limit: int = 50):
+    """List all call records (optionally filtered by business). Maps DB fields to frontend-friendly names."""
+    from chromagora_api.db.base import get_supabase
+    sb = get_supabase()
+    if not sb:
+        return []
+    query = sb.table("call_records").select("*").order("started_at", desc=True).limit(limit)
+    if business_id:
+        query = query.eq("business_id", str(business_id))
+    resp = query.execute()
+    results = []
+    for row in (resp.data or []):
+        started = row.get("started_at")
+        ended = row.get("ended_at")
+        duration = None
+        if started and ended:
+            from datetime import datetime
+            try:
+                s = datetime.fromisoformat(started.replace("z", "+00:00"))
+                e = datetime.fromisoformat(ended.replace("z", "+00:00"))
+                duration = int((e - s).total_seconds())
+            except Exception:
+                pass
+        results.append({
+            "id": row["id"],
+            "caller_number": row.get("caller_phone", ""),
+            "recipient_number": row.get("caller_name", ""),
+            "status": row.get("call_status", ""),
+            "duration_seconds": duration,
+            "created_at": row.get("created_at", started or ""),
+            "transcript": row.get("transcript_text"),
+            "business_id": row.get("business_id"),
+        })
+    return results
+
+
 @router.get("/calls", response_model=list[CallRecordResponse])
 async def list_calls(business_id: UUID, limit: int = 50):
     """List call records for a business."""
