@@ -28,7 +28,7 @@ body {
     @apply bg-bg-card border border-bg-border rounded-lg p-4;
   }
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors;
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-primary {
     @apply btn bg-accent hover:bg-accent-hover text-white;
@@ -39,6 +39,9 @@ body {
   .btn-danger {
     @apply btn bg-danger/20 hover:bg-danger/30 text-danger border border-danger/30;
   }
+  .btn-success {
+    @apply btn bg-success hover:bg-success/80 text-white;
+  }
   .input {
     @apply w-full bg-bg border border-bg-border rounded-md px-3 py-2 text-text placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-accent/50;
   }
@@ -48,4 +51,17 @@ body {
   .badge {
     @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
   }
+}
+
+/* Kanban columns */
+.kanban-column {
+  @apply bg-bg-card border border-bg-border rounded-lg p-3 min-h-[200px];
+}
+
+/* Animations */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
