@@ -138,8 +138,8 @@ def similarity_search(
 
 def _get_supabase():
     """Get Supabase client. Late import to allow patching in tests."""
-    from chromagora_api.db.base import get_supabase, get_supabase_admin
-    return get_supabase()
+    from chromagora_api.db.base import get_supabase_admin
+    return get_supabase_admin()
 
 
 def _table_admin(name: str):
