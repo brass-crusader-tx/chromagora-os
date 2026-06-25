@@ -42,7 +42,7 @@ export default function Sidebar() {
         ))}
       </nav>
       <div className="p-3 border-t border-bg-border text-xs text-text-dim">
-        v0.1 — Light Mode
+        v0.1 — Dark Mode
       </div>
     </aside>
   );
