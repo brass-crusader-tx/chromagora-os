@@ -86,7 +86,7 @@ def _send_via_sendgrid(
         logger.error("SENDGRID_API_KEY not configured")
         return {"sent": False, "error": "SendGrid API key not configured"}
 
-    from email_provider import sendgrid_send
+    from chromagora_api.services.email_provider import sendgrid_send
     return sendgrid_send(
         api_key=api_key,
         to_address=to_address,
@@ -106,7 +106,7 @@ def _send_via_ses(
 ) -> dict[str, Any]:
     """Send via AWS SES. Requires boto3 and AWS credentials."""
     try:
-        from email_provider import ses_send
+        from chromagora_api.services.email_provider import ses_send
         return ses_send(
             to_address=to_address,
             subject=subject,

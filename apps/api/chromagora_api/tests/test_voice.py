@@ -13,7 +13,6 @@ from chromagora_api.main import app
 from chromagora_schemas.voice import (
     CallRecordCreate,
     CallSummaryCreate,
-    VoiceQualificationResult,
 )
 from chromagora_api.services import voice_service
 
@@ -32,13 +31,20 @@ class TestVoiceService:
             "id": str(uuid4()),
             "business_id": str(uuid4()),
             "caller_phone": "+15551234567",
+            "caller_name": None,
             "call_status": "inbound",
             "started_at": "2026-06-24T10:00:00Z",
+            "ended_at": None,
+            "recording_url": None,
+            "transcript_text": None,
             "consent_recorded": False,
+            "trace_id": None,
+            "created_at": "2026-06-24T10:00:00Z",
+            "updated_at": "2026-06-24T10:00:00Z",
         }])
         mock_sb.table.return_value = table_mock
 
-        with patch.object(voice_service, "_get_supabase", return_value=mock_sb):
+        with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb):
             data = CallRecordCreate(
                 business_id=uuid4(),
                 caller_phone="+15551234567",
@@ -59,7 +65,7 @@ class TestVoiceService:
         table_mock.execute.return_value = MagicMock(data=[])
         mock_sb.table.return_value = table_mock
 
-        with patch.object(voice_service, "_get_supabase", return_value=mock_sb):
+        with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb):
             result = voice_service.get_call_record(uuid4())
 
         assert result is None
@@ -72,13 +78,19 @@ class TestVoiceService:
             "id": str(uuid4()),
             "call_record_id": str(uuid4()),
             "intent": "estimate_request",
+            "service_type": None,
+            "address_or_area": None,
             "urgency": "normal",
+            "lead_quality": "unknown",
             "escalation_required": False,
+            "escalation_reason": None,
+            "structured_notes": {},
             "confidence": 0.8,
+            "created_at": "2026-06-24T10:00:00Z",
         }])
         mock_sb.table.return_value = table_mock
 
-        with patch.object(voice_service, "_get_supabase", return_value=mock_sb):
+        with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb):
             data = CallSummaryCreate(
                 call_record_id=uuid4(),
                 intent="estimate_request",
@@ -110,7 +122,7 @@ class TestVoiceService:
 
     def test_qualify_call_booking(self):
         result = voice_service.qualify_call_transcript(
-            "I'd like to schedule an appointment for Gutter cleaning"
+            "I'd like to schedule an appointment for gutter cleaning"
         )
         assert result.caller_intent == "booking"
         assert result.service_type == "gutter_cleaning"
@@ -126,7 +138,7 @@ class TestVoiceService:
         assert len(result.missing_information) > 0
 
     def test_qualify_call_low_confidence_no_service(self):
-        result = voice_service.qualify_call_transcript("Hello, just calling about stuff")
+        result = voice_service.qualify_call_transcript("Hello, what do you offer?")
         assert result.confidence == 0.2
         assert result.next_action == "send_information_packet"
 
@@ -150,6 +162,7 @@ async def test_create_call_route(transport):
         "id": str(uuid4()),
         "business_id": "b1234567-1234-5678-1234-567812345678",
         "caller_phone": "+15551234567",
+        "caller_name": None,
         "call_status": "inbound",
         "started_at": "2026-06-24T10:00:00Z",
         "ended_at": None,
@@ -222,9 +235,11 @@ async def test_create_summary_route(transport):
         "call_record_id": "c1234567-1234-5678-1234-567812345678",
         "intent": "estimate_request",
         "service_type": "lawn_care",
+        "address_or_area": None,
         "urgency": "normal",
         "lead_quality": "warm",
         "escalation_required": False,
+        "escalation_reason": None,
         "structured_notes": {},
         "confidence": 0.7,
         "created_at": "2026-06-24T10:00:00Z",

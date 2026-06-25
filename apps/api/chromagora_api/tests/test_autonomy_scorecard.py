@@ -26,13 +26,11 @@ def _mock_supabase(proposals=None, executions=None, events=None, envelopes=None)
     """Create mock Supabase client with chainable table operations."""
     mock_sb = MagicMock()
 
-    # Default empty responses
     proposals = proposals or []
     executions = executions or []
     events = events or []
     envelopes = envelopes or []
 
-    # Build a table router
     table_data = {
         "action_proposals": proposals,
         "action_executions": executions,
@@ -65,6 +63,7 @@ def test_get_autonomy_scorecard_empty():
     assert sc.total_proposals == 0
     assert sc.avg_confidence == 0.0
     assert sc.autonomy_level_recommended == 1
+
 
 def test_get_autonomy_scorecard_with_proposals():
     """Scorecard counts proposals correctly."""
@@ -137,7 +136,7 @@ def test_get_autonomy_scorecard_with_envelopes():
 
 
 # ---------------------------------------------------------------------------
-# Recommendation tests
+# Recommendation tests (pure unit tests — no Supabase needed)
 # ---------------------------------------------------------------------------
 
 def test_recommend_level_1_baseline():
@@ -205,7 +204,7 @@ def test_recommend_violations_decrease():
         autonomy_level_current=3,
     )
     rec = _recommend_autonomy_level(sc)
-    assert rec < 3 or rec == 1  # Should decrease
+    assert rec < 3 or rec == 1
 
 
 # ---------------------------------------------------------------------------

@@ -18,7 +18,7 @@ from chromagora_api.db.base import get_supabase
 @dataclass
 class AutonomyScorecard:
     business_id: str
-    generated_at: str
+    generated_at: str = ""
     total_proposals: int = 0
     approvals_required: int = 0
     approvals_accepted: int = 0

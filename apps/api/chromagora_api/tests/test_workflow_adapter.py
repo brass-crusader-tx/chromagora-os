@@ -121,7 +121,7 @@ class TestWorkflowLiteAdapter:
 
         adapter = WorkflowLiteAdapter()
 
-        with patch("chromagora_api.services.workflow_adapter.get_supabase", return_value=mock_sb):
+        with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb):
             result = adapter.get_workflow_status(str(uuid4()))
 
         assert "error" in result
@@ -138,7 +138,7 @@ class TestWorkflowLiteAdapter:
 
         adapter = WorkflowLiteAdapter()
 
-        with patch("chromagora_api.services.workflow_adapter.get_supabase", return_value=mock_sb):
+        with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb):
             result = adapter.get_workflow_status(str(uuid4()))
 
         assert result == expected

@@ -27,6 +27,7 @@ class CallRecordBase(BaseModel):
     recording_url: Optional[str] = None
     transcript_text: Optional[str] = None
     consent_recorded: bool = False
+    trace_id: Optional[str] = None
 
 
 class CallRecordCreate(CallRecordBase):

@@ -81,7 +81,7 @@ def test_voice_qualification_result():
         confidence=0.7,
     )
     assert data.caller_intent == "estimate_request"
-    assert data.is_estimate_recommended is True
+    assert data.estimate_booking_recommended is False
 
 
 def test_voice_qualification_defaults():

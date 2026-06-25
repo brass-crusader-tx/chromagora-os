@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import os
-import sys
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
-# Ensure the service module uses our env patch
 import chromagora_api.services.vector_memory as vm_module
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -37,9 +36,7 @@ def _mock_supabase(data=None, insert_data=None):
 
 def test_vector_memory_disabled_by_default():
     """ENABLE_VECTOR_MEMORY defaults to false."""
-    # Ensure env is clean
     os.environ.pop("ENABLE_VECTOR_MEMORY", None)
-    # Reload module to pick up env change
     import importlib
     importlib.reload(vm_module)
     assert vm_module.is_vector_memory_enabled() is False
@@ -58,7 +55,7 @@ def test_store_embedding_when_disabled_returns_none():
     with patch.dict(os.environ, {"ENABLE_VECTOR_MEMORY": "false"}):
         import importlib
         importlib.reload(vm_module)
-        result = vm_module.store_artifact(uuid4(), [0.1, 0.2])
+        result = vm_module.store_embedding(uuid4(), [0.1, 0.2])
     assert result is None
 
 
@@ -80,13 +77,14 @@ def test_create_artifact_inserts_record():
     inserted = {"id": str(uuid4()), "artifact_type": "note", "title": "Test"}
     mock_sb, table_mock = _mock_supabase(insert_data=[inserted])
 
-    with patch.object(vm_module, "_get_supabase", return_value=mock_sb):
-        result = vm_module.create_artifact(
-            business_id=uuid4(),
-            title="Test note",
-            text_content="Test content",
-            artifact_type="note",
-        )
+    with patch("chromagora_api.db.base.get_supabase", return_value=mock_sb):
+        with patch.object(vm_module, "_get_supabase", return_value=mock_sb):
+            result = vm_module.create_artifact(
+                business_id=uuid4(),
+                title="Test note",
+                text_content="Test content",
+                artifact_type="note",
+            )
 
     assert result["id"] == inserted["id"]
     mock_sb.table.assert_called_with("memory_artifacts")
@@ -156,7 +154,6 @@ def test_delete_artifact_with_vector_enabled_also_deletes_embeddings():
         with patch.object(vm_module, "_get_supabase", return_value=mock_sb):
             result = vm_module.delete_artifact(uuid4())
 
-        # Embeddings table was queried for deletion
         mock_sb.table.assert_any_call("memory_embeddings")
         assert result is True
 
@@ -175,7 +172,7 @@ def test_store_embedding_when_enabled():
         mock_sb, table_mock = _mock_supabase(insert_data=[inserted])
 
         with patch.object(vm_module, "_get_supabase", return_value=mock_sb):
-            result = vm_module.store_artifact(
+            result = vm_module.store_embedding(
                 artifact_fk=uuid4(),
                 embedding_vector=[0.1] * 1536,
             )
@@ -191,7 +188,9 @@ def test_similarity_search_when_enabled_calls_rpc():
         importlib.reload(vm_module)
 
         mock_sb = MagicMock()
-        mock_sb.rpc.return_value = MagicMock(data=[{"id": str(uuid4()), "similarity": 0.9}])
+        rpc_result = MagicMock()
+        rpc_result.execute.return_value = MagicMock(data=[{"id": str(uuid4()), "similarity": 0.9}])
+        mock_sb.rpc.return_value = rpc_result
 
         with patch.object(vm_module, "_get_supabase", return_value=mock_sb):
             result = vm_module.similarity_search(uuid4(), [0.1] * 1536, top_k=5)
