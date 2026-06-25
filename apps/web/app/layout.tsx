@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Multi-agent operating system for SMBs",
 };
 
+const themeInitScript = `(()=>{try{var t=localStorage.getItem("chromagora-theme");if(t==="light"){document.documentElement.classList.add("light")}}catch(e){}})()`;
+
 export default function RootLayout({
   children,
 }: {
@@ -15,6 +17,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="flex">
         <ThemeProvider>
           <Sidebar />

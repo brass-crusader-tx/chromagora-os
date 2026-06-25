@@ -14,21 +14,27 @@ const ThemeContext = createContext<ThemeContextValue>({
   toggle: () => {},
 });
 
+const THEME_KEY = "chromagora-theme";
+
+function applyTheme(theme: Theme) {
+  document.documentElement.classList.toggle("light", theme === "light");
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
-    const stored = localStorage.getItem("chromagora-theme") as Theme | null;
+    const stored = localStorage.getItem(THEME_KEY) as Theme | null;
     const initial = stored ?? "dark";
     setTheme(initial);
-    document.documentElement.classList.toggle("light", initial === "light");
+    applyTheme(initial);
   }, []);
 
   function toggle() {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
-    document.documentElement.classList.toggle("light", next === "light");
-    localStorage.setItem("chromagora-theme", next);
+    applyTheme(next);
+    localStorage.setItem(THEME_KEY, next);
   }
 
   return (
