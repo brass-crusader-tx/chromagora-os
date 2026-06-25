@@ -6,7 +6,7 @@
 -- Call records: inbound/outbound call tracking
 CREATE TABLE IF NOT EXISTS call_records (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    business_id uuid NOT NULL REFERENCES client_businesses(id),
+    business_id uuid NOT NULL REFERENCES businesses(id),
     caller_phone text NOT NULL,
     caller_name text,
     call_status text NOT NULL DEFAULT 'inbound' CHECK (call_status IN ('inbound', 'outbound', 'missed', 'voicemail')),
@@ -28,7 +28,7 @@ ALTER TABLE call_records ENABLE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation_call_records ON call_records
     USING (
         business_id IN (
-            SELECT id FROM client_businesses
+            SELECT id FROM businesses
             WHERE tenant_id = current_setting('app.current_tenant', true)::uuid
         )
     );
@@ -59,7 +59,7 @@ CREATE POLICY tenant_isolation_call_summaries ON call_summaries
         call_record_id IN (
             SELECT id FROM call_records
             WHERE business_id IN (
-                SELECT id FROM client_businesses
+                SELECT id FROM businesses
                 WHERE tenant_id = current_setting('app.current_tenant', true)::uuid
             )
         )

@@ -6,7 +6,7 @@
 -- Memory artifacts: store source content for embedding
 CREATE TABLE IF NOT EXISTS memory_artifacts (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    business_id uuid NOT NULL REFERENCES client_businesses(id),
+    business_id uuid NOT NULL REFERENCES businesses(id),
     artifact_type text NOT NULL DEFAULT 'note',
     title text NOT NULL DEFAULT '',
     text_content text NOT NULL DEFAULT '',
@@ -22,7 +22,7 @@ ALTER TABLE memory_artifacts ENABLE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation_memory_artifacts ON memory_artifacts
     USING (
         business_id IN (
-            SELECT id FROM client_businesses
+            SELECT id FROM businesses
             WHERE tenant_id = current_setting('app.current_tenant', true)::uuid
         )
     );
