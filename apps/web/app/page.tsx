@@ -32,7 +32,7 @@ interface LedgerEntry {
   action: string;
   actor: string;
   created_at: string;
-  dollar_impact?: number;
+  dollar_impact?: number | null;
 }
 
 export default function DashboardPage() {
@@ -134,7 +134,7 @@ export default function DashboardPage() {
                   <p className="text-xs text-text-dim">{entry.actor}</p>
                 </div>
                 <div className="text-right">
-                  {entry.dollar_impact !== undefined && (
+                  {typeof entry.dollar_impact === "number" && (
                     <p className="text-sm text-text">${entry.dollar_impact.toLocaleString()}</p>
                   )}
                   <p className="text-xs text-text-dim">{new Date(entry.created_at).toLocaleDateString()}</p>

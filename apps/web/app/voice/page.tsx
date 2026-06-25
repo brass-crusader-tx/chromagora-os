@@ -39,7 +39,7 @@ export default function VoicePage() {
     setLoading(true);
     try {
       const [c, s] = await Promise.all([
-        api.get<VoiceCall[]>("/voice/calls"),
+        api.get<VoiceCall[]>("/voice/list"),
         api.get<VoiceSummary[]>("/voice/summaries").catch(() => [] as VoiceSummary[]),
       ]);
       setCalls(c);
