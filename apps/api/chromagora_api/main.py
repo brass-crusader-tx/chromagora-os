@@ -74,3 +74,9 @@ app.include_router(businesses_router)
 
 from chromagora_api.routes.mobile import router as mobile_router
 app.include_router(mobile_router)
+
+from chromagora_api.routes.voice import router as voice_router
+app.include_router(voice_router)
+
+from chromagora_api.routes.autonomy import router as autonomy_router
+app.include_router(autonomy_router)
