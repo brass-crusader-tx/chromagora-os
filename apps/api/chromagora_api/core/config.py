@@ -27,6 +27,15 @@ class Settings(BaseSettings):
     enable_vector_memory: bool = False
     enable_real_email_sending: bool = False
 
+    # Auth
+    api_keys: str = ""
+    enforce_auth: bool = False
+
+    # Security
+    allowed_origins: str = "*"
+    rate_limit_per_minute: int = 60
+    enforce_rate_limit: bool = False
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 

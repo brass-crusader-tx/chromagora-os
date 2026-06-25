@@ -7,10 +7,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from chromagora_api.core.auth import apply_auth
 from chromagora_api.core.config import settings
+from chromagora_api.core.errors import setup_exception_handlers
+from chromagora_api.core.ratelimit import apply_rate_limit
 from chromagora_api.routes.health import router as health_router
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -31,13 +34,23 @@ app = FastAPI(
 )
 
 # CORS
+origins = [o.strip() for o in settings.allowed_origins.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_headers=["Content-Type", "Authorization", "X-API-Key"],
 )
+
+# Exception handlers
+setup_exception_handlers(app)
+
+# Rate limiting
+apply_rate_limit(app)
+
+# Auth middleware (protects all non-health routes)
+apply_auth(app)
 
 # Routes
 app.include_router(health_router)

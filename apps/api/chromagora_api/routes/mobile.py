@@ -11,6 +11,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
+from chromagora_api.db.tenant import DatabaseUnavailable, TenantError
 from chromagora_api.services.mobile_service import (
     get_mobile_today,
     list_mobile_approvals,
@@ -38,7 +39,9 @@ async def mobile_today(business_id: UUID):
     """Mobile dashboard: urgent approvals, events, workflows, jobs, opportunities."""
     try:
         return get_mobile_today(business_id)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
 
@@ -51,7 +54,9 @@ async def mobile_approvals_list(business_id: UUID, status: str = "pending"):
     """List approval requests for mobile."""
     try:
         return list_mobile_approvals(business_id, status)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
 
@@ -90,7 +95,9 @@ async def mobile_command_feed(business_id: UUID, limit: int = 30):
     """Recent events for the mobile command feed."""
     try:
         return get_mobile_command_feed(business_id, limit)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
 
@@ -103,7 +110,9 @@ async def mobile_jobs_today(business_id: UUID):
     """Today's scheduled jobs for mobile field view."""
     try:
         return get_mobile_jobs_today(business_id)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
 
@@ -122,7 +131,9 @@ async def mobile_capture_note(data: MobileNoteCapture):
             lead_id=data.lead_id,
             note_type=data.note_type,
         )
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
 
@@ -142,5 +153,7 @@ async def mobile_capture_photo(data: MobilePhotoMetadata):
             caption=data.caption,
             taken_at=data.taken_at,
         )
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))

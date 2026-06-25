@@ -148,7 +148,7 @@ async def build_context_packet(
 
     tenant_id = get_business_tenant_id(str(business_id), sb)
     if not tenant_id:
-        raise RuntimeError("Business not found")
+        raise TenantError("Business not found")
 
     # 1. Load business twin slice
     twin_slice: dict[str, Any] = {}

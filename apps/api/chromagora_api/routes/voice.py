@@ -11,7 +11,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
-from chromagora_api.db.tenant import get_active_business_ids, get_backend_supabase
+from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_active_business_ids, get_backend_supabase
 from chromagora_schemas.voice import (
     CallRecordCreate,
     CallRecordResponse,
@@ -44,7 +44,9 @@ async def create_call(data: CallRecordCreate):
         if not result:
             raise HTTPException(status_code=500, detail="Failed to create call record")
         return result
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
 
@@ -63,7 +65,9 @@ async def list_all_calls(business_id: UUID = None, limit: int = 50):
     try:
         sb = get_backend_supabase()
         active_business_ids = get_active_business_ids(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     if business_id:
         if str(business_id) not in active_business_ids:
@@ -107,7 +111,9 @@ async def list_summaries(business_id: UUID = None, limit: int = 50):
     try:
         sb = get_backend_supabase()
         active_business_ids = get_active_business_ids(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     if business_id:
         if str(business_id) not in active_business_ids:
@@ -178,7 +184,9 @@ async def patch_transcript(call_id: UUID, transcript_text: str):
         if not result:
             raise HTTPException(status_code=404, detail="Call record not found")
         return result
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
 
@@ -194,7 +202,9 @@ async def create_summary(data: CallSummaryCreate):
         if not result:
             raise HTTPException(status_code=500, detail="Failed to create summary")
         return result
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
 

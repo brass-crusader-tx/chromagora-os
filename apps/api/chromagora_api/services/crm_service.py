@@ -6,7 +6,7 @@ import json
 from typing import Any, Optional
 from uuid import UUID
 
-from chromagora_api.db.tenant import get_backend_supabase, get_business_tenant_id
+from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_backend_supabase, get_business_tenant_id
 from chromagora_schemas.crm import (
     LeadCreate, LeadUpdate, LeadResponse,
     QuoteCreate, QuoteUpdate, QuoteResponse,
@@ -25,7 +25,7 @@ def _get_supabase():
 
 def _ensure_business_scope(sb, business_id: UUID) -> None:
     if not get_business_tenant_id(str(business_id), sb):
-        raise RuntimeError("Business not found")
+        raise TenantError("Business not found")
 
 
 def _get_scoped_record(sb, table: str, record_id: UUID) -> Optional[dict[str, Any]]:

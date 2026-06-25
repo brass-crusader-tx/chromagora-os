@@ -8,6 +8,8 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, status
 
 from chromagora_api.db.tenant import (
+    DatabaseUnavailable,
+    TenantError,
     get_active_tenant_id,
     get_backend_supabase,
     get_business_tenant_id,
@@ -26,7 +28,9 @@ async def list_workflow_definitions():
     try:
         sb = get_backend_supabase()
         tenant_id = get_active_tenant_id(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     defs_resp = (
         sb.table("workflow_definitions")
@@ -73,7 +77,9 @@ async def create_workflow_definition(body: dict):
     """Create a new workflow definition."""
     try:
         sb = get_backend_supabase()
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     name = body.get("name", "")
     if not name:
@@ -103,7 +109,9 @@ async def review_request_dry_run(
     try:
         sb = get_backend_supabase()
         tenant_id_raw = get_business_tenant_id(str(business_id), sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     if not tenant_id_raw:
         raise HTTPException(status_code=404, detail="Business not found")
@@ -135,7 +143,9 @@ async def stale_quote_followup_dry_run(
     try:
         sb = get_backend_supabase()
         tenant_id_raw = get_business_tenant_id(str(business_id), sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     if not tenant_id_raw:
         raise HTTPException(status_code=404, detail="Business not found")

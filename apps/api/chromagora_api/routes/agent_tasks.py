@@ -6,7 +6,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
-from chromagora_api.db.tenant import get_backend_supabase, get_business_tenant_id
+from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_backend_supabase, get_business_tenant_id
 from chromagora_api.services.reputation_agent import run_review_request
 from chromagora_api.services.sales_agent import run_stale_quote_followup
 
@@ -17,7 +17,9 @@ def _tenant_for_business(business_id: UUID) -> UUID:
     try:
         sb = get_backend_supabase()
         tenant_id = get_business_tenant_id(str(business_id), sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     if not tenant_id:
         raise HTTPException(status_code=404, detail="Business not found")

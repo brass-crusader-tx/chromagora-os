@@ -8,13 +8,13 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 from typing import Any, Optional
 
-from chromagora_api.db.tenant import get_backend_supabase, get_business_tenant_id
+from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_backend_supabase, get_business_tenant_id
 
 router = APIRouter(prefix="/businesses/{business_id}/tools", tags=["tools"])
 
 
 def get_supabase():
-    """Compatibility seam for tests; production uses the backend admin client."""
+    """Compatibility seam for tests and internal callers."""
     return get_backend_supabase()
 
 
@@ -22,11 +22,13 @@ def _scoped_client(business_id: UUID):
     try:
         sb = get_supabase()
         if not sb:
-            raise RuntimeError("Database not configured")
+            raise DatabaseUnavailable("Database not configured")
         if not get_business_tenant_id(str(business_id), sb):
             raise HTTPException(status_code=404, detail="Business not found")
         return sb
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
 

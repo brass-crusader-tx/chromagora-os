@@ -7,6 +7,8 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, status
 
 from chromagora_api.db.tenant import (
+    DatabaseUnavailable,
+    TenantError,
     get_active_business_ids,
     get_active_tenant_id,
     get_backend_supabase,
@@ -22,7 +24,9 @@ async def list_opportunities(business_id: UUID | None = None):
         sb = get_backend_supabase()
         tenant_id = get_active_tenant_id(sb)
         active_business_ids = get_active_business_ids(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     query = sb.table("opportunities").select("*").eq("tenant_id", tenant_id).order("created_at", desc=True)
     if business_id:
@@ -50,7 +54,9 @@ async def create_opportunity(body: dict):
         sb = get_backend_supabase()
         tenant_id = get_active_tenant_id(sb)
         active_business_ids = get_active_business_ids(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     title = body.get("title", "")
     if not title:

@@ -6,7 +6,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
 
-from chromagora_api.db.tenant import get_active_business_ids, get_backend_supabase
+from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_active_business_ids, get_backend_supabase
 from chromagora_api.services.vector_memory import list_artifacts as vm_list_artifacts
 
 router = APIRouter(prefix="/memory", tags=["memory"])
@@ -18,7 +18,9 @@ async def list_memory_artifacts(business_id: UUID | None = None):
     try:
         sb = get_backend_supabase()
         active_business_ids = get_active_business_ids(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     if business_id and str(business_id) not in active_business_ids:
         raise HTTPException(status_code=404, detail="Business not found")

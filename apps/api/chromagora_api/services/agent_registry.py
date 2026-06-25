@@ -30,7 +30,7 @@ def _ensure_business_scope(sb, business_id: UUID) -> None:
     from chromagora_api.db.tenant import get_business_tenant_id
 
     if not get_business_tenant_id(str(business_id), sb):
-        raise RuntimeError("Business not found")
+        raise TenantError("Business not found")
 
 
 def create_agent_definition(data: AgentDefinitionCreate) -> Optional[AgentDefinitionResponse]:

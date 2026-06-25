@@ -6,6 +6,16 @@ from supabase import Client
 
 from chromagora_api.core.config import settings
 
+
+class TenantError(Exception):
+    """Raised when a business or tenant cannot be resolved (maps to 404)."""
+    pass
+
+
+class DatabaseUnavailable(Exception):
+    """Raised when Supabase client is not configured (maps to 503)."""
+    pass
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,7 +38,7 @@ def get_backend_supabase() -> Client:
 
     sb = get_supabase_admin()
     if not sb:
-        raise RuntimeError("Database not configured")
+        raise DatabaseUnavailable("Database not configured")
     return sb
 
 
@@ -41,7 +51,7 @@ def get_active_tenant_id(client: Client | None = None) -> str:
     resp = sb.table("tenants").select("id").order("created_at").limit(2).execute()
     tenants = resp.data or []
     if not tenants:
-        raise RuntimeError("No tenant configured")
+        raise TenantError("No tenant configured")
     if len(tenants) > 1:
         logger.warning(
             "CHROMAGORA_TENANT_ID is unset; using first tenant from %d tenants",

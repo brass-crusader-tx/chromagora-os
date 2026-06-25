@@ -6,7 +6,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
 
-from chromagora_api.db.tenant import get_active_tenant_id, get_backend_supabase
+from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_active_tenant_id, get_backend_supabase
 
 router = APIRouter(prefix="/ledger", tags=["ledger"])
 
@@ -17,7 +17,9 @@ async def list_ledger(business_id: UUID | None = None, agent_id: UUID | None = N
     try:
         sb = get_backend_supabase()
         tenant_id = get_active_tenant_id(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     query = (
         sb.table("action_executions")

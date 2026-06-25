@@ -11,6 +11,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
 
+from chromagora_api.db.tenant import DatabaseUnavailable, TenantError
 from chromagora_api.services.autonomy_scorecard import (
     get_autonomy_scorecard,
     scorecard_to_dict,
@@ -29,7 +30,7 @@ async def get_scorecard(business_id: UUID):
     try:
         scorecard = get_autonomy_scorecard(business_id)
         return scorecard_to_dict(scorecard)
-    except RuntimeError as e:
-        if str(e) == "Business not found":
-            raise HTTPException(status_code=404, detail=str(e))
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))

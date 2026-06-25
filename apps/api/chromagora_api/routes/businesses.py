@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, status
 
-from chromagora_api.db.tenant import get_active_tenant_id, get_backend_supabase
+from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_active_tenant_id, get_backend_supabase
 
 router = APIRouter(prefix="/businesses", tags=["businesses"])
 
@@ -15,7 +15,9 @@ async def list_businesses():
     try:
         sb = get_backend_supabase()
         tenant_id = get_active_tenant_id(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     resp = (
         sb.table("businesses")
@@ -36,7 +38,9 @@ async def create_business(body: dict):
     try:
         sb = get_backend_supabase()
         tenant_id = get_active_tenant_id(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     name = body.get("name", "")
     if not name:
@@ -61,7 +65,9 @@ async def get_business(business_id: str):
     try:
         sb = get_backend_supabase()
         tenant_id = get_active_tenant_id(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     resp = (
         sb.table("businesses")

@@ -51,7 +51,7 @@ def get_autonomy_scorecard(business_id: UUID) -> AutonomyScorecard:
     """Generate autonomy scorecard for a business by querying Supabase."""
     try:
         sb = get_supabase()
-    except RuntimeError:
+    except (RuntimeError, DatabaseUnavailable):
         scorecard = AutonomyScorecard(business_id=str(business_id))
         scorecard.notes.append("Database not available")
         return scorecard
@@ -62,7 +62,8 @@ def get_autonomy_scorecard(business_id: UUID) -> AutonomyScorecard:
 
     bid = str(business_id)
     if not get_business_tenant_id(bid, sb):
-        raise RuntimeError("Business not found")
+        from chromagora_api.db.tenant import TenantError
+        raise TenantError("Business not found")
 
     now = datetime.now(timezone.utc).isoformat()
     scorecard = AutonomyScorecard(

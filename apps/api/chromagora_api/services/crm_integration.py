@@ -104,7 +104,7 @@ class InternalCrmLiteProvider(CrmProvider):
         from chromagora_api.db.tenant import get_business_tenant_id
 
         if not get_business_tenant_id(str(business_id), self._get_supabase()):
-            raise RuntimeError("Business not found")
+            raise TenantError("Business not found")
 
     def _ensure_lead_scope(self, lead_id: str) -> Optional[dict[str, Any]]:
         sb = self._get_supabase()

@@ -7,7 +7,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
-from chromagora_api.db.tenant import get_active_business_ids, get_backend_supabase
+from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_active_business_ids, get_backend_supabase
 from chromagora_api.services.crm_service import (
     create_lead, get_lead, list_leads, update_lead,
     create_quote, get_quote, list_quotes, update_quote,
@@ -39,7 +39,9 @@ def _active_business_ids() -> list[str]:
     try:
         sb = get_backend_supabase()
         return get_active_business_ids(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
 

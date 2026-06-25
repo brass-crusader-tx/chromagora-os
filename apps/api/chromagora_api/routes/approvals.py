@@ -6,7 +6,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, status
 
-from chromagora_api.db.tenant import get_active_tenant_id, get_backend_supabase
+from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_active_tenant_id, get_backend_supabase
 
 router = APIRouter(prefix="/approvals", tags=["approvals"])
 
@@ -17,7 +17,9 @@ async def list_approvals(status: str | None = None):
     try:
         sb = get_backend_supabase()
         tenant_id = get_active_tenant_id(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
     query = (
@@ -46,7 +48,9 @@ async def approve_request(approval_id: UUID, decision_notes: str = ""):
     try:
         sb = get_backend_supabase()
         tenant_id = get_active_tenant_id(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
     resp = (
@@ -84,7 +88,9 @@ async def reject_request(approval_id: UUID, decision_notes: str = ""):
     try:
         sb = get_backend_supabase()
         tenant_id = get_active_tenant_id(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
     resp = (

@@ -39,9 +39,9 @@ def _ensure_business_scope(sb, business_id: UUID, tenant_id: UUID | None = None)
 
     scoped_tenant_id = get_business_tenant_id(str(business_id), sb)
     if not scoped_tenant_id:
-        raise RuntimeError("Business not found")
+        raise TenantError("Business not found")
     if tenant_id and scoped_tenant_id != str(tenant_id):
-        raise RuntimeError("Business not found")
+        raise TenantError("Business not found")
     return scoped_tenant_id
 
 
@@ -55,7 +55,7 @@ def _ensure_workflow_run_scope(sb, workflow_run_id: UUID) -> str:
         .execute()
     )
     if not resp.data:
-        raise RuntimeError("Workflow not found")
+        raise TenantError("Workflow not found")
     return tenant_id
 
 

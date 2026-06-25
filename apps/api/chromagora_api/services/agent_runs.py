@@ -30,9 +30,9 @@ def _ensure_business_scope(sb, business_id: UUID, tenant_id: UUID | None = None)
 
     scoped_tenant_id = get_business_tenant_id(str(business_id), sb)
     if not scoped_tenant_id:
-        raise RuntimeError("Business not found")
+        raise TenantError("Business not found")
     if tenant_id and scoped_tenant_id != str(tenant_id):
-        raise RuntimeError("Business not found")
+        raise TenantError("Business not found")
 
 
 def start_agent_run(

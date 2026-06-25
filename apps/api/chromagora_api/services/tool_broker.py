@@ -34,7 +34,7 @@ def _tenant_for_business(sb, business_id: UUID) -> str:
 
     tenant_id = get_business_tenant_id(str(business_id), sb)
     if not tenant_id:
-        raise RuntimeError("Business not found")
+        raise TenantError("Business not found")
     return tenant_id
 
 

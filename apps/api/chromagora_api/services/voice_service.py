@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_supabase():
-    from chromagora_api.db.tenant import get_backend_supabase
+    from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_backend_supabase
     return get_backend_supabase()
 
 
@@ -33,16 +33,17 @@ def _table_admin(name: str):
 
 
 def _ensure_business_scope(sb, business_id: UUID) -> None:
-    from chromagora_api.db.tenant import get_business_tenant_id
+    from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_business_tenant_id
 
     if not get_business_tenant_id(str(business_id), sb):
-        raise RuntimeError("Business not found")
+        raise TenantError("Business not found")
 
 
 def _ensure_call_scope(sb, call_record_id: UUID) -> dict[str, Any]:
+    from chromagora_api.db.tenant import TenantError
     resp = sb.table("call_records").select("*").eq("id", str(call_record_id)).execute()
     if not resp.data:
-        raise RuntimeError("Call record not found")
+        raise TenantError("Call record not found")
     row = resp.data[0]
     _ensure_business_scope(sb, UUID(row["business_id"]))
     return row
@@ -71,12 +72,13 @@ def create_call_record(business_id: UUID, data: CallRecordCreate) -> Optional[Ca
 
 def get_call_record(call_record_id: UUID) -> Optional[CallRecordResponse]:
     """Get a call record by ID."""
+    from chromagora_api.db.tenant import TenantError
     sb = _get_supabase()
     if not sb:
         return None
     try:
         row = _ensure_call_scope(sb, call_record_id)
-    except RuntimeError:
+    except (RuntimeError, TenantError):
         return None
     return CallRecordResponse(**row)
 
@@ -138,12 +140,13 @@ def create_call_summary(data: CallSummaryCreate) -> Optional[CallSummaryResponse
 
 def get_call_summary(call_record_id: UUID) -> Optional[CallSummaryResponse]:
     """Get the summary for a call record."""
+    from chromagora_api.db.tenant import TenantError
     sb = _get_supabase()
     if not sb:
         return None
     try:
         _ensure_call_scope(sb, call_record_id)
-    except RuntimeError:
+    except (RuntimeError, TenantError):
         return None
     resp = (
         sb.table("call_summaries")

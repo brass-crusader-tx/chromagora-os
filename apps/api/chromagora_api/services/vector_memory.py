@@ -60,7 +60,7 @@ def list_artifacts(business_id: UUID | str | None, artifact_type: str | None = N
     """List memory artifacts for active-tenant businesses."""
     sb = _get_supabase()
     if not sb:
-        raise RuntimeError("Database not configured")
+        raise DatabaseUnavailable("Database not configured")
     business_ids = _resolve_business_ids(sb, business_id)
     if not business_ids:
         return []
@@ -130,7 +130,7 @@ def similarity_search(
 
     sb = _get_supabase()
     if not sb:
-        raise RuntimeError("Database not configured")
+        raise DatabaseUnavailable("Database not configured")
     _ensure_business_scope(sb, business_id)
 
     # Use Supabase raw SQL for vector similarity (RPC call preferred in production)
@@ -148,7 +148,7 @@ def similarity_search(
 
 def _get_supabase():
     """Get Supabase client. Late import to allow patching in tests."""
-    from chromagora_api.db.tenant import get_backend_supabase
+    from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_backend_supabase
     return get_backend_supabase()
 
 
@@ -157,19 +157,19 @@ def _table_admin(name: str):
 
 
 def _resolve_business_ids(sb, business_id: UUID | str | None) -> list[str]:
-    from chromagora_api.db.tenant import get_active_business_ids, get_business_tenant_id
+    from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_active_business_ids, get_business_tenant_id
 
     if business_id:
         bid = str(business_id)
         if not get_business_tenant_id(bid, sb):
-            raise RuntimeError("Business not found")
+            raise TenantError("Business not found")
         return [bid]
     return get_active_business_ids(sb)
 
 
 def _ensure_business_scope(sb, business_id: UUID | str) -> None:
     if not _resolve_business_ids(sb, business_id):
-        raise RuntimeError("Business not found")
+        raise TenantError("Business not found")
 
 
 def _ensure_artifact_scope(sb, artifact_id: UUID) -> None:
@@ -180,5 +180,5 @@ def _ensure_artifact_scope(sb, artifact_id: UUID) -> None:
         .execute()
     )
     if not resp.data:
-        raise RuntimeError("Memory artifact not found")
+        raise TenantError("Memory artifact not found")
     _ensure_business_scope(sb, resp.data[0]["business_id"])

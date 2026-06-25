@@ -7,6 +7,8 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, status
 
 from chromagora_api.db.tenant import (
+    DatabaseUnavailable,
+    TenantError,
     get_active_business_ids,
     get_backend_supabase,
     get_business_tenant_id,
@@ -40,7 +42,9 @@ async def list_agents(business_id: UUID | None = None):
     try:
         sb = get_backend_supabase()
         active_business_ids = get_active_business_ids(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     if business_id:
         if str(business_id) not in active_business_ids:
@@ -71,7 +75,9 @@ async def create_agent(body: AgentDefinitionCreate):
     """Create a new agent definition (simplified — creates definition only)."""
     try:
         sb = get_backend_supabase()
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     data = body.model_dump()
     resp = sb.table("agent_definitions").insert(data).execute()
@@ -86,7 +92,9 @@ async def get_agent(agent_id: str):
     try:
         sb = get_backend_supabase()
         active_business_ids = get_active_business_ids(sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     if not active_business_ids:
         raise HTTPException(status_code=404, detail="Agent not found")
@@ -137,7 +145,9 @@ async def get_business_agents(business_id: UUID):
         sb = get_backend_supabase()
         if not get_business_tenant_id(str(business_id), sb):
             raise HTTPException(status_code=404, detail="Business not found")
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     return list_business_agents(business_id)
 
@@ -149,7 +159,9 @@ async def post_business_agent(business_id: UUID, body: BusinessAgentInstanceCrea
         sb = get_backend_supabase()
         if not get_business_tenant_id(str(business_id), sb):
             raise HTTPException(status_code=404, detail="Business not found")
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     # Ensure business_id in path matches body
     body.business_id = business_id
@@ -168,6 +180,8 @@ async def get_agent_runs(business_id: UUID):
         sb = get_backend_supabase()
         if not get_business_tenant_id(str(business_id), sb):
             raise HTTPException(status_code=404, detail="Business not found")
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     return list_agent_runs(business_id)

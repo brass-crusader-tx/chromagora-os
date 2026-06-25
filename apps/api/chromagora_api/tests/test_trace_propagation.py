@@ -38,13 +38,13 @@ class TestEnsureTraceId:
 
 class TestGetRecordsByTrace:
     def test_returns_empty_when_no_db(self):
-        with patch("chromagora_api.db.base.get_supabase") as mock_sb:
+        with patch("chromagora_api.db.tenant.get_backend_supabase") as mock_sb:
             mock_sb.return_value = None
             result = get_records_by_trace("test-trace")
             assert result == {}
 
     def test_queries_tables(self):
-        with patch("chromagora_api.db.base.get_supabase") as mock_sb:
+        with patch("chromagora_api.db.tenant.get_backend_supabase") as mock_sb:
             mock_client = MagicMock()
             mock_resp = MagicMock()
             mock_resp.data = None

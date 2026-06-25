@@ -9,7 +9,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from chromagora_api.db.tenant import get_backend_supabase, get_business_tenant_id
+from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_backend_supabase, get_business_tenant_id
 from chromagora_schemas.authority import (
     AuthorityEnvelopeCreate,
     AuthorityEnvelopeResponse,
@@ -48,7 +48,9 @@ def _scoped_client(business_id: UUID):
         if not get_business_tenant_id(str(business_id), sb):
             raise HTTPException(status_code=404, detail="Business not found")
         return sb
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
 
 

@@ -7,7 +7,7 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
-from chromagora_api.db.tenant import get_backend_supabase, get_business_tenant_id
+from chromagora_api.db.tenant import DatabaseUnavailable, TenantError, get_backend_supabase, get_business_tenant_id
 from chromagora_api.services.reputation_agent import run_review_request
 from chromagora_api.services.sales_agent import run_stale_quote_followup
 from chromagora_api.services.procurement_agent import evaluate_opportunity
@@ -49,7 +49,7 @@ class OpportunitySimInput(BaseModel):
 
 
 def get_supabase():
-    """Compatibility seam for tests; production uses the backend admin client."""
+    """Compatibility seam for tests and internal callers."""
     return get_backend_supabase()
 
 
@@ -57,9 +57,11 @@ def _scoped_business_context(business_id: UUID):
     try:
         sb = get_supabase()
         if not sb:
-            raise RuntimeError("Database not configured")
+            raise DatabaseUnavailable("Database not configured")
         tenant_id = get_business_tenant_id(str(business_id), sb)
-    except RuntimeError as e:
+    except TenantError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except DatabaseUnavailable as e:
         raise HTTPException(status_code=503, detail=str(e))
     if not tenant_id:
         raise HTTPException(status_code=404, detail="Business not found")

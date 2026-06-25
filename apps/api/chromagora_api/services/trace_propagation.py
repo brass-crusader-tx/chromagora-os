@@ -103,6 +103,8 @@ def get_records_by_trace(trace_id: str) -> dict[str, list[dict]]:
     Useful for debugging and observability.
     """
     from chromagora_api.db.tenant import (
+        DatabaseUnavailable,
+        TenantError,
         get_active_business_ids,
         get_active_tenant_id,
         get_backend_supabase,
@@ -111,7 +113,7 @@ def get_records_by_trace(trace_id: str) -> dict[str, list[dict]]:
         sb = get_backend_supabase()
         tenant_id = get_active_tenant_id(sb)
         business_ids = get_active_business_ids(sb)
-    except RuntimeError:
+    except (RuntimeError, TenantError, DatabaseUnavailable):
         return {}
 
     tables = [
