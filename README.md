@@ -1,6 +1,6 @@
-# Chromagora OS v0.1
+# Chromagora OS
 
-A multi-agent operating system for SMBs.
+Current Supabase-first Chromagora OS baseline: FastAPI backend, Next.js cockpit, Python workers, and numbered Supabase/PostgreSQL migrations.
 
 Chromagora OS is not a chatbot, CRM skin, or generic automation tool. It is a structured operating cell where autonomous agents operate under explicit policies and authority, execute business workflows, maintain a live Business Twin mirror of real business state, and enable human-in-the-loop oversight through an Operator Cockpit.
 
@@ -18,7 +18,7 @@ Supabase (PostgreSQL + Auth + Realtime + RLS) is the primary and only datastore.
 
 ## Build Sequence
 
-See [docs/CHAPTERBOOK.md](docs/CHAPTERBOOK.md) for the 26-chapter build plan.
+See [docs/CURRENT_STATE.md](docs/CURRENT_STATE.md) for what exists now. [docs/CHAPTERBOOK.md](docs/CHAPTERBOOK.md) is the historical base build blueprint through Chapter 26, not a fresh-start instruction set.
 
 ## Local Development
 

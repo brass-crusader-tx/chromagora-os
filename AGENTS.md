@@ -29,14 +29,26 @@ Use all available tools freely:
 - Push to GitHub regularly
 
 ### Architecture
-- Follow `docs/CHAPTERBOOK.md` for build order
+- Treat `docs/CHAPTERBOOK.md` as a historical baseline through Chapter 26, not a fresh-start build order
 - Reference `docs/ARCHITECTURE_CONSTITUTION.md` for rules
 - Use Supabase Auth for authentication
 - Enable RLS on all tenant-scoped tables
 
+## Context Priority
+
+When files conflict, follow this order:
+1. Current source code and migrations
+2. `docs/CURRENT_STATE.md`
+3. Active vertical docs under `docs/verticals/`
+4. `docs/CHAPTERBOOK.md` as historical baseline through Chapter 26
+5. Archived docs only when explicitly requested
+
+Do not treat archived chapterbooks or v0.1 acceptance docs as active build instructions.
+
 ## Key Files
 
-- `docs/CHAPTERBOOK.md` — Build blueprint
+- `docs/CURRENT_STATE.md` — Current implementation summary
+- `docs/CHAPTERBOOK.md` — Historical base build blueprint
 - `docs/ARCHITECTURE_CONSTITUTION.md` — Architecture rules
 - `SUPABASE_ARCHITECTURE.md` — Database layer
 - `docs/DOMAIN_GLOSSARY.md` — Domain language

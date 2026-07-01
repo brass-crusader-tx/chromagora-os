@@ -1,5 +1,10 @@
 # Model Routing Policy
 
+This policy describes the base OS model router for ordinary agent runs.
+Specialized verticals may define their own model gateway, timeout policy, and
+model selection, while still recording model calls and respecting tenant
+scoping, traceability, and cost controls.
+
 ## Tier Assignments
 
 | Tier | Model | Use Case | Cost |
@@ -26,10 +31,12 @@
 - **Customer-facing drafts**: Tier 2 minimum
 - **Never downgrade compliance-sensitive tasks**
 
-## Free Models Only
+## Base Router Cost Policy
 
-All models use the `:free` suffix on OpenRouter. Never pay for models.
-If a free model is unavailable, escalate to human rather than pay.
+The base router currently uses OpenRouter `:free` models. If a free model is
+unavailable, ordinary OS agent runs should escalate to human rather than pay by
+default. Heavy vertical pipelines must document their own gateway and cost
+controls before using different timeout or model-selection rules.
 
 ## Code Constants
 

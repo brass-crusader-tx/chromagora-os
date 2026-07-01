@@ -1,4 +1,9 @@
-"""Demo simulation endpoints — end-to-end loops."""
+"""Runtime simulation endpoints.
+
+These `/demo/*` routes are retained for backward compatibility with the
+original operator walkthrough. They simulate internal OS runtime loops; they
+are not prospect demo-site or Demo Factory endpoints.
+"""
 
 from __future__ import annotations
 
@@ -12,7 +17,15 @@ from chromagora_api.services.reputation_agent import run_review_request
 from chromagora_api.services.sales_agent import run_stale_quote_followup
 from chromagora_api.services.procurement_agent import evaluate_opportunity
 
-router = APIRouter(prefix="/demo", tags=["demo"])
+router = APIRouter(
+    prefix="/demo",
+    tags=["runtime simulations"],
+    responses={
+        200: {
+            "description": "Internal runtime simulation result. Future prospect demo-site APIs should use /demo-sites/* or /demo-site-batches/*.",
+        }
+    },
+)
 
 
 class ReviewRequestSimInput(BaseModel):

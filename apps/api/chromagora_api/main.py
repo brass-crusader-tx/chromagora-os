@@ -73,6 +73,8 @@ app.include_router(agent_tasks_router)
 from chromagora_api.routes.procurement import router as procurement_router
 app.include_router(procurement_router)
 
+# Backward-compatible internal runtime simulations. Future prospect demo-site
+# APIs should use /demo-sites/* or /demo-site-batches/*, not this /demo prefix.
 from chromagora_api.routes.demo import router as demo_router
 app.include_router(demo_router)
 

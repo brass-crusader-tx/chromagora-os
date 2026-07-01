@@ -1,8 +1,5 @@
 # Schemas — Shared Schemas
 
-Shared schemas between API, web, and workers.
+Shared schema package for API and workers.
 
-Contains:
-- Pydantic models for Python
-- TypeScript type definitions
-- JSON Schema definitions
+Currently contains Pydantic models for Python. TypeScript/generated JSON Schema can be added later if needed.

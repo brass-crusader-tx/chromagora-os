@@ -22,7 +22,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # Set up environment
-cp ../.env.example ../.env
+cp ../../.env.example ../../.env
 # Edit .env with your Supabase project credentials
 
 # Run tests

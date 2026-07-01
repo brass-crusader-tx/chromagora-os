@@ -1,5 +1,8 @@
 # Chromagora OS v0.1 Acceptance Test
 
+> HISTORICAL ACCEPTANCE ARTIFACT.
+> This checklist describes the original v0.1 baseline and should not be treated as the current implementation roadmap.
+
 This document defines when Chromagora OS v0.1 is considered complete.
 
 ## Core Criteria

@@ -27,6 +27,8 @@ MODEL_TIER_MAP: dict[int, str] = {
 }
 
 DEFAULT_TEMPERATURE = 0.0
+# NOTE: This is the base OS model router. Heavy vertical pipelines should not reuse
+# DEFAULT_TIMEOUT_SECONDS blindly; define a vertical-specific gateway when needed.
 DEFAULT_TIMEOUT_SECONDS = 30
 DEFAULT_MAX_TOKENS = 2048
 

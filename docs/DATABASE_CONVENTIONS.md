@@ -49,7 +49,7 @@ missing_documents text[] NOT NULL DEFAULT '{}'
 - Composite indexes for common query patterns (tenant_id + created_at DESC)
 
 ## Naming
-- Tables: snake_case, singular (e.g., `tenant`, not `tenants`)
+- Tables: snake_case, plural for entity collections, matching existing migrations.
 - Columns: snake_case
 - Indexes: idx_{table}_{column}
 - Policies: {rule_name} ON {table}

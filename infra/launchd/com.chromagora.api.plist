@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.chromagora.api</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/admin/.openclaw/workspace/chromagora-os/apps/api/.venv/bin/python</string>
+    <string>-m</string>
+    <string>uvicorn</string>
+    <string>chromagora_api.main:app</string>
+    <string>--host</string>
+    <string>0.0.0.0</string>
+    <string>--port</string>
+    <string>8000</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/admin/.openclaw/workspace/chromagora-os/apps/api</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/Users/admin/.openclaw/workspace/chromagora-os/apps/api/.venv/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <key>PYTHONPATH</key>
+    <string>/Users/admin/.openclaw/workspace/chromagora-os/apps/api:/Users/admin/.openclaw/workspace/chromagora-os/packages/schemas:/Users/admin/.openclaw/workspace/packages/schemas</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/admin/.openclaw/workspace/chromagora-os/apps/api/logs/api.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/admin/.openclaw/workspace/chromagora-os/apps/api/logs/api.err.log</string>
+</dict>
+</plist>

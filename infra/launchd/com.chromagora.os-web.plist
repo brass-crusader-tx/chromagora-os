@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.chromagora.os-web</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/npx</string>
+    <string>next</string>
+    <string>start</string>
+    <string>--port</string>
+    <string>3010</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/admin/.openclaw/workspace/chromagora-os/apps/web</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <key>NODE_ENV</key>
+    <string>production</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/admin/.openclaw/workspace/chromagora-os/apps/web/logs/next.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/admin/.openclaw/workspace/chromagora-os/apps/web/logs/next.err.log</string>
+</dict>
+</plist>

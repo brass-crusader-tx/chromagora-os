@@ -116,7 +116,7 @@ export default function Sidebar() {
         </nav>
 
         <div className="p-3 border-t border-bg-border text-xs text-text-dim">
-          v0.1 — {theme === "dark" ? "Dark" : "Light"} Mode
+          Chromagora OS — {theme === "dark" ? "Dark" : "Light"} Mode
         </div>
       </aside>
     </>

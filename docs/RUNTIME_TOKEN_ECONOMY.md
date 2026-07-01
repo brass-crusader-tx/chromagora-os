@@ -39,18 +39,23 @@ Context Packets must be compact enough for the model tier assigned. A Tier 1 tas
 
 ## Model Routing Tiers
 
+These tiers describe ordinary OS agent runs. Specialized verticals may define
+their own model gateway, timeout policy, and model selection, while still
+recording model calls and respecting tenant scoping, traceability, and cost
+controls.
+
 ```
 Tier 0 — No model
   Deterministic: CRUD, routing, status transitions, timers, policy checks, event emission.
 
-Tier 1 — Small/free model (e.g., gemma-4-26b-it:free on OpenRouter)
+Tier 1 — Small/base model
   Classification, entity extraction, formatting, simple drafting, note cleanup.
 
-Tier 2 — Mid/free model (e.g., qwen/qwen3-coder:free on OpenRouter)
+Tier 2 — Mid/base model
   Opportunity scoring, customer nuance, bid/no-bid reasoning, content drafting,
   approval card summaries, structured extraction.
 
-Tier 3 — Strong/free model (e.g., nemotron-3-super-120b:free on OpenRouter)
+Tier 3 — Strong/base model
   Complex procurement analysis, ambiguous customer situations, negotiation prep,
   high-value decisions, strategic reasoning.
 

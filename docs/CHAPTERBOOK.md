@@ -1,8 +1,11 @@
-# Chromagora OS v0.1 Build Chapterbook (Supabase Edition)
+# Chromagora OS Base Build Blueprint Through Chapter 26 (Supabase Edition)
+
+> CURRENT STATUS NOTE:
+> This file is the base build blueprint through Chapter 26. It is not a fresh-start instruction set. Before implementing new chapters, inspect the current codebase and preserve the existing Supabase/FastAPI/Next/worker implementation.
 
 > **This is the Supabase-adapted edition of the chapterbook.**
 > All database references have been updated: SQLite is removed. Supabase (PostgreSQL + Auth + Realtime + RLS) is the only datastore.
-> Original chapterbook saved as `docs/CHAPTERBOOK_SQLITE_ORIGINAL.md`.
+> Original chapterbook saved as `docs/CHAPTERBOOK_ORIGINAL.md`.
 
 ## Build doctrine
 
@@ -172,7 +175,7 @@ CHROMAGORA_ENV=development
 * RLS enabled on all tenant-scoped tables
 * `created_at` and `updated_at` use `timestamptz`
 * JSON data stored as `jsonb`
-* Enum types via `CREATE TYPE ... AS ENUM`
+* Status-like domains normally use CHECK constraints unless a true PostgreSQL enum is intentionally justified.
 * Indexes on foreign keys and frequently queried columns
 * No SQLite-compatible fallbacks — this is Postgres-only
 
@@ -339,7 +342,6 @@ Requirements:
     /core        — config, supabase client, security
     /routes
     /db
-    /models       — SQLAlchemy or raw SQL against Supabase
     /schemas      — Pydantic
     /services
     /tests
@@ -878,7 +880,7 @@ Add mock development tools and seed script via Supabase.
 Mock tools: crm.create_lead, crm.update_lead_status, crm.create_followup_task, reputation.queue_review_request, procurement.create_opportunity_note, seo.create_content_draft, email.create_draft, supplier.create_supplier_note, message.create_draft
 
 /scripts/seed_dev_tools.py — upserts ToolDefinitions via Supabase SERVICE_ROLE_KEY.
-/docs/TOOL_BROKER.md
+Document the Tool Broker behavior in the relevant service README or vertical runtime doc.
 Add tests.
 ```
 
@@ -1232,10 +1234,12 @@ Requirements:
 - Tier 2: openrouter/qwen/qwen3-coder:free
 - Tier 3: openrouter/nvidia/nemotron-3-super-120b-a12b:free or similar free tier
 - Tier 4: not applicable (human)
-- Free models only (":free" suffix on OpenRouter)
+- Base router uses OpenRouter `:free` models for ordinary OS agent runs.
 - No hardcoded API keys
 - Timeout, error handling, structured logging
 - Mock provider for provider-agnostic tests
+
+Note: the base model router is for ordinary OS agent runs. Specialized verticals may define their own model gateway, timeout policy, and model selection, while still recording model calls and respecting tenant scoping, traceability, and cost controls.
 
 Do not wire to agents yet.
 Add tests for mock provider.
@@ -1249,8 +1253,9 @@ Add tests for mock provider.
 Create /docs/MODEL_ROUTING_POLICY.md.
 
 Document tier assignments, escalation triggers, downgrade rules.
-Emphasize: free models only. Never pay for models.
-No model for Tier 0. Cheap/free for Tier 1-3. Human for Tier 4.
+Emphasize: the base router uses free models by default for ordinary OS agent runs.
+No model for Tier 0. Base/free models for Tier 1-3. Human for Tier 4.
+Clarify that specialized verticals may define their own model gateway, timeout policy, and model selection, while still recording model calls and respecting tenant scoping, traceability, and cost controls.
 Add code constants.
 No real provider calls yet.
 ```
@@ -1267,7 +1272,7 @@ extract_tender_fields(text, mode="deterministic" | "llm_structured")
 Output: title, buyer_name, deadline, location, service_keywords, required_documents, insurance_requirements, estimated_value, submission_method, disqualifying_requirements, unknowns, confidence.
 
 Rules: parser does NOT save to database, create actions, or execute tools.
-Uses OpenRouter with free models only.
+Uses the base OpenRouter model gateway unless a specialized vertical gateway is explicitly designed.
 Mock LLM tests.
 ```
 
@@ -1689,7 +1694,7 @@ Create VoiceQualificationResult schema.
 
 Fields: caller_intent, service_type, address_or_area, service_area_match, timeline, urgency, budget_signal, photos_requested, estimate_booking_recommended, escalation_required, escalation_reason, bad_fit_signals, next_action, confidence, missing_information.
 
-/docs/VOICE_AGENT_ARCHITECTURE.md
+Document voice-agent design in an active vertical or service doc before implementation.
 No real voice.
 ```
 
@@ -1804,7 +1809,7 @@ Successful v0.1 must allow:
 20. Run without real external integrations
 21. Run on Supabase (not SQLite)
 22. RLS enforced on all tenant tables
-23. Free models only (no paid API costs)
+23. Base router cost controls
 
 Explicitly NOT in v0.1: real voice, real email by default, real scraping, Temporal, pgvector required, native Android, autonomous contract submission, autonomous negotiation.
 ```
@@ -1852,7 +1857,7 @@ Build in this order:
 11. Rules-Based Agents
 12. Authority + Tool UI
 13. Opportunity Intelligence
-14. LLM Integration (free models only)
+14. LLM Integration (base router)
 15. Tactical Subagents
 16. End-to-End Simulations
 17. CRM-lite + Drafts
@@ -1926,7 +1931,7 @@ Chromagora OS should save tokens by:
 * using typed events instead of conversational coordination
 * writing compact evidence bundles
 * measuring cost per workflow and agent run
-* **using free-tier models on OpenRouter (":free" suffix) — never paying for inference**
+* **using the base OpenRouter free-tier models for ordinary OS agent runs, with specialized vertical gateways documented separately when needed**
 
 Chromagora OS must not save tokens by:
 * using weak models for high-value judgment
@@ -1942,5 +1947,5 @@ Chromagora OS must not save tokens by:
 
 Final rule:
 ```
-Spend fewer tokens by default. Spend whatever tokens are required when correctness, trust, money, compliance, or customer experience depends on it. Never pay for model inference — use free tiers only.
+Spend fewer tokens by default. Spend whatever tokens are required when correctness, trust, money, compliance, or customer experience depends on it. The base OS router defaults to free-tier inference; specialized vertical gateways must define timeout, model-selection, traceability, tenant-scoping, and cost controls explicitly.
 ```

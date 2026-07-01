@@ -1,5 +1,8 @@
 # Temporal Upgrade Plan
 
+> HISTORICAL BASELINE NOTE.
+> This plan was written against the original v0.1 workflow-lite baseline. Check `docs/CURRENT_STATE.md` and current migrations before treating any timeline language as active.
+
 Chromagora OS uses workflow-lite (database-backed state machines) for v0.1. This document plans the migration to Temporal for durable workflows.
 
 ## Why Temporal Later

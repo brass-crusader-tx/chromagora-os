@@ -4,7 +4,7 @@
 
 Supabase provides the entire backend infrastructure:
 - **PostgreSQL 15+** — all domain data, with UUID, JSONB, and array types
-- **Supabase Auth** — userno custom auth)
+- **Supabase Auth** — user identity, sessions, JWTs; no custom auth system
 - **Realtime** — live event streaming via websocket
 - **Row Level Security (RLS)** — tenant isolation at the database engine level
 - **Storage** — file artifacts (photos, PDFs) in buckets
@@ -46,11 +46,13 @@ payload jsonb NOT NULL DEFAULT '{}',
 evidence jsonb NOT NULL DEFAULT '{}'
 ```
 
-### Enums (Database-Level)
+### Status Domains
+
+Status-like domains should normally use CHECK constraints unless a true PostgreSQL enum is intentionally justified.
+
 ```sql
-CREATE TYPE agent_status AS ENUM ('pending', 'running', 'completed', 'failed', 'cancelled');
-CREATE TYPE action_result_status AS ENUM ('dry_run', 'success', 'failed', 'blocked', 'approval_required', 'cancelled');
-CREATE TYPE autonomy_level AS ENUM ('0_observe', '1_analyze', '2_draft', '3_internal_action', '4_low_risk_external', '5_bounded_negotiation', '6_binding_execution');
+status text NOT NULL DEFAULT 'pending'
+  CHECK (status IN ('pending', 'running', 'completed', 'failed', 'cancelled'));
 ```
 
 ### Indexes

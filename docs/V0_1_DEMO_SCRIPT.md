@@ -1,5 +1,8 @@
 # Chromagora OS v0.1 Demo Script
 
+> HISTORICAL DEMO ARTIFACT.
+> This script documents the original v0.1 walkthrough. Current implementation work should start from `docs/CURRENT_STATE.md` and active vertical docs.
+
 Scenario: Brass Landscaping & Snow Removal — a real SMB going live with Chromagora.
 
 ## Prerequisites

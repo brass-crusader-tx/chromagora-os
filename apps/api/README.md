@@ -11,14 +11,12 @@ The Chromagora OS backend API.
 ## Structure
 ```
 chromagora_api/
-  main.py          — FastAPI application entry
-  core/            — config, supabase client, security
+  main.py          — FastAPI app and router registration
+  core/            — config, Supabase client, auth, errors, rate limit
+  db/              — Supabase admin helpers and tenant scoping
   routes/          — API route handlers
-  db/              — database helpers, tenant context
-  models/          — SQLAlchemy or raw SQL models
-  schemas/         — Pydantic request/response schemas
-  services/        — business logic services
-  tests/           — unit tests
+  services/        — business logic and runtime services
+  tests/           — API tests
 ```
 
 ## Running

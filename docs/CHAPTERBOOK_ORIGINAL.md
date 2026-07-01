@@ -1,5 +1,8 @@
 # Chromagora OS v0.1 Build Chapterbook
 
+> ARCHIVED CONTEXT ONLY.
+> This file is not an active implementation guide. Use `docs/CHAPTERBOOK.md` and current vertical docs for active work.
+
 ## Build doctrine
 
 Chromagora OS should be built as a multi-agent operating cell for SMBs. The system must not become:
