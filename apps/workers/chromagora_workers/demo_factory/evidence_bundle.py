@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from chromagora_workers.demo_factory.evidence_normalizers import sanitize_service_area_candidates
+
 
 def build_evidence_bundle(
     project: dict[str, Any],
@@ -20,7 +22,10 @@ def build_evidence_bundle(
         _flatten(meta.get("service_candidates") for meta in metadata_rows)
         + _service_candidates_from_row(raw_row)
     )
-    location_candidates = _merge_unique(_flatten(meta.get("location_candidates") for meta in metadata_rows))
+    location_candidates = sanitize_service_area_candidates(
+        _merge_unique(_flatten(meta.get("location_candidates") for meta in metadata_rows)),
+        max_items=8,
+    )
     image_candidates = _merge_unique(
         _flatten(meta.get("image_candidates") for meta in metadata_rows)
         + [asset.get("source_url") for asset in assets if asset.get("asset_type") == "image_candidate"]

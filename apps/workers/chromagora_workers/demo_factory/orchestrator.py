@@ -10,12 +10,15 @@ from uuid import UUID
 from chromagora_api.services.demo_deployment_service import publish_demo
 from chromagora_api.services.demo_frameworks import retrieve_framework_patterns
 
+from chromagora_workers.demo_factory.errors import classify_failure
+
 from chromagora_workers.demo_factory.agents.adversarial_checker_agent import run_adversarial_checker_agent
 from chromagora_workers.demo_factory.agents.asset_curation_agent import run_asset_curation_agent
 from chromagora_workers.demo_factory.agents.brand_synthesis_agent import run_brand_synthesis_agent
 from chromagora_workers.demo_factory.agents.conversion_strategy_agent import run_conversion_strategy_agent
 from chromagora_workers.demo_factory.agents.review_evidence_agent import run_review_evidence_agent
 from chromagora_workers.demo_factory.agents.site_architecture_agent import run_site_architecture_agent
+from chromagora_workers.demo_factory.deterministic_qa import run_deterministic_qa
 from chromagora_workers.demo_factory.evidence_bundle import build_evidence_bundle
 from chromagora_workers.demo_factory.site_crawler import crawl_site
 from chromagora_workers.demo_factory.site_spec_assembler import assemble_site_spec
@@ -124,8 +127,21 @@ def process_project(project_id: UUID | str, sb=None) -> dict[str, Any]:
         )
         _emit_event(sb, tenant_id, "demo_site.site_spec_created", project, {"spec_id": spec_row["id"]})
 
+        _set_stage(sb, project, "qa", "run_deterministic_qa")
+        det_qa = run_deterministic_qa(site_spec, evidence)
+        _persist_deterministic_qa_report(sb, tenant_id, project_uuid, UUID(spec_row["id"]), det_qa)
+        if not det_qa.passed:
+            blocking = [f.failure_detail for f in det_qa.failures if f.severity == "blocking"]
+            _emit_event(sb, tenant_id, "demo_site.qa_failed", project, {"blocking": blocking, "qa_type": "deterministic"})
+            raise RuntimeError("; ".join(blocking))
+
         _set_stage(sb, project, "qa", "run_adversarial_checker")
-        adversarial = run_adversarial_checker_agent(project_id=project_uuid, site_spec=site_spec)
+        adversarial = run_adversarial_checker_agent(
+            project_id=project_uuid,
+            site_spec=site_spec,
+            evidence_bundle=evidence,
+            deterministic_qa_result=det_qa,
+        )
         _persist_adversarial_report(sb, tenant_id, project_uuid, UUID(spec_row["id"]), adversarial)
         if not adversarial.passed:
             _emit_event(sb, tenant_id, "demo_site.qa_failed", project, {"blocking": adversarial.blocking_issues})
@@ -158,10 +174,24 @@ def process_project(project_id: UUID | str, sb=None) -> dict[str, Any]:
         return {"status": "published", "project_id": str(project_uuid), "deployment": deployment}
     except Exception as exc:
         message = str(exc)[:2000]
+        status, error_class = classify_failure(exc)
         sb.table("demo_site_projects").update(
-            {"status": "failed_retryable", "current_stage": "failed_retryable", "error_message": message}
+            {
+                "status": status,
+                "current_stage": "failed_retryable",
+                "error_message": message,
+                "metadata": {
+                    **(project.get("metadata") or {}),
+                    "error_class": error_class,
+                    "last_failure_stage": project.get("current_stage"),
+                },
+            }
         ).eq("id", str(project_id)).execute()
-        _emit_event(sb, tenant_id, "demo_site.project_failed", project, {"error": message})
+        _emit_event(sb, tenant_id, "demo_site.project_failed", project, {
+            "error": message,
+            "error_class": error_class,
+            "status": status,
+        })
         raise
 
 
@@ -210,6 +240,22 @@ def _emit_event(
         ).execute()
     except Exception:
         pass
+
+
+def _persist_deterministic_qa_report(sb, tenant_id: UUID, project_id: UUID, spec_id: UUID, result) -> None:
+    sb.table("demo_site_qa_reports").insert(
+        {
+            "tenant_id": str(tenant_id),
+            "project_id": str(project_id),
+            "spec_id": str(spec_id),
+            "report_type": "deterministic",
+            "status": "passed" if result.passed else "failed",
+            "blocking_issues_json": [f.detail for f in result.failures if f.severity == "blocking"],
+            "warnings_json": [w.detail for w in result.warnings],
+            "screenshots_json": [],
+            "report_json": result.model_dump(mode="json"),
+        }
+    ).execute()
 
 
 def _persist_adversarial_report(sb, tenant_id: UUID, project_id: UUID, spec_id: UUID, report) -> None:

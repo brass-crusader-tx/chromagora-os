@@ -140,9 +140,7 @@ def publish_demo(
 
 
 def _verification_url(demo_slug: str, demo_url: str) -> str:
-    public_base = os.getenv("DEMO_FACTORY_PUBLIC_BASE_URL")
-    if public_base:
-        return f"{public_base.rstrip('/')}/demo/{demo_slug}"
+    """Always verify the canonical wildcard URL, not just the path preview."""
     return demo_url
 
 

@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import html
+import re
 from datetime import date
 from typing import Any
+from urllib.parse import urlparse
 
 from chromagora_schemas.demo_factory import ReviewEvidence, ReviewEvidenceBlock, score_review_identity_match
 
@@ -51,6 +54,65 @@ def build_grounded_review_evidence(evidence_bundle: dict[str, Any]) -> ReviewEvi
     )
 
 
+def _reject_candidate(candidate: dict[str, Any], source_domain: str) -> str | None:
+    """Reject a review candidate deterministically. Returns rejection reason or None."""
+    review_text = str(candidate.get("review_text") or "").strip()
+    source_url = str(candidate.get("source_url") or "").strip()
+    source_name = str(candidate.get("source_name") or "").strip()
+    source_kind = str(candidate.get("source_kind") or candidate.get("provenance") or "").strip()
+    signals = candidate.get("identity_match_signals") or {}
+
+    if not review_text:
+        return "empty_text"
+    if len(review_text) < 25:
+        return "text_too_short"
+    if len(review_text) > 700:
+        return "text_too_long"
+
+    lower_text = review_text.lower()
+    if any(token in lower_text for token in ["lorem ipsum", "{{", "}}", "as an ai", "todo", "fixme"]):
+        return "looks_like_marketing_copy"
+
+    marketing_patterns = [
+        r"\bbook\s+now\b",
+        r"\bcall\s+us\s+today\b",
+        r"\brequest\s+a\s+quote\b",
+        r"\bcontact\s+us\b",
+        r"\bget\s+started\b",
+        r"\blearn\s+more\b",
+        r"\bread\s+more\b",
+    ]
+    if any(re.search(pattern, lower_text) for pattern in marketing_patterns) and len(review_text) < 80:
+        return "looks_like_marketing_copy"
+
+    if source_kind == "business_site":
+        if not source_url:
+            return "missing_identity_signal"
+        candidate_domain = _extract_domain(source_url)
+        if not candidate_domain:
+            return "missing_identity_signal"
+        source_domain_clean = source_domain.lstrip("www.")
+        candidate_domain_clean = candidate_domain.lstrip("www.")
+        if source_domain_clean != candidate_domain_clean:
+            if source_domain_clean not in candidate_domain_clean and candidate_domain_clean not in source_domain_clean:
+                return "wrong_domain"
+        has_website = signals.get("website_match") is True
+        has_name = signals.get("business_name_match") is True
+        if not has_website and not has_name:
+            return "missing_identity_signal"
+        return None
+
+    if source_kind in {"external_review_site", "google_maps"}:
+        if not source_url:
+            return "missing_identity_signal"
+        return None
+
+    if not source_url:
+        return "missing_identity_signal"
+
+    return None
+
+
 def _candidate_to_review(candidate: dict[str, Any]) -> ReviewEvidence | None:
     review_text = _clean_review_text(candidate.get("review_text"))
     source_url = str(candidate.get("source_url") or "").strip()
@@ -65,12 +127,23 @@ def _candidate_to_review(candidate: dict[str, Any]) -> ReviewEvidence | None:
     if confidence is None:
         confidence = score_review_identity_match(signals)
     rating = _coerce_rating(candidate.get("rating"))
+    source_name_raw = str(candidate.get("source_name") or "").strip().lower()
+    if source_name_raw in {"business_site"}:
+        source_kind = "business_site"
+    elif source_name_raw in {"external_review_site", "google_maps"}:
+        source_kind = "external_review_site"
+    else:
+        source_kind = "unknown"
     return ReviewEvidence(
         reviewer_name=_clean_optional(candidate.get("reviewer_name")),
         rating=rating,
         review_text=review_text,
         review_date=_coerce_date(candidate.get("review_date")),
         source_url=source_url,
+        source_name=_clean_optional(candidate.get("source_name")),
+        source_kind=source_kind,
+        provenance=_clean_optional(candidate.get("provenance")),
+        source_page_type=_clean_optional(candidate.get("page_type")),
         identity_match_signals=signals,
         confidence_score=confidence,
     )
@@ -144,3 +217,16 @@ def _unique(values: list[str]) -> list[str]:
         if value not in output:
             output.append(value)
     return output
+
+
+def _extract_domain(url: str) -> str | None:
+    try:
+        parsed = urlparse(url)
+        host = (parsed.netloc or "").lower()
+        if not host:
+            return None
+        host = host.split(":")[0]
+        host = host.removeprefix("www.")
+        return host or None
+    except Exception:
+        return None

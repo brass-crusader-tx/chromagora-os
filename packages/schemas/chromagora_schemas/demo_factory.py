@@ -193,6 +193,10 @@ class ReviewEvidence(BaseModel):
     review_text: str
     review_date: date | None = None
     source_url: str
+    source_name: str | None = None
+    source_kind: Literal["business_site", "external_review_site", "manual", "unknown"] = "unknown"
+    provenance: str | None = None
+    source_page_type: str | None = None
     identity_match_signals: dict[str, bool] = Field(default_factory=dict)
     confidence_score: float = Field(ge=0, le=1)
 

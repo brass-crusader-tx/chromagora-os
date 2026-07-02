@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from pydantic import BaseModel
+
 
 BANNED_SLOP_PHRASES = [
     "solutions tailored to your needs",
@@ -13,6 +15,22 @@ BANNED_SLOP_PHRASES = [
     "contact us today",
     "we pride ourselves",
     "comprehensive services",
+    "a focused demo page",
+    "public evidence",
+    "trust signals",
+    "private preview",
+    "built around the services",
+]
+
+BANNED_HERO_PHRASES = [
+    "a focused demo page",
+    "public evidence",
+    "trust signals",
+    "private preview",
+    "built around the services",
+    "contact path visible from",
+    "solutions tailored",
+    "dedicated to excellence",
 ]
 
 CTA_DEFAULTS_BY_VERTICAL = {
@@ -131,3 +149,128 @@ def service_body_from_evidence(service: str) -> str:
 def _looks_generic(text: str) -> bool:
     lowered = text.lower()
     return any(phrase in lowered for phrase in BANNED_SLOP_PHRASES) or lowered.startswith("professional ")
+
+
+def build_hero_body_fallback(
+    business_name: str,
+    vertical: str | None,
+    primary_services: list[str],
+    service_area: str | None,
+    contact_path: str | None,
+) -> str:
+    """Build a deterministic hero body when the model fails."""
+    name = business_name or "this business"
+    area = f"{service_area}-area" if service_area else "local"
+    vertical_label = (vertical or "services").strip()
+    service_hint = ""
+    if primary_services:
+        top = primary_services[0]
+        if top:
+            service_hint = f" around {top.lower()}" if len(primary_services) == 1 else ""
+    contact_hint = ""
+    if contact_path:
+        if "tel:" in contact_path.lower():
+            contact_hint = " with a quick call"
+        elif "mailto:" in contact_path.lower():
+            contact_hint = " by email"
+        else:
+            contact_hint = " online"
+    return (
+        f"{name} helps {area} homeowners with{service_hint} {vertical_label}"
+        f"{contact_hint} through a clear, direct path."
+    )
+
+
+class CopyQualityIssue(BaseModel):
+    issue_code: str
+    field: str | None = None
+    severity: str = "blocking"
+    detail: str = ""
+
+
+def validate_generated_copy(
+    hero_body: str | None,
+    hero_heading: str | None,
+    service_area: str | None,
+    evidence_bundle: dict[str, Any] | None = None,
+) -> list[CopyQualityIssue]:
+    """Validate generated copy for publishability."""
+    issues: list[CopyQualityIssue] = []
+    body = (hero_body or "").strip()
+    heading = (hero_heading or "").strip()
+
+    if not body:
+        issues.append(CopyQualityIssue(
+            issue_code="empty_hero_body",
+            field="hero_body",
+            detail="Hero body is empty.",
+        ))
+        return issues
+
+    if len(body) < 40:
+        issues.append(CopyQualityIssue(
+            issue_code="hero_body_too_short",
+            field="hero_body",
+            detail=f"Hero body is too short ({len(body)} chars).",
+        ))
+
+    if len(body) > 600:
+        issues.append(CopyQualityIssue(
+            issue_code="hero_body_too_long",
+            field="hero_body",
+            detail=f"Hero body is too long ({len(body)} chars).",
+        ))
+
+    lowered = body.lower()
+    for phrase in BANNED_HERO_PHRASES:
+        if phrase in lowered:
+            issues.append(CopyQualityIssue(
+                issue_code="generic_hero_phrase",
+                field="hero_body",
+                detail=f"Contains banned generic phrase: '{phrase}'.",
+            ))
+
+    if heading:
+        heading_lowered = heading.lower()
+        for phrase in BANNED_HERO_PHRASES:
+            if phrase in heading_lowered:
+                issues.append(CopyQualityIssue(
+                    issue_code="generic_hero_phrase",
+                    field="hero_heading",
+                    detail=f"Heading contains banned generic phrase: '{phrase}'.",
+                ))
+
+    if service_area and len(service_area) > 80:
+        issues.append(CopyQualityIssue(
+            issue_code="service_area_contaminated",
+            field="service_area",
+            detail=f"Service area is too long ({len(service_area)} chars), possible contamination.",
+        ))
+
+    if _has_raw_scrape_leakage(body, evidence_bundle):
+        issues.append(CopyQualityIssue(
+            issue_code="raw_scrape_leakage",
+            field="hero_body",
+            detail="Hero body contains a long raw snippet from the crawled site.",
+        ))
+
+    return issues
+
+
+def _has_raw_scrape_leakage(text: str, evidence_bundle: dict[str, Any] | None) -> bool:
+    if not evidence_bundle:
+        return False
+    summaries = evidence_bundle.get("crawl_text_summaries") or []
+    text_lowered = text.lower()
+    for summary in summaries:
+        if not summary or len(summary) < 50:
+            continue
+        summary_lowered = summary.lower()
+        if len(text_lowered) < 30:
+            continue
+        if summary_lowered[:60] in text_lowered:
+            return True
+        overlap_count = sum(1 for word in summary_lowered.split() if word in text_lowered)
+        if overlap_count > 10 and overlap_count > len(summary_lowered.split()) * 0.5:
+            return True
+    return False

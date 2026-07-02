@@ -1,0 +1,22 @@
+# Demo Factory Caddyfile example
+# Handles wildcard demo hosts with on-demand TLS
+
+{
+    on_demand_tls {
+        ask http://127.0.0.1:3011/demo-sites/tls-ask
+    }
+}
+
+*.demo.chromagora.com {
+    tls {
+        on_demand
+    }
+
+    # Preserve the original Host header for slug extraction
+    header Host {host}
+
+    # Proxy to the Next.js web app
+    reverse_proxy http://127.0.0.1:3011 {
+        header_up Host {host}
+    }
+}

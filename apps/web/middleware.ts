@@ -9,9 +9,6 @@ export function middleware(request: NextRequest) {
     const slug = hostname.slice(0, -suffix.length);
     if (slug && request.nextUrl.pathname === "/") {
       const url = request.nextUrl.clone();
-      url.protocol = "http:";
-      url.hostname = "127.0.0.1";
-      url.port = "3011";
       url.pathname = `/demo/${slug}`;
       return NextResponse.rewrite(url);
     }
