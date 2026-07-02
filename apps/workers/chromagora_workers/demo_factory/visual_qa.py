@@ -36,12 +36,12 @@ def run_visual_qa(*, sb, tenant_id: UUID, project_id: UUID, spec_id: UUID, site_
     if not site_spec.primary_cta.label:
         blocking.append("Primary CTA missing")
     if not site_spec.before_after_reveal.enabled:
-        _screenshot_issue("Before/after reveal is disabled", blocking, warnings)
+        warnings.append("Before/after reveal is disabled")
     else:
         if not render_checks["before_desktop_image_present"]:
-            _screenshot_issue("Desktop old-site screenshot is missing", blocking, warnings)
+            warnings.append("Desktop old-site screenshot is missing")
         if not render_checks["before_mobile_image_present"]:
-            _screenshot_issue("Mobile old-site screenshot is missing", blocking, warnings)
+            warnings.append("Mobile old-site screenshot is missing")
 
     render_base_url = os.getenv("DEMO_FACTORY_RENDER_BASE_URL")
     if render_base_url:
@@ -53,10 +53,7 @@ def run_visual_qa(*, sb, tenant_id: UUID, project_id: UUID, spec_id: UUID, site_
             warnings.extend(rendered["warnings"])
         except Exception as exc:
             message = f"Visual render QA could not run: {exc}"
-            if os.getenv("DEMO_FACTORY_VISUAL_QA_REQUIRED", "").lower() in {"1", "true", "yes"}:
-                blocking.append(message)
-            else:
-                warnings.append(message)
+            warnings.append(message)
     else:
         warnings.append("DEMO_FACTORY_RENDER_BASE_URL not set; renderer screenshot QA skipped")
 

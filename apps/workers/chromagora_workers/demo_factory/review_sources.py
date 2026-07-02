@@ -73,6 +73,9 @@ def _reject_candidate(candidate: dict[str, Any], source_domain: str) -> str | No
     if any(token in lower_text for token in ["lorem ipsum", "{{", "}}", "as an ai", "todo", "fixme"]):
         return "looks_like_marketing_copy"
 
+    if _is_business_description(review_text):
+        return "business_description_not_review"
+
     marketing_patterns = [
         r"\bbook\s+now\b",
         r"\bcall\s+us\s+today\b",
@@ -111,6 +114,65 @@ def _reject_candidate(candidate: dict[str, Any], source_domain: str) -> str | No
         return "missing_identity_signal"
 
     return None
+
+
+def _is_business_description(text: str) -> bool:
+    """Detect business descriptions, staff bios, and service lists masquerading as reviews."""
+    lower = text.lower()
+
+    first_person_business = [
+        r"\bwe\s+are\b",
+        r"\bwe\s+provide\b",
+        r"\bwe\s+offer\b",
+        r"\bwe\s+specialize\b",
+        r"\bour\s+company\b",
+        r"\bour\s+team\b",
+        r"\bour\s+services\b",
+        r"\bour\s+mission\b",
+        r"\babout\s+us\b",
+    ]
+    if any(re.search(p, lower) for p in first_person_business):
+        return True
+
+    staff_bio_patterns = [
+        r"\b\w+\s+brings?\s+",
+        r"\b\w+\s+oversees?\s+",
+        r"\b\w+\s+manages?\s+",
+        r"\b\w+\s+leads?\s+",
+        r"\b\w+\s+handles?\s+",
+        r"\b\w+\s+ensures?\s+",
+        r"\byour\s+(local\s+)?clients\b",
+        r"\bhis\s+business\s+",
+        r"\bher\s+business\s+",
+    ]
+    if any(re.search(p, lower) for p in staff_bio_patterns):
+        return True
+
+    company_desc_patterns = [
+        r"\b\w+-?owned\s+and\s+operated\b",
+        r"\bbased\s+in\s+\w+",
+        r"\bwith\s+over\s+\d+\s+years?\s+of\b",
+        r"\bfully\s+licensed\b",
+        r"\binsured\s+and\s+licensed\b",
+        r"\bserving\s+the\s+\w+\s+area\b",
+        r"\byour\s+trusted\b",
+        r"\bfor\s+over\s+\d+\s+years?\b",
+    ]
+    if any(re.search(p, lower) for p in company_desc_patterns):
+        return True
+
+    service_list_patterns = [
+        r"\bcomprehensive\s+range\b",
+        r"\bprofessional\s+maintenance\b",
+        r"\bquality\s+to\s+ensure\b",
+        r"\bfrom\s+\w+\s+to\s+\w+",
+        r"\bour\s+crew\b",
+        r"\bour\s+experts\b",
+    ]
+    if any(re.search(p, lower) for p in service_list_patterns):
+        return True
+
+    return False
 
 
 def _candidate_to_review(candidate: dict[str, Any]) -> ReviewEvidence | None:

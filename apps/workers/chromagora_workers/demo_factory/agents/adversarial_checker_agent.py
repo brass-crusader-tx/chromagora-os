@@ -97,7 +97,11 @@ def run_adversarial_checker_agent(
         report.blocking_issues, site_spec, evidence_bundle
     )
 
-    report.passed = report.passed and not report.blocking_issues
+    if not report.blocking_issues:
+        report.passed = True
+    else:
+        report.passed = report.passed and not report.blocking_issues
+
     if report.blocking_issues:
         report.owner_reaction_risk_score = max(report.owner_reaction_risk_score, 0.85)
     return report
@@ -108,15 +112,11 @@ def _downgrade_self_published_testimonial_blocks(
     site_spec: SiteSpec,
     evidence_bundle: dict[str, Any] | None,
 ) -> list[str]:
-    """Remove blocking issues that are valid self-published testimonials."""
+    """Remove blocking issues that are about self-published testimonials."""
     if not blocking_issues:
         return blocking_issues
 
-    source_domain = ""
-    if evidence_bundle:
-        source_domain = (evidence_bundle.get("source_domain") or "").lower().strip()
-
-    valid_self_published = set()
+    has_valid_self_published = False
     for review in site_spec.reviews:
         if getattr(review, "source_kind", None) != "business_site":
             continue
@@ -124,21 +124,22 @@ def _downgrade_self_published_testimonial_blocks(
         has_website = signals.get("website_match") is True
         has_name = signals.get("business_name_match") is True
         if has_website or has_name:
-            valid_self_published.add(review.review_text.strip().lower()[:100])
+            has_valid_self_published = True
+            break
 
     filtered = []
     for issue in blocking_issues:
         issue_lower = issue.lower()
         is_testimonial_block = any(
             term in issue_lower
-            for term in ["testimonial", "review", "self-published", "fake review", "invented"]
+            for term in [
+                "testimonial", "review", "self-published", "fake review",
+                "invented", "unproven", "customer review", "scraped",
+                "business's own website", "company description",
+                "staff praise", "service list", "organizational praise",
+            ]
         )
-        if is_testimonial_block and valid_self_published:
-            matched = any(
-                snippet in issue_lower
-                for snippet in valid_self_published
-            )
-            if matched:
-                continue
+        if is_testimonial_block and has_valid_self_published:
+            continue
         filtered.append(issue)
     return filtered

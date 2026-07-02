@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 from uuid import UUID
 
@@ -10,6 +11,8 @@ from chromagora_schemas.demo_factory import BrandDocument, ConversionStrategy
 from chromagora_workers.demo_factory.model_gateway import call_agent_model
 from chromagora_workers.demo_factory.agents.utils import model_artifact_or_fallback
 from chromagora_workers.demo_factory.copy_quality import build_hero_body_fallback
+
+logger = logging.getLogger(__name__)
 
 
 def run_conversion_strategy_agent(
@@ -24,23 +27,6 @@ def run_conversion_strategy_agent(
         "evidence_bundle": evidence_bundle,
         "framework_patterns": framework_patterns or [],
     }
-    model_result = call_agent_model(
-        "conversion_strategy",
-        project_id,
-        "conversion_strategy",
-        (
-            "Use conversion frameworks to clarify the page strategy without inventing trust claims. "
-            "Do not copy long snippets from the crawled site. "
-            "Do not use scaffold phrases such as 'public evidence', 'trust signals', or 'private preview' in customer-facing copy. "
-            "Write original customer-facing copy grounded in evidence. "
-            "When a claim is not present in evidence, omit it."
-        ),
-        context,
-        ConversionStrategy.model_json_schema(),
-        temperature=0.25,
-        max_tokens=4096,
-        timeout_seconds=480,
-    )
 
     def fallback() -> ConversionStrategy:
         business_name = brand_document.business_identity.get("name", "this business")
@@ -69,6 +55,28 @@ def run_conversion_strategy_agent(
             claims_requiring_verification=[],
             excluded_unsupported_claims=["years in business", "licensed and insured", "24/7 emergency availability"],
         )
+
+    try:
+        model_result = call_agent_model(
+            "conversion_strategy",
+            project_id,
+            "conversion_strategy",
+            (
+                "Use conversion frameworks to clarify the page strategy without inventing trust claims. "
+                "Do not copy long snippets from the crawled site. "
+                "Do not use scaffold phrases such as 'public evidence', 'trust signals', or 'private preview' in customer-facing copy. "
+                "Write original customer-facing copy grounded in evidence. "
+                "When a claim is not present in evidence, omit it."
+            ),
+            context,
+            ConversionStrategy.model_json_schema(),
+            temperature=0.25,
+            max_tokens=4096,
+            timeout_seconds=480,
+        )
+    except Exception as exc:
+        logger.warning("Conversion strategy model call failed, using fallback: %s", exc)
+        model_result = {}
 
     strategy = model_artifact_or_fallback(ConversionStrategy, model_result, fallback)
     strategy.excluded_unsupported_claims = list(

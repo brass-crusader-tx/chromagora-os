@@ -15,7 +15,22 @@ SERVICE_MARKETING_WORDS = {
     "reliable", "trusted", "satisfaction", "guaranteed", "free estimate",
     "contact", "visit", "click", "learn more", "read more", "discover",
     "transform", "elevate", "enhance", "revitalize", "restore",
+    "resodding", "installation", " sodding", "interlock", "hardscaping",
+    "irrigation", " trimming", "removal", " pruning", "stump",
+    "aeration", "fertiliz", "seeding", "sod install",
 }
+
+SERVICE_PREFIXES = re.compile(
+    r"^(?:resodding|installation|sodding|interlock|hardscaping|irrigation|"
+    r"trimming|removal|pruning|stump|aeration|fertiliz|seeding|sod install|"
+    r"lawn care|landscape|landscaping|cleaning|pressure|power|mulch|"
+    r"drainage|grading|excavation|demolition|paving|asphalt|concrete|"
+    r"fencing|deck|patio|porch|roofing|siding|gutter|window|door|"
+    r"painting|drywall|flooring|tile|carpet|plumbing|electrical|hvac|"
+    r"appliance|pest|tree|shrub|plant|garden|bed|sprinkler|"
+    r"street|avenue|boulevard|drive|road|lane|court|place|way|circle)\s+",
+    re.IGNORECASE,
+)
 
 SENTENCE_PUNCTUATION = re.compile(r"[.!?;:]")
 CONSECUTIVE_SPACES = re.compile(r"\s{2,}")
@@ -49,6 +64,9 @@ def sanitize_location_candidate(value: str) -> str | None:
     for word in SERVICE_MARKETING_WORDS:
         if re.search(rf"\b{re.escape(word)}\b", lowered):
             return None
+
+    if SERVICE_PREFIXES.match(cleaned):
+        return None
 
     if re.match(r"^\d+\s", cleaned):
         return None

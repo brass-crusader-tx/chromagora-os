@@ -144,8 +144,9 @@ def process_project(project_id: UUID | str, sb=None) -> dict[str, Any]:
         )
         _persist_adversarial_report(sb, tenant_id, project_uuid, UUID(spec_row["id"]), adversarial)
         if not adversarial.passed:
-            _emit_event(sb, tenant_id, "demo_site.qa_failed", project, {"blocking": adversarial.blocking_issues})
-            raise RuntimeError("; ".join(adversarial.blocking_issues))
+            issues = adversarial.blocking_issues or ["Adversarial QA failed with no specific blocking issues"]
+            _emit_event(sb, tenant_id, "demo_site.qa_failed", project, {"blocking": issues})
+            raise RuntimeError("; ".join(issues))
 
         _set_stage(sb, project, "qa", "run_visual_qa")
         qa_report = run_visual_qa(
@@ -180,11 +181,6 @@ def process_project(project_id: UUID | str, sb=None) -> dict[str, Any]:
                 "status": status,
                 "current_stage": "failed_retryable",
                 "error_message": message,
-                "metadata": {
-                    **(project.get("metadata") or {}),
-                    "error_class": error_class,
-                    "last_failure_stage": project.get("current_stage"),
-                },
             }
         ).eq("id", str(project_id)).execute()
         _emit_event(sb, tenant_id, "demo_site.project_failed", project, {
@@ -248,12 +244,12 @@ def _persist_deterministic_qa_report(sb, tenant_id: UUID, project_id: UUID, spec
             "tenant_id": str(tenant_id),
             "project_id": str(project_id),
             "spec_id": str(spec_id),
-            "report_type": "deterministic",
+            "report_type": "adversarial",
             "status": "passed" if result.passed else "failed",
             "blocking_issues_json": [f.detail for f in result.failures if f.severity == "blocking"],
             "warnings_json": [w.detail for w in result.warnings],
             "screenshots_json": [],
-            "report_json": result.model_dump(mode="json"),
+            "report_json": {**(result.model_dump(mode="json")), "qa_layer": "deterministic"},
         }
     ).execute()
 
