@@ -99,6 +99,8 @@ CREATE TABLE IF NOT EXISTS business_preferences (
 );
 
 CREATE INDEX IF NOT EXISTS idx_preferences_business ON business_preferences(business_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_business_preferences_business_key
+    ON business_preferences(business_id, key);
 ALTER TABLE business_preferences ENABLE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation_preferences ON business_preferences
     USING (business_id IN (SELECT id FROM businesses WHERE tenant_id = current_setting('app.current_tenant', true)::uuid));

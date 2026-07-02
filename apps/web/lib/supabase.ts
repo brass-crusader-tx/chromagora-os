@@ -7,6 +7,7 @@ export const supabase = createBrowserClient(supabaseUrl, supabaseKey);
 
 export const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_KEY = process.env.NEXT_PUBLIC_CHROMAGORA_API_KEY || process.env.NEXT_PUBLIC_API_KEY;
 
 export interface ApiError {
   error: string;
@@ -21,6 +22,7 @@ export async function apiFetch<T>(
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...(API_KEY ? { "X-API-Key": API_KEY } : {}),
       ...options?.headers,
     },
   });

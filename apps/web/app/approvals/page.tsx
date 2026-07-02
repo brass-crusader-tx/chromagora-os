@@ -17,6 +17,10 @@ interface Approval {
   dollar_amount?: number;
   created_at: string;
   resolved_at?: string;
+  quote_id?: string | null;
+  risk_level?: string | null;
+  reason?: string | null;
+  proposed_payload?: Record<string, unknown> | null;
 }
 
 export default function ApprovalsPage() {
@@ -122,10 +126,33 @@ export default function ApprovalsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-medium text-text">{approval.action_type}</h3>
+                    {approval.quote_id && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-accent/20 text-accent">Quote follow-up</span>
+                    )}
+                    {approval.risk_level && (
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                        approval.risk_level === "low" ? "bg-success/20 text-success" :
+                        approval.risk_level === "medium" ? "bg-warning/20 text-warning" :
+                        approval.risk_level === "high" ? "bg-danger/20 text-danger" :
+                        approval.risk_level === "critical" ? "bg-danger/30 text-danger font-bold" :
+                        "bg-muted/20 text-text-muted"
+                      }`}>
+                        {approval.risk_level}
+                      </span>
+                    )}
                     <StatusBadge status={approval.status} />
                   </div>
                   {approval.description && (
                     <p className="text-sm text-text-muted">{approval.description}</p>
+                  )}
+                  {approval.reason && (
+                    <p className="text-xs text-text-dim mt-1">Agent reason: {approval.reason}</p>
+                  )}
+                  {approval.proposed_payload && typeof approval.proposed_payload.body === "string" && (
+                    <div className="mt-1.5">
+                      <p className="text-[10px] text-text-dim uppercase tracking-wide mb-0.5">Draft preview</p>
+                      <p className="text-xs text-text-dim">{approval.proposed_payload.body.length > 200 ? approval.proposed_payload.body.slice(0, 200) + "…" : approval.proposed_payload.body}</p>
+                    </div>
                   )}
                   <div className="flex gap-4 mt-2 text-xs text-text-dim">
                     {approval.dollar_amount && (

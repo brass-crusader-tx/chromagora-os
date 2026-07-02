@@ -39,6 +39,7 @@ def apply_auth(app: FastAPI) -> None:
         "/opportunities", "/ledger", "/memory", "/voice",
         "/crm", "/tools", "/authority", "/autonomy", "/demo",
         "/mobile", "/procurement", "/agent-tasks",
+        "/events", "/traces", "/quotes",
     ]
 
     @app.middleware("http")

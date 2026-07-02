@@ -26,11 +26,16 @@ export default function LedgerPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [businessId, setBusinessId] = useState("");
+  const [appliedBusinessId, setAppliedBusinessId] = useState("");
 
   async function loadLedger() {
     setLoading(true);
     try {
-      const data = await api.get<LedgerEntry[]>("/ledger");
+      const query = appliedBusinessId
+        ? `?business_id=${encodeURIComponent(appliedBusinessId)}`
+        : "";
+      const data = await api.get<LedgerEntry[]>(`/ledger${query}`);
       setEntries(data);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to load ledger");
@@ -41,7 +46,17 @@ export default function LedgerPage() {
 
   useEffect(() => {
     loadLedger();
-  }, []);
+  }, [appliedBusinessId]);
+
+  function applyBusinessFilter(e: React.FormEvent) {
+    e.preventDefault();
+    setAppliedBusinessId(businessId.trim());
+  }
+
+  function clearBusinessFilter() {
+    setBusinessId("");
+    setAppliedBusinessId("");
+  }
 
   const filtered = entries.filter((entry) => {
     const matchesSearch =
@@ -69,6 +84,25 @@ export default function LedgerPage() {
       )}
 
       {/* Filters */}
+      <form onSubmit={applyBusinessFilter} className="flex flex-col lg:flex-row gap-3 mb-3">
+        <input
+          className="input flex-1"
+          placeholder="Filter by business ID"
+          value={businessId}
+          onChange={(e) => setBusinessId(e.target.value)}
+        />
+        <div className="flex gap-2">
+          <button type="submit" className="btn-secondary text-xs">
+            Apply Business
+          </button>
+          {appliedBusinessId && (
+            <button type="button" onClick={clearBusinessFilter} className="btn-secondary text-xs">
+              Clear
+            </button>
+          )}
+        </div>
+      </form>
+
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <input
           className="input flex-1"

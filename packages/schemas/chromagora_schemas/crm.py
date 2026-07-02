@@ -68,11 +68,19 @@ class LeadResponse(LeadBase):
 class QuoteBase(BaseModel):
     business_id: UUID
     lead_id: Optional[UUID] = None
+    customer_id: Optional[UUID] = None
     quote_amount: Optional[float] = Field(default=None, ge=0, le=1_000_000_000)
+    currency: str = Field(default="CAD", max_length=10)
     service_type: str = Field(..., max_length=_STATUS)
+    description: Optional[str] = Field(default=None, max_length=_NOTES)
     status: str = Field(default="draft", max_length=_STATUS)
     sent_at: Optional[datetime] = None
+    accepted_at: Optional[datetime] = None
+    declined_at: Optional[datetime] = None
     last_followup_at: Optional[datetime] = None
+    follow_up_count: int = Field(default=0, ge=0)
+    next_follow_up_at: Optional[datetime] = None
+    stale_detected_at: Optional[datetime] = None
     notes: Optional[str] = Field(default=None, max_length=_NOTES)
 
 
@@ -85,7 +93,12 @@ class QuoteUpdate(BaseModel):
     service_type: Optional[str] = Field(default=None, max_length=_STATUS)
     status: Optional[str] = Field(default=None, max_length=_STATUS)
     sent_at: Optional[datetime] = None
+    accepted_at: Optional[datetime] = None
+    declined_at: Optional[datetime] = None
     last_followup_at: Optional[datetime] = None
+    follow_up_count: Optional[int] = Field(default=None, ge=0)
+    next_follow_up_at: Optional[datetime] = None
+    stale_detected_at: Optional[datetime] = None
     notes: Optional[str] = Field(default=None, max_length=_NOTES)
 
 

@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     # Supabase
     supabase_url: str = ""
     supabase_anon_key: str = ""
+    supabase_publishable_key: str = ""
+    supabase_secret_key: str = ""
     supabase_service_role_key: str = ""
     supabase_access_token: str = ""
     database_url: str = ""
@@ -36,7 +38,7 @@ class Settings(BaseSettings):
     rate_limit_per_minute: int = 60
     enforce_rate_limit: bool = False
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 
 settings = Settings()

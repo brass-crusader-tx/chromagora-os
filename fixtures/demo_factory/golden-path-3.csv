@@ -1,0 +1,4 @@
+Rank,Business Name,Website URL,Website Domain,Suggested Demo CTA,Website Weakness / Redesign Delta,Before/After Slider Angle,Demo Angle,Backend Hook
+1,Acme Roofing,https://example.com,example.com,Request a roof quote,Mobile quote path is hard to find,Pull down to reveal the clearer quote path,Make roof estimate requests obvious,Follow up with stale quote requests
+2,Beta Landscaping,https://iana.org,iana.org,Request a yard quote,Services are buried below generic copy,Slide to reveal a cleaner service-first page,Make landscaping services scannable,Offer seasonal follow-up reminders
+3,Cedar Plumbing,https://example.org,example.org,Request a plumbing callback,Contact options are not clear on mobile,Reveal the new mobile callback path,Reduce friction before a service call,Follow up on missed inquiries

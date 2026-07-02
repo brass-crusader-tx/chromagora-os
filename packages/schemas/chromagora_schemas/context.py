@@ -98,6 +98,7 @@ class ContextPacket(BaseModel):
     approved_claims: list[dict[str, Any]] = Field(default_factory=list)
     output_schema_name: Optional[str] = None
     escalation_conditions: dict[str, Any] = Field(default_factory=dict)
+    trace_id: Optional[str] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

@@ -1,0 +1,27 @@
+source_key: distilled_avatar_strategy
+title: "Distilled Owner/Visitor Avatar Strategy"
+source_refs:
+  - 100m_offers
+  - 100m_leads
+patterns:
+  - pattern_key: business_owner_reaction_filter
+    title: "Business Owner Reaction Filter"
+    tags: [adversarial_checker, proof_stack, objection_collapse]
+    pattern_json:
+      purpose: "Prevent the owner from seeing anything fake, embarrassing, or obviously generic."
+      checks:
+        - "Business name, phone, domain, and location must match evidence."
+        - "Services must be supported or marked as broad safe defaults."
+        - "Reviews must be sourced from the business site or matched Google profile."
+        - "Photos must not imply completed work unless sourced from the business."
+        - "Claims like licensed, insured, emergency, years, awards, and guarantees need evidence."
+  - pattern_key: visitor_first_action_filter
+    title: "Visitor First Action Filter"
+    tags: [CTA_hierarchy, dream_outcome, effort_sacrifice]
+    pattern_json:
+      purpose: "Make the visitor's next useful action clear within the first viewport."
+      rules:
+        - "Hero should name the service outcome and location only when supported."
+        - "CTA should match the trade and available contact method."
+        - "Mobile sticky CTA should stay available."
+        - "Contact panel should ask for just enough detail to start."

@@ -1,0 +1,30 @@
+corpus: chromagora_private_offer_strategy
+license_scope: local_private_reference
+raw_corpus_policy: "Do not commit raw third-party text. Keep source PDFs local and ingest only distilled patterns."
+local_source_dir_env: HORMOZI_CORPUS_DIR
+local_source_dir_default: /Users/admin/Chromagora/Hormozi
+sources:
+  - source_key: 100m_offers
+    title: "$100M Offers"
+    local_path: /Users/admin/Chromagora/Hormozi/Hormozi_$100M Offers.pdf
+    sha256: a18bbbb23aa08be57be7e1cb03bf4265a6adb420b15615638723e7353e7e0b43
+  - source_key: 100m_leads
+    title: "$100M Leads"
+    local_path: /Users/admin/Chromagora/Hormozi/Hormozi_$100M Leads_PDF.pdf
+    sha256: 2deda10d1e53f8bf61e60ac79335f92175364ce238b670ec1a4b22e7f361642b
+  - source_key: 100m_money_models
+    title: "$100M Money Models"
+    local_path: /Users/admin/Chromagora/Hormozi/Hormozi_$100M Money Models.pdf
+    sha256: 86eb74efb95c35db341b0d92a9d835f1ec48650980bd82835624deb261fc5333
+  - source_key: 100m_bonus_chapters
+    title: "$100M Bonus Chapters"
+    local_path: /Users/admin/Chromagora/Hormozi/$100M Bonus Chapters.pdf
+    sha256: 4dfc502fab1119a1c0eeb7f4a79d35924c76e93f159094588da7d6f71085045f
+  - source_key: 100m_leads_lost_chapter
+    title: "$100M Leads Lost Chapter"
+    local_path: /Users/admin/Chromagora/Hormozi/$100M Leads The Lost Chapter.pdf
+    sha256: 109d7d2de764658857387c9d09e3eef216d4cf64c5a9aecfaff7acc3fb163a88
+  - source_key: 100m_leads_cold_outreach
+    title: "$100M Leads Cold Outreach Downloads"
+    local_path: /Users/admin/Chromagora/Hormozi/$100M Leads Cold Outreach Downloads.pdf
+    sha256: efd80a10f714d061d41608c737a870c17ab56e91c316d85c74eec0efc0ee39a0

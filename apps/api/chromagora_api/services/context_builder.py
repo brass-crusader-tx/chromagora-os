@@ -15,6 +15,7 @@ from chromagora_schemas.context import (
     ModelTier,
     TaskType,
 )
+from chromagora_api.db.tenant import TenantError
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +77,7 @@ _DEFAULT_BUDGETS: dict[TaskType, ContextBudget] = {
 def _get_supabase():
     """Get Supabase client from app state."""
     # Import lazily to avoid circular imports
-    from chromagora_api.db.tenant import get_backend_supabase
+    from chromagora_api.db.tenant import get_backend_supabase, get_business_tenant_id
     return get_backend_supabase()
 
 
@@ -126,29 +127,40 @@ def _build_evidence_from_events(
 
 async def build_context_packet(
     business_id: UUID,
-    task_type: TaskType,
+    task_type: TaskType | str,
     actor_type: str,
     actor_id: Optional[UUID],
     objective: str,
-    requested_model_tier: ModelTier | int,
+    requested_model_tier: ModelTier | int = ModelTier.MEDIUM,
+    tenant_id: Optional[UUID] = None,
     workflow_run_id: Optional[UUID] = None,
     action_proposal_id: Optional[UUID] = None,
     event_ids: Optional[list[UUID]] = None,
+    trace_id: Optional[str] = None,
 ) -> ContextPacket:
     """Build a ContextPacket by querying Supabase for business state.
 
     This is deterministic — no LLM calls, no vector retrieval.
     """
+    if isinstance(task_type, str):
+        try:
+            task_type = TaskType(task_type)
+        except ValueError:
+            task_type = TaskType.CUSTOMER_MESSAGE_DRAFT
+
     if isinstance(requested_model_tier, int):
         requested_model_tier = ModelTier(requested_model_tier)
 
     budget = _DEFAULT_BUDGETS.get(task_type, ContextBudget())
     sb = _get_supabase()
-    from chromagora_api.db.tenant import get_business_tenant_id
 
-    tenant_id = get_business_tenant_id(str(business_id), sb)
     if not tenant_id:
-        raise TenantError("Business not found")
+        tid = get_business_tenant_id(str(business_id), sb)
+        if not tid:
+            raise TenantError("Business not found")
+        tenant_id = UUID(tid)
+    else:
+        tenant_id = UUID(str(tenant_id))
 
     # 1. Load business twin slice
     twin_slice: dict[str, Any] = {}
@@ -169,19 +181,26 @@ async def build_context_packet(
     forbidden_claims: list[dict] = []
     try:
         resp = (
-            sb.table("claims")
-            .select("id, claim_type, status, amount, description, created_at")
+            sb.table("approved_business_claims")
+            .select("id, claim_type, claim_text, is_active, created_at")
             .eq("business_id", str(business_id))
-            .in_("status", ["approved", "forbidden"])
+            .eq("is_active", True)
             .execute()
         )
-        for c in resp.data or []:
-            if c.get("status") == "approved":
-                approved_claims.append(c)
-            else:
-                forbidden_claims.append(c)
+        approved_claims = resp.data or []
     except Exception as exc:
-        logger.warning("Failed to load claims: %s", exc)
+        logger.warning("Failed to load approved claims: %s", exc)
+    try:
+        resp = (
+            sb.table("forbidden_business_claims")
+            .select("id, claim_type, claim_text, reason, is_active, created_at")
+            .eq("business_id", str(business_id))
+            .eq("is_active", True)
+            .execute()
+        )
+        forbidden_claims = resp.data or []
+    except Exception as exc:
+        logger.warning("Failed to load forbidden claims: %s", exc)
 
     # 3. Load recent events (capped by budget)
     relevant_events: list[dict] = []
@@ -221,4 +240,5 @@ async def build_context_packet(
         approved_claims=approved_claims[:5],
         forbidden_claims=forbidden_claims[:5],
         created_at=datetime.now(timezone.utc),
+        trace_id=trace_id,
     )

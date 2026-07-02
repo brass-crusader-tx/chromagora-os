@@ -1,4 +1,11 @@
-"""Tool Broker — dry-run tool execution with policy enforcement."""
+"""Tool Broker — tool execution with policy enforcement.
+
+For the quote follow-up loop, the handler creates its own action_proposal,
+then calls request_tool_execution with the existing proposal_id.
+
+If approval is required, a REAL approval_request is created.
+If allowed, execution is triggered via the action_executor service.
+"""
 
 from __future__ import annotations
 
@@ -11,6 +18,7 @@ from uuid import UUID, uuid4
 
 from chromagora_schemas.authority import PolicyDecision
 from chromagora_api.services.policy_kernel import evaluate_action_policy
+from chromagora_api.services.runtime_utils import parse_json_field, to_jsonable
 
 logger = logging.getLogger(__name__)
 
@@ -96,51 +104,254 @@ def _hash_args(tool_args: dict) -> str:
 # Main entry point
 # ---------------------------------------------------------------------------
 
+class TenantError(Exception):
+    """Business/tenant resolution error."""
+    pass
+
+
+def _find_existing_approval(sb, tenant_id: str, idempotency_key: str) -> Optional[dict[str, Any]]:
+    """Return an existing approval request for an idempotency key."""
+    try:
+        resp = (
+            sb.table("approval_requests")
+            .select("*")
+            .eq("tenant_id", tenant_id)
+            .eq("idempotency_key", idempotency_key)
+            .limit(1)
+            .execute()
+        )
+        return resp.data[0] if resp.data else None
+    except Exception:
+        return None
+
+
 def request_tool_execution(
-    business_id: UUID,
-    actor_type: str,
-    actor_id: Optional[UUID],
-    tool_name: str,
-    tool_action: str,
-    tool_args_json: dict[str, Any],
+    tenant_id: Optional[UUID] = None,
+    business_id: Optional[UUID] = None,
+    action_proposal_id: Optional[UUID] = None,
+    actor_type: str = "agent",
+    actor_id: Optional[UUID] = None,
+    tool_name: str = "",
+    tool_action: str = "",
+    tool_args_json: Optional[dict[str, Any]] = None,
     dry_run: bool = True,
     dollar_exposure: float = 0.0,
     risk_level: str = "low",
     confidence: Optional[float] = None,
     compliance_sensitive: bool = False,
+    trace_id: Optional[str] = None,
 ) -> dict[str, Any]:
-    """Request tool execution — always dry-run first.
+    """Request tool execution with policy enforcement.
+
+    Two calling modes:
+
+    1. Legacy mode (no action_proposal_id): Creates a new ActionProposal,
+       evaluates policy, and proceeds as before.
+
+    2. Quote-follow-up mode (action_proposal_id provided): The caller
+       (quote_stale_handler) has already created the ActionProposal.
+       This function evaluates policy, creates a real approval_request
+       if needed, and triggers execution if allowed.
 
     Flow:
-    1. Look up ToolDefinition
-    2. Check BusinessToolPermission
-    3. Create ActionProposal
-    4. Evaluate policy
-    5. If denied -> blocked
-    6. If approval required -> ApprovalRequest
-    7. If allowed and dry_run -> ActionExecution with status "dry_run"
-    8. Emit events
-    9. Return structured result
+    1. Load or create ActionProposal
+    2. Evaluate policy
+    3. If denied -> blocked
+    4. If approval required -> create real ApprovalRequest
+    5. If allowed -> execute via action_executor
+    6. Return structured result
     """
     sb = _get_supabase()
-    tenant_id = _tenant_for_business(sb, business_id)
+
+    # Resolve tenant_id
+    if not tenant_id and business_id:
+        tenant_id_str = _tenant_for_business(sb, business_id)
+        tenant_id = UUID(tenant_id_str)
+    elif not tenant_id:
+        return {"outcome": "failed", "error": "Cannot resolve tenant_id"}
+
+    if not trace_id:
+        trace_id = str(uuid4())
+
     result: dict[str, Any] = {
-        "tool_name": tool_name,
-        "tool_action": tool_action,
-        "dry_run": dry_run,
-        "status": "unknown",
+        "outcome": "unknown",
         "action_proposal_id": None,
+        "approval_request_id": None,
         "policy_decision": None,
         "execution_result": None,
-        "events_emitted": [],
-        "errors": [],
+        "trace_id": trace_id,
     }
+
+    # ── Mode 2: Existing proposal (quote follow-up path) ───────────────
+    if action_proposal_id:
+        try:
+            resp = sb.table("action_proposals").select("*").eq("id", str(action_proposal_id)).execute()
+            if not resp.data:
+                return {"outcome": "failed", "error": "Action proposal not found"}
+            proposal = resp.data[0]
+        except Exception as exc:
+            return {"outcome": "failed", "error": f"Failed to load proposal: {exc}"}
+
+        proposal_id = action_proposal_id
+        result["action_proposal_id"] = str(proposal_id)
+
+        if not business_id:
+            business_id = UUID(proposal["business_id"]) if proposal.get("business_id") else None
+
+        action_type = proposal.get("action_type", "")
+        proposal_risk = proposal.get("risk_level", "low")
+        proposal_requires_approval = proposal.get("requires_approval", True)
+        proposed_payload = parse_json_field(proposal.get("proposed_payload", {}), default={})
+
+        # Evaluate policy
+        policy = evaluate_action_policy(
+            business_id=business_id,
+            actor_type="agent",
+            actor_id=UUID(proposal["proposed_by_id"]) if proposal.get("proposed_by_id") else None,
+            action_type=action_type,
+            target_system="crm",
+            autonomy_level_requested=2,
+            dollar_exposure=0.0,
+            risk_level=proposal_risk,
+            confidence=None,
+            compliance_sensitive=False,
+            tenant_id=tenant_id,
+        )
+
+        result["policy_decision"] = policy.model_dump(mode="json")
+        effective_requires_approval = policy.requires_approval or proposal_requires_approval
+
+        # Persist policy decision on the proposal
+        proposal_status = "blocked" if policy.denied else (
+            "approval_required" if effective_requires_approval else "approved"
+        )
+        try:
+            sb.table("action_proposals").update({
+                "status": proposal_status,
+                "policy_decision_json": to_jsonable(policy),
+                "requires_approval": effective_requires_approval,
+                "policy_decision_id": str(uuid4()),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            }).eq("id", str(proposal_id)).execute()
+        except Exception as exc:
+            logger.warning("Failed to update proposal with policy decision: %s", exc)
+
+        # Blocked
+        if policy.denied:
+            result["outcome"] = "blocked"
+            _persist_execution(
+                str(tenant_id), business_id, proposal_id, None, action_type, action_type,
+                proposed_payload, "blocked", policy.decision_notes, "agent", None,
+                trace_id=trace_id,
+            )
+            return result
+
+        # Approval required -> create or reuse a REAL approval request
+        if effective_requires_approval:
+            approval_id = uuid4()
+            approval_idempotency_key = f"approval.required:{proposal_id}"
+            existing_approval = _find_existing_approval(sb, str(tenant_id), approval_idempotency_key)
+            if existing_approval:
+                result["outcome"] = "approval_required"
+                result["approval_request_id"] = existing_approval.get("id")
+                return result
+
+            try:
+                title = proposal.get("title", "Action requires approval")
+                reason = proposal.get("reason", "")
+                sb.table("approval_requests").insert({
+                    "id": str(approval_id),
+                    "tenant_id": str(tenant_id),
+                    "business_id": str(business_id) if business_id else None,
+                    "action_proposal_id": str(proposal_id),
+                    "status": "pending",
+                    "requested_by_type": "agent",
+                    "requested_by_id": proposal.get("proposed_by_id"),
+                    "requested_at": datetime.now(timezone.utc).isoformat(),
+                    "title": title,
+                    "summary": reason,
+                    "draft_payload": to_jsonable(proposed_payload),
+                    "risk_level": proposal_risk,
+                    "agent_run_id": proposal.get("agent_run_id"),
+                    "idempotency_key": approval_idempotency_key,
+                    "trace_id": trace_id,
+                }).execute()
+            except Exception as exc:
+                existing_approval = _find_existing_approval(sb, str(tenant_id), approval_idempotency_key)
+                if existing_approval:
+                    result["outcome"] = "approval_required"
+                    result["approval_request_id"] = existing_approval.get("id")
+                    return result
+                logger.error("Failed to create approval request: %s", exc)
+                return {"outcome": "failed", "error": f"Approval request creation failed: {exc}"}
+
+            result["outcome"] = "approval_required"
+            result["approval_request_id"] = str(approval_id)
+
+            # Emit approval.required event
+            try:
+                sb.table("events").insert({
+                    "id": str(uuid4()),
+                    "tenant_id": str(tenant_id),
+                    "business_id": str(business_id) if business_id else None,
+                    "event_type": "approval.required",
+                    "source_type": "tool_broker",
+                    "source_id": str(proposal_id),
+                    "entity_type": "action_proposal",
+                    "entity_id": str(proposal_id),
+                    "payload_json": {
+                        "proposal_id": str(proposal_id),
+                        "approval_request_id": str(approval_id),
+                        "action_type": action_type,
+                    },
+                    "idempotency_key": f"approval.required.event:{proposal_id}",
+                    "trace_id": trace_id,
+                }).execute()
+            except Exception:
+                pass
+
+            _persist_execution(
+                str(tenant_id), business_id, proposal_id, approval_id, action_type, action_type,
+                proposed_payload, "approval_required", policy.decision_notes, "agent", None,
+                trace_id=trace_id, idempotency_key=f"approval.required.ledger:{proposal_id}",
+            )
+            return result
+
+        # Allowed -> execute immediately
+        try:
+            from chromagora_api.services.action_executor import execute_approved_action
+            exec_result = execute_approved_action(
+                action_proposal_id=proposal_id,
+                trace_id=trace_id,
+            )
+            result["execution_result"] = exec_result
+            if exec_result.get("status") == "success":
+                result["outcome"] = "allowed_executed"
+            else:
+                result["outcome"] = "failed"
+                result["error"] = exec_result.get("error", "Execution failed")
+        except Exception as exc:
+            logger.error("Execution failed: %s", exc)
+            result["outcome"] = "failed"
+            result["error"] = str(exc)
+
+        return result
+
+    # ── Mode 1: Legacy path (no existing proposal) ─────────────────────
+    if not tool_args_json:
+        tool_args_json = {}
+
+    result["tool_name"] = tool_name
+    result["tool_action"] = tool_action
+
+    if not business_id:
+        return {"outcome": "failed", "error": "business_id required"}
 
     # 1. Look up ToolDefinition
     tool_def = _lookup_tool(tool_name, tool_action)
     if not tool_def:
-        result["status"] = "blocked"
-        result["errors"].append(f"Tool not found: {tool_name}/{tool_action}")
+        result["outcome"] = "blocked"
+        result["errors"] = [f"Tool not found: {tool_name}/{tool_action}"]
         return result
 
     tool_def_id = tool_def["id"]
@@ -149,13 +360,11 @@ def request_tool_execution(
     permission = _check_tool_permission(business_id, tool_def_id)
     if not permission:
         if tool_def.get("is_external_action"):
-            result["status"] = "blocked"
-            result["errors"].append(
-                f"No permission for external tool: {tool_name}"
-            )
+            result["outcome"] = "blocked"
+            result["errors"] = [f"No permission for external tool: {tool_name}"]
             return result
 
-    # 3. Create ActionProposal (persist for audit trail)
+    # 3. Create ActionProposal
     proposal_id = uuid4()
     result["action_proposal_id"] = str(proposal_id)
 
@@ -181,12 +390,12 @@ def request_tool_execution(
         risk_level=risk_level,
         confidence=confidence,
         compliance_sensitive=compliance_sensitive,
-        tenant_id=UUID(tenant_id),
+        tenant_id=tenant_id,
     )
 
     result["policy_decision"] = policy.model_dump(mode="json")
     _persist_proposal(
-        tenant_id=tenant_id,
+        tenant_id=str(tenant_id),
         business_id=business_id,
         proposal_id=proposal_id,
         tool_name=tool_name,
@@ -200,54 +409,86 @@ def request_tool_execution(
             "approval_required" if policy.requires_approval or requires_approval else "approved"
         ),
         policy=policy,
+        trace_id=trace_id,
     )
 
     # 5. If denied -> blocked
     if policy.denied:
-        result["status"] = "blocked"
+        result["outcome"] = "blocked"
         if sb:
             _persist_execution(
-                tenant_id, business_id, proposal_id, None, tool_name, tool_action,
+                str(tenant_id), business_id, proposal_id, None, tool_name, tool_action,
                 tool_args_json, "blocked", policy.decision_notes, actor_type, actor_id,
+                trace_id=trace_id,
             )
         return result
 
-    # 6. If approval required -> ApprovalRequest
+    # 6. If approval required -> create real ApprovalRequest
     if policy.requires_approval or requires_approval:
-        result["status"] = "approval_required"
+        approval_id = uuid4()
+        try:
+            sb.table("approval_requests").insert({
+                "id": str(approval_id),
+                "tenant_id": str(tenant_id),
+                "business_id": str(business_id),
+                "action_proposal_id": str(proposal_id),
+                "status": "pending",
+                "requested_by_type": actor_type,
+                "requested_by_id": str(actor_id) if actor_id else None,
+                "requested_at": datetime.now(timezone.utc).isoformat(),
+                "title": f"{tool_name}.{tool_action}",
+                "risk_level": risk_level,
+                "idempotency_key": f"approval.required:{proposal_id}",
+                "trace_id": trace_id,
+            }).execute()
+            result["approval_request_id"] = str(approval_id)
+        except Exception as exc:
+            logger.warning("Failed to create approval request: %s", exc)
+
+        result["outcome"] = "approval_required"
         if sb:
             _persist_execution(
-                tenant_id, business_id, proposal_id, None, tool_name, tool_action,
+                str(tenant_id), business_id, proposal_id, approval_id, tool_name, tool_action,
                 tool_args_json, "approval_required", policy.decision_notes, actor_type, actor_id,
+                trace_id=trace_id,
             )
         return result
 
-    # 7. If allowed and dry_run -> execute dry_run
+    # 7. If allowed -> execute via action_executor
     if dry_run:
-        result["status"] = "dry_run"
+        result["outcome"] = "allowed_executed"
         result["execution_result"] = {
-            "mock": True,
+            "dry_run": True,
             "tool": tool_name,
             "action": tool_action,
             "args_preview": {k: str(v)[:100] for k, v in tool_args_json.items()},
             "executed_at": datetime.now(timezone.utc).isoformat(),
         }
-        result["events_emitted"] = [
-            {"event_type": "action.proposed", "source_type": "tool_broker"},
-            {"event_type": "action.approved", "source_type": "tool_broker"},
-            {"event_type": "action.executed", "source_type": "tool_broker"},
-        ]
         if sb:
             _persist_execution(
-                tenant_id, business_id, proposal_id, None, tool_name, tool_action,
+                str(tenant_id), business_id, proposal_id, None, tool_name, tool_action,
                 tool_args_json, "dry_run", "Dry run executed successfully",
-                actor_type, actor_id,
+                actor_type, actor_id, trace_id=trace_id,
             )
         return result
 
-    # 8. Real execution (not implemented yet — always dry-run)
-    result["status"] = "not_implemented"
-    result["errors"].append("Real tool execution not yet implemented. Use dry_run=True.")
+    # Real execution
+    try:
+        from chromagora_api.services.action_executor import execute_approved_action
+        exec_result = execute_approved_action(
+            action_proposal_id=proposal_id,
+            trace_id=trace_id,
+        )
+        result["execution_result"] = exec_result
+        if exec_result.get("status") == "success":
+            result["outcome"] = "allowed_executed"
+        else:
+            result["outcome"] = "failed"
+            result["error"] = exec_result.get("error", "Execution failed")
+    except Exception as exc:
+        result["outcome"] = "failed"
+        result["error"] = str(exc)
+
     return result
 
 
@@ -264,6 +505,8 @@ def _persist_proposal(
     autonomy_level: int,
     status: str,
     policy: PolicyDecision,
+    trace_id: Optional[str] = None,
+    idempotency_key: Optional[str] = None,
 ) -> None:
     """Persist the action proposal that ledger entries reference."""
     try:
@@ -277,13 +520,13 @@ def _persist_proposal(
             "title": f"{tool_name}.{tool_action}",
             "description": f"Tool execution request for {tool_name}/{tool_action}",
             "target_system": tool_name,
-            "proposed_payload": _redact_args(tool_args),
+            "proposed_payload": to_jsonable(_redact_args(tool_args)),
             "confidence": None,
             "risk_level": risk_level,
             "autonomy_level_required": autonomy_level,
             "status": status,
-            "policy_decision_json": policy.model_dump(mode="json"),
-            "trace_id": str(proposal_id),
+            "policy_decision_json": to_jsonable(policy),
+            "trace_id": trace_id or str(proposal_id),
         }).execute()
     except Exception as exc:
         logger.warning("Failed to persist action proposal: %s", exc)
@@ -301,6 +544,8 @@ def _persist_execution(
     notes: str,
     actor_type: str,
     actor_id: Optional[UUID],
+    trace_id: Optional[str] = None,
+    idempotency_key: Optional[str] = None,
 ) -> None:
     """Persist action execution to the ledger."""
     try:
@@ -312,13 +557,14 @@ def _persist_execution(
             "tool_name": tool_name,
             "tool_action": tool_action,
             "tool_args_hash": _hash_args(tool_args),
-            "tool_args_redacted": _redact_args(tool_args),
+            "tool_args_redacted": to_jsonable(_redact_args(tool_args)),
+            "idempotency_key": idempotency_key,
             "result_status": result_status,
             "error_message": notes if result_status == "blocked" else None,
             "executed_by_type": actor_type,
             "executed_by_id": str(actor_id) if actor_id else None,
             "reversibility": "reversible",
-            "trace_id": str(proposal_id),
+            "trace_id": trace_id or str(proposal_id),
         }).execute()
     except Exception as exc:
         logger.warning("Failed to persist execution: %s", exc)

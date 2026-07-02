@@ -36,6 +36,10 @@ Thumbs.db
 .coverage
 htmlcov/
 
+# Local service logs
+logs/
+**/logs/
+
 # Aider
 .aider*
 .aider.chat.history.md

@@ -452,18 +452,73 @@ def seed():
 
     # 15. Quotes (bonus CRM data)
     print("\n[15] Creating quotes...")
+    quote_ids = []
     for i in range(4):
         biz_idx = i % len(biz_ids)
-        sb.table("quotes").insert({
+        resp = sb.table("quotes").insert({
             "id": str(uuid4()),
             "business_id": biz_ids[biz_idx],
             "quote_amount": 5000 + i * 2500,
             "service_type": ["consulting", "logistics", "analysis", "support"][i],
             "status": ["draft", "sent", "accepted", "rejected"][i],
+            "sent_at": days_ago(i) if i > 0 else None,
             "created_at": days_ago(i * 2),
             "updated_at": days_ago(i),
         }).execute()
-    print("  4 quotes created")
+        quote_ids.append(resp.data[0]["id"])
+    print(f"  {len(quote_ids)} quotes created")
+
+    # 16. Quote follow-up demo: stale quote + business preferences
+    print("\n[16] Creating quote follow-up demo data...")
+    # Create a lead/customer for the stale quote
+    stale_lead_resp = sb.table("leads").insert({
+        "id": str(uuid4()),
+        "business_id": biz_ids[0],
+        "customer_name": "Samantha Reed",
+        "customer_contact": "samantha@email.com",
+        "contact_email": "samantha@email.com",
+        "contact_phone": "+1-555-0142",
+        "company_name": "Reed Logistics Co",
+        "source": "website",
+        "service_type": "logistics",
+        "status": "qualified",
+        "notes": "Interested in fleet logistics. Quote sent, awaiting response.",
+    }).execute()
+    stale_lead_id = stale_lead_resp.data[0]["id"]
+
+    # Create a quote sent 5 days ago (stale at 3-day threshold)
+    stale_quote_resp = sb.table("quotes").insert({
+        "id": str(uuid4()),
+        "business_id": biz_ids[0],
+        "lead_id": stale_lead_id,
+        "quote_amount": 12500,
+        "service_type": "logistics",
+        "status": "sent",
+        "sent_at": days_ago(5),
+        "created_at": days_ago(5),
+        "updated_at": days_ago(5),
+    }).execute()
+    stale_quote_id = stale_quote_resp.data[0]["id"]
+    print(f"  Stale quote: {stale_quote_id[:8]}... (sent 5 days ago)")
+
+    # Set business preferences for follow-up settings
+    follow_up_prefs = [
+        ("stale_quote_threshold_days", 3),
+        ("max_quote_follow_ups", 3),
+        ("follow_up_interval_days", 3),
+        ("quote_follow_up_requires_approval", True),
+        ("preferred_follow_up_channel", "email"),
+        ("follow_up_tone", "friendly"),
+    ]
+    for key, value in follow_up_prefs:
+        sb.table("business_preferences").upsert({
+            "business_id": biz_ids[0],
+            "key": key,
+            "value_json": {"value": value},
+            "source": "default",
+            "confidence": 1.0,
+        }, on_conflict="business_id,key").execute()
+    print("  Business preferences set (threshold=3 days, max_follow_ups=3, requires_approval=true)")
 
     # Summary
     print("\n" + "=" * 50)
@@ -480,7 +535,14 @@ def seed():
     print(f"  Calls:          10")
     print("  Call summaries: 6")
     print(f"  Workflows:      {len(wf_data)}")
-    print(f"  Quotes:         4")
+    print(f"  Quotes:         {len(quote_ids)} (+ 1 stale demo quote)")
+    print()
+    print("  DEMO COMMANDS:")
+    print("  1. Run detector:  POST /businesses/{biz_ids[0]}/quotes/detect-stale")
+    print("  2. Process event: POST /events/process?event_type=quote.stale")
+    print("  3. Check approvals: GET /approvals?status=pending")
+    print("  4. Approve:        POST /approvals/{id}/approve")
+    print("  5. Check trace:    GET /traces/{trace_id}")
 
 
 if __name__ == "__main__":

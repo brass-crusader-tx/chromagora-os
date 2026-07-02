@@ -1,0 +1,63 @@
+source_key: distilled_offer_strategy
+title: "Distilled Local-Service Offer Strategy"
+source_refs:
+  - 100m_offers
+  - 100m_bonus_chapters
+patterns:
+  - pattern_key: value_equation_local_service
+    title: "Value Equation For Local Service Demos"
+    tags: [value_equation, dream_outcome, perceived_likelihood, time_delay, effort_sacrifice]
+    pattern_json:
+      purpose: "Make the prospect's next step feel concrete, believable, fast to start, and low effort."
+      rules:
+        - "Make the desired customer outcome specific to the service vertical."
+        - "Increase proof only with evidence found on the site, testimonials, reviews, photos, or verified claims."
+        - "Reduce time-to-first-action by making call, callback, quote, or photo-upload CTAs visible early."
+        - "Reduce effort by making the visitor's first request simple and concrete."
+      demo_site_fields:
+        - hero.heading
+        - hero.body
+        - primary_cta.label
+        - quote_cta.body
+      forbidden_without_evidence:
+        - "#1 rated"
+        - "guaranteed results"
+        - "24/7 emergency"
+        - "licensed and insured"
+        - "family owned"
+        - "decades of experience"
+        - "award-winning"
+        - "same-day service"
+        - "free estimates"
+  - pattern_key: offer_stack_without_fabrication
+    title: "Offer Stack Without Inventing Claims"
+    tags: [grand_slam_offer, offer_stack, proof_stack, objection_collapse]
+    pattern_json:
+      purpose: "Clarify the existing next step without inventing promotions, guarantees, prices, or credentials."
+      rules:
+        - "Translate the business's real service into an easier first action."
+        - "Use a neutral first-step CTA when evidence is thin."
+        - "Prefer 'request', 'send', 'book', or 'talk through' over hype verbs."
+        - "Move unsupported offers into claims_to_avoid."
+      local_service_examples:
+        roofing: "Text a photo of your roof"
+        concrete: "Request a concrete estimate"
+        excavation: "Talk through the job site"
+        plumbing: "Request a plumbing callback"
+        hvac: "Book a service call"
+        landscaping: "Request a yard quote"
+        junk_removal: "Send photos for a pickup estimate"
+        tree_service: "Request a tree work estimate"
+  - pattern_key: risk_reversal_as_friction_reduction
+    title: "Risk Reversal As Friction Reduction"
+    tags: [risk_reversal, objection_collapse, CTA_hierarchy]
+    pattern_json:
+      purpose: "Lower perceived commitment without inventing guarantees."
+      safe_moves:
+        - "Frame the CTA as a first conversation or estimate request."
+        - "Ask for enough detail to make the next call useful."
+        - "Show what happens after the request in short process steps."
+      unsafe_moves:
+        - "Do not invent money-back guarantees."
+        - "Do not promise same-day response unless verified."
+        - "Do not imply emergency availability unless verified."

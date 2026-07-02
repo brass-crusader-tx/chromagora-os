@@ -1,0 +1,31 @@
+source_key: distilled_lead_strategy
+title: "Distilled Local-Service Lead Strategy"
+source_refs:
+  - 100m_leads
+  - 100m_leads_lost_chapter
+  - 100m_leads_cold_outreach
+patterns:
+  - pattern_key: lead_magnet_fit_for_service_business
+    title: "Lead Magnet Fit For Local Service"
+    tags: [CTA_hierarchy, lead_capture, effort_sacrifice, time_delay]
+    pattern_json:
+      purpose: "Use the demo to make the first qualified inquiry easier, not to create fake giveaways."
+      rules:
+        - "For visual trades, ask for photos when that reduces estimate friction."
+        - "For site-work trades, ask for job-site details or a callback."
+        - "For urgent trades, use callback language unless emergency support is verified."
+        - "Keep forms short and aligned to the first useful conversation."
+  - pattern_key: outreach_relevance_without_insult
+    title: "Outreach Relevance Without Insulting The Current Site"
+    tags: [problem_agitation, objection_collapse, proof_stack]
+    pattern_json:
+      purpose: "Describe the demo angle plainly without dunking on the business owner."
+      rules:
+        - "Name the rebuild as a private preview."
+        - "Frame current-site gaps as quote-path or mobile clarity opportunities."
+        - "Avoid telling the owner their site is bad."
+        - "Point to the before/after experience instead of overexplaining."
+      banned_tones:
+        - "your website is costing you money"
+        - "your site is broken"
+        - "AI built this for you"

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from chromagora_api.services.workflow_engine import (
     create_workflow_run,
@@ -43,7 +43,7 @@ def run_review_request_workflow(
     4. If allowed -> dry-run ActionExecution
     5. Complete if no approval required
     """
-    trace_id = str(UUID())
+    trace_id = str(uuid4())
 
     # Step 1: Create WorkflowRun
     run = create_workflow_run(
@@ -162,7 +162,7 @@ def run_stale_quote_followup_workflow(
     5. Pause for approval if required
     6. Complete if allowed
     """
-    trace_id = str(UUID())
+    trace_id = str(uuid4())
 
     # Step 1: Create WorkflowRun
     run = create_workflow_run(

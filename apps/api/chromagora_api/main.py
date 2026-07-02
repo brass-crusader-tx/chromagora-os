@@ -104,3 +104,9 @@ app.include_router(memory_router)
 
 from chromagora_api.routes.opportunities import router as opportunities_router
 app.include_router(opportunities_router)
+
+from chromagora_api.routes.quote_follow_up import router as quote_follow_up_router
+app.include_router(quote_follow_up_router)
+
+from chromagora_api.routes.demo_sites import router as demo_sites_router
+app.include_router(demo_sites_router)

@@ -1,0 +1,25 @@
+source_key: distilled_money_model_strategy
+title: "Distilled Money Model Strategy For Demo Offers"
+source_refs:
+  - 100m_money_models
+patterns:
+  - pattern_key: sprint_offer_economics
+    title: "Website + Follow-Up Sprint Economics"
+    tags: [offer_stack, value_equation, money_model]
+    pattern_json:
+      purpose: "Keep the internal offer economically simple while demos stay focused on the prospect's site."
+      rules:
+        - "Position the demo as a preview, not a finished custom site."
+        - "Keep fulfillment scope bounded to site rebuild plus simple follow-up system."
+        - "Avoid payment, billing, or onboarding automation until the demo engine is reliable."
+        - "Make operator approval the gate before any outreach."
+  - pattern_key: do_not_expand_before_engine_works
+    title: "Do Not Expand Before Demo Engine Works"
+    tags: [scope_control, throughput, operational_focus]
+    pattern_json:
+      purpose: "Protect the build from drifting into CRM, billing, onboarding, or custom-code sites too early."
+      rules:
+        - "Prioritize link drop, CSV batch processing, crawl, SiteSpec, render, QA, publish, and review."
+        - "Do not build arbitrary generated React."
+        - "Do not build autonomous outreach sending."
+        - "Do not build client-domain deployment in v1."
