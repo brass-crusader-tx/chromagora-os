@@ -1,0 +1,44 @@
+name: Chromagora remote desktop repair
+
+on:
+  push:
+    branches:
+      - ops/chromagora-rd-repair-20260826
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  host-probe:
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - name: Diagnose Chromagora remote desktop host
+        shell: bash
+        run: |
+          set -u
+          echo '=== TIME/HOST ==='
+          date -u '+%Y-%m-%dT%H:%M:%SZ'
+          hostname
+          id
+          echo '=== LAUNCHD ==='
+          launchctl print "gui/$(id -u)" 2>/dev/null | grep -Ei 'novnc|websock|vnc|chromagora|remote|cloudflared|screensharing|tsunami' | head -250 || true
+          echo '=== PROCESSES ==='
+          ps ax -o pid=,ppid=,etime=,command= | grep -Ei 'novnc|websock|vnc|chromagora|remote|cloudflared|screensharing|tsunami' | grep -v grep | head -250 || true
+          echo '=== LISTENERS ==='
+          lsof -nP -iTCP -sTCP:LISTEN 2>/dev/null | grep -Ei ':3300|:5900|:5901|:6080|:6081|:48761|:8765|python|node|cloudflared|websock|vnc|screenshar' | head -250 || true
+          echo '=== LOCAL HTTP ==='
+          for u in http://127.0.0.1:3300/remote http://127.0.0.1:48761/ http://127.0.0.1:6080/ http://127.0.0.1:6080/vnc.html; do
+            echo "--- $u"
+            curl -ksS --max-time 3 -o /tmp/rd-body.$$ -D - "$u" 2>&1 | head -20
+            head -c 300 /tmp/rd-body.$$ 2>/dev/null || true
+            echo
+          done
+          rm -f /tmp/rd-body.$$
+          echo '=== LAUNCHAGENTS ==='
+          find "$HOME/Library/LaunchAgents" -maxdepth 1 -type f \( -iname '*novnc*' -o -iname '*vnc*' -o -iname '*chromagora*' -o -iname '*remote*' -o -iname '*tsunami*' \) -print 2>/dev/null | sort || true
+          echo '=== RELEVANT FILES ==='
+          find "$HOME/.tsunami-agent" "$HOME/Downloads" -maxdepth 5 -type f \( -iname '*novnc*' -o -iname '*websock*' -o -iname '*chromagora*' -o -iname '*vnc*' -o -iname '*remote*desktop*' \) -print 2>/dev/null | head -300 || true
+          echo '=== SCREEN SHARING ==='
+          launchctl print system/com.apple.screensharing 2>&1 | head -120 || true
