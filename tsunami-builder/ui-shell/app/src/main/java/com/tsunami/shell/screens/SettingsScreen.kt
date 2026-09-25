@@ -44,6 +44,7 @@ import com.tsunami.shell.theme.*
                 "scrobbling" -> ScrobblingSettings(state)
                 "backup" -> BackupSettings(state)
                 "controls" -> ControlSettings(state)
+                "external-controls" -> ExternalControlSettings(state)
                 "context-rules" -> ContextRuleSettings(state)
                 "quick-actions" -> QuickActionSettings(state)
                 "custom-sections" -> CustomSectionsSettings(state)
@@ -77,6 +78,7 @@ private fun settingsTitle(page:String)=when(page){
     "scrobbling"->"Listening services"
     "backup"->"Backup & portability"
     "controls"->"Controls & gestures"
+    "external-controls"->"External playback surfaces"
     "context-rules"->"Context rules"
     "quick-actions"->"Quick actions & sessions"
     "custom-sections"->"Custom library sections"
@@ -116,6 +118,7 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Audio processing","ReplayGain ${state.replayGainMode} · DSP ${if(state.dspEnabled)"ON" else "OFF"}"){state.settingsExpanded="audio"}
             ActionRow("Output profiles","${state.audioProfiles.size} route profiles"){state.settingsExpanded="audio-profiles"}
             ActionRow("Controls & gestures","One-handed ${if(state.oneHandedNowPlaying)"ON" else "OFF"} · ${state.quickActions.size} quick actions"){state.settingsExpanded="controls"}
+            ActionRow("External playback surfaces","Notification · Quick Settings · widget · Wear"){state.settingsExpanded="external-controls"}
             ActionRow("Shuffle behavior",state.shuffleMode){state.settingsExpanded="shuffle"}
             ActionRow("Visualizer","${state.visualizerMode} · ${if(state.visualizerMonochrome)"monochrome" else "structural palette"}"){state.settingsExpanded="visualizer"}
             ActionRow("Lyrics & timing","${if(state.lyricsWordTiming)"word timing" else "line timing"} · ${state.lyricsGlobalDelayMs} ms"){state.settingsExpanded="lyrics"}
@@ -446,25 +449,6 @@ private fun settingsTitle(page:String)=when(page){
                 }
             }
             Rule()
-            Text("Android notification · up to five supported actions",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(top=12.dp,bottom=4.dp))
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
-                listOf("Previous","Play/Pause","Next","Favourite","Shuffle","Repeat").forEach{action->
-                    TextCommand(action,{state.toggleNotificationAction(action)},action in state.notificationActions,modifier=Modifier.semantics{contentDescription="Notification action: $action"})
-                }
-            }
-            Rule()
-            Text("Quick Settings · two glanceable transport actions",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(top=12.dp,bottom=4.dp))
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
-                listOf("Play/Pause","Next","Previous","Favourite").forEach{action->
-                    TextCommand(action,{state.toggleQuickSettingsAction(action)},action in state.quickSettingsActions,modifier=Modifier.semantics{contentDescription="Quick Settings action: $action"})
-                }
-            }
-            Rule()
-            ActionRow("Home-screen widget",state.widgetLayout){state.cycleWidgetLayout()}
-            ToggleRow("Wear transport",if(state.wearControlsEnabled)"ON" else "OFF"){state.wearControlsEnabled=!state.wearControlsEnabled}
-            if(state.wearControlsEnabled) ActionRow("Wear secondary action",state.wearSecondaryAction){state.cycleWearSecondaryAction()}
-            Text("These surfaces mirror the user-facing control contract only; this shell does not register a tile, widget, notification service, or Wear data layer.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
-            Rule()
         }
         item{
             IntentSection("Track gestures")
@@ -481,6 +465,38 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Triple",state.headsetTriple){state.headsetTriple=if(state.headsetTriple=="Previous")"Seek −15s" else "Previous"}
             ActionRow("Long",state.headsetLong){state.headsetLong=if(state.headsetLong=="Actions")"Output" else "Actions"}
             Text("Mappings are represented explicitly; this preview does not listen for hardware buttons.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+        }
+    }
+}
+
+@Composable private fun ColumnScope.ExternalControlSettings(state:ShellState){
+    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+        item{
+            IntentSection("Notification transport")
+            Text("Keep the stable transport visible outside the app; choose up to five actions.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=8.dp))
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+                listOf("Previous","Play/Pause","Next","Favourite","Shuffle","Repeat").forEach{action->
+                    TextCommand(action,{state.toggleNotificationAction(action)},action in state.notificationActions,modifier=Modifier.semantics{contentDescription="Notification action: $action"})
+                }
+            }
+            Rule()
+        }
+        item{
+            IntentSection("Quick Settings")
+            Text("A glanceable surface carries only two transport actions.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=8.dp))
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+                listOf("Play/Pause","Next","Previous","Favourite").forEach{action->
+                    TextCommand(action,{state.toggleQuickSettingsAction(action)},action in state.quickSettingsActions,modifier=Modifier.semantics{contentDescription="Quick Settings action: $action"})
+                }
+            }
+            Rule()
+        }
+        item{
+            IntentSection("Home & wrist")
+            ActionRow("Home-screen widget",state.widgetLayout){state.cycleWidgetLayout()}
+            ToggleRow("Wear transport",if(state.wearControlsEnabled)"ON" else "OFF"){state.wearControlsEnabled=!state.wearControlsEnabled}
+            if(state.wearControlsEnabled) ActionRow("Wear secondary action",state.wearSecondaryAction){state.cycleWearSecondaryAction()}
+            Text("These are product-surface contracts only. The isolated shell does not register a tile, widget, notification service or Wear data layer.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
