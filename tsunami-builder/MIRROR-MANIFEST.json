@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "16d1778b6bd5d97b862f46b8e17f152f34e0eb43",
+  "source_head": "5330f7530374cfd8b5ce198e956cc6d7edd9b687",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 8,
-  "note": "Every listed blob is mirrored byte-identically from the current private Genesis branch. Hosted workflow execution remains manual while runner allocation is unavailable. Build outputs are not claimed until Android assembly succeeds.",
+  "note": "Every listed blob is mirrored byte-identically from private Genesis source head 5330f7530374cfd8b5ce198e956cc6d7edd9b687. Hosted workflow execution remains manual while runner allocation is unavailable. Build outputs are not claimed until Android assembly succeeds.",
   "files": [
     {
       "path": "ui-shell/app/build.gradle.kts",
@@ -16,7 +16,7 @@
     },
     {
       "path": "ui-shell/app/src/androidTest/java/com/tsunami/shell/GenesisInteractionTest.kt",
-      "git_blob_sha": "e20d2f55bc777cfed2ca9bc561a7cff11b91a61e",
+      "git_blob_sha": "4e9dc89a4c3bbed34975dfc1cd20fecdcedb2b77",
       "bytes": 22163
     },
     {
@@ -76,7 +76,7 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/SettingsScreen.kt",
-      "git_blob_sha": "68dd5207c4843d738a04d11e2ae1c47ed5b5a4a4",
+      "git_blob_sha": "038414509d9968eaca05010bc218615a0c53bdc8",
       "bytes": 42936
     },
     {
@@ -86,7 +86,7 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/state/ShellState.kt",
-      "git_blob_sha": "5732ef281e6ce760a86b85688bd7cb1da4ccba7e",
+      "git_blob_sha": "978e56f86c4524a90b1ce0f02ba80f06f4f01c73",
       "bytes": 37637
     },
     {
