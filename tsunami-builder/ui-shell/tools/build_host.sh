@@ -227,14 +227,14 @@ if [[ "$MODE" == "--install" || "$MODE" == "--verify-device" ]]; then
     cp -R build/verification "$REPORT/visual"
     cp -R tools/proofs "$REPORT/font-proofs"
     cp "$REPO_ROOT/docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md" "$REPORT/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md"
-    test "$(find "$REPORT/visual" -maxdepth 1 -name '[0-9][0-9]-*.png' ! -name '*-mono.png' ! -name '*-squint.png' | wc -l | tr -d ' ')" = "36"
+    test "$(find "$REPORT/visual" -maxdepth 1 -name '[0-9][0-9]-*.png' ! -name '*-mono.png' ! -name '*-squint.png' | wc -l | tr -d ' ')" = "37"
     test -s "$REPORT/visual/contact-sheet.png"
     if grep -q 'FATAL EXCEPTION' "$REPORT/visual/logcat-tail.txt" && grep -q 'Process: com.tsunami.shell' "$REPORT/visual/logcat-tail.txt"; then
       echo "ERROR: shell crash signature found in device logcat." >&2
       exit 4
     fi
     {
-      echo "VISUAL_CAPTURE=PASS states=36"
+      echo "VISUAL_CAPTURE=PASS states=37"
       echo "VISUAL_SANITY=PASS"
       echo "MONOCHROME_REVIEW_DERIVATION=PASS"
       echo "SQUINT_REVIEW_DERIVATION=PASS"
