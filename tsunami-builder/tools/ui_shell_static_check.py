@@ -18,6 +18,7 @@ UI = ROOT / "ui-shell"
 SRC = UI / "app/src/main/java/com/tsunami/shell"
 TEST = UI / "app/src/androidTest/java/com/tsunami/shell/GenesisInteractionTest.kt"
 CAPTURE = UI / "tools/capture_verify.sh"
+VISUAL_SANITY = UI / "tools/visual_sanity_verify.py"
 MANIFEST = UI / "app/src/main/AndroidManifest.xml"
 CODESPACE_BUILD = ROOT / "tools/ui_shell_codespace_build.py"
 PORTAL_PUBLISH = UI / "tools/publish_chromagora_apk.sh"
@@ -39,7 +40,7 @@ PYTHON_TOOLS = [
     UI / "tools/generate_tsunami_sans.py",
     UI / "tools/prepare_fonts.py",
     UI / "tools/source_verify.py",
-    UI / "tools/visual_sanity_verify.py",
+    VISUAL_SANITY,
 ]
 
 REQUIRED = [
@@ -57,6 +58,7 @@ REQUIRED = [
     SRC / "theme/TsunamiTheme.kt",
     TEST,
     CAPTURE,
+    VISUAL_SANITY,
     MANIFEST,
     CODESPACE_BUILD,
     PORTAL_PUBLISH,
@@ -289,8 +291,29 @@ def main() -> int:
         fail(f"player launch modes drifted: {sorted(mode_literals)}")
 
     captures = capture_rows(read(CAPTURE))
-    if len(captures) != 36:
-        fail(f"visual matrix count drifted: {len(captures)} != 36 captures")
+    if len(captures) != 37:
+        fail(f"visual matrix count drifted: {len(captures)} != 37 captures")
+    capture_names = [row[0] for row in captures]
+    if len(set(capture_names)) != len(capture_names):
+        duplicates = sorted({name for name in capture_names if capture_names.count(name) > 1})
+        fail("duplicate capture names: " + ", ".join(duplicates))
+    visual_sanity = read(VISUAL_SANITY)
+    expected_block = re.search(r"EXPECTED\s*=\s*\{(?P<body>[\s\S]*?)\n\}", visual_sanity)
+    if not expected_block:
+        fail("visual sanity verifier EXPECTED set could not be parsed")
+    expected_names = set(re.findall(r'"([0-9][0-9]-[^"]+)"', expected_block.group("body")))
+    actual_names = set(capture_names)
+    missing_from_verifier = sorted(actual_names - expected_names)
+    missing_from_capture = sorted(expected_names - actual_names)
+    if missing_from_verifier or missing_from_capture:
+        fail(
+            "capture/verifier name drift: "
+            f"missing_from_verifier={missing_from_verifier} "
+            f"missing_from_capture={missing_from_capture}"
+        )
+    if len(expected_names) != 37:
+        fail(f"visual sanity expected-state count drifted: {len(expected_names)} != 37")
+    print("VISUAL_MATRIX_PARITY=PASS states=37 names=exact")
     capture_scenarios = {row[2] for row in captures}
     unknown_scenarios = sorted(capture_scenarios - REQUIRED_SCENARIOS)
     if unknown_scenarios:
