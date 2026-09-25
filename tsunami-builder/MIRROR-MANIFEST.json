@@ -2,16 +2,16 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "91becaf245b6fdb8266b138154d9bd0061a06c2e",
+  "source_head": "e1228007363a62252e64596df7436c781b8ebcd8",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 8,
-  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 91becaf245b6fdb8266b138154d9bd0061a06c2e. Documentation-only files outside the mirror set are intentionally excluded. Build/device PASS remains contingent on executable Android verification.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head e1228007363a62252e64596df7436c781b8ebcd8. Documentation-only files outside the mirror set are intentionally excluded. Build/device PASS remains contingent on executable Android verification.",
   "files": [
     {
       "path": "ui-shell/README.md",
-      "git_blob_sha": "16c96b700b240c101d7601dfbd62832e6472447d",
+      "git_blob_sha": "ca015b74c7a7d6af7f2acc74b0e9ca4e857b9339",
       "bytes": 8130
     },
     {
@@ -166,7 +166,7 @@
     },
     {
       "path": "ui-shell/tools/build_host.sh",
-      "git_blob_sha": "d025d8a6e5a69cba4d801a96905bfabdc154c256",
+      "git_blob_sha": "3bb76baf7e72a7de8be29ada38d79433487eba18",
       "bytes": 9577
     },
     {
@@ -181,8 +181,8 @@
     },
     {
       "path": "ui-shell/tools/generate_tsunami_sans.py",
-      "git_blob_sha": "51a391fecf19226b9653c084c33a4395cfc8923b",
-      "bytes": 23647
+      "git_blob_sha": "ffdfa4b304fd0cea3b8c1bbb02ecc5518aeeb656",
+      "bytes": 24173
     },
     {
       "path": "ui-shell/tools/jvm_state_gate.sh",
@@ -201,7 +201,7 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "b463b168f8fce8326df86a04e896399867f2cd7c",
+      "git_blob_sha": "0e816d19104a19187526901f7db195f9b2a3bd9f",
       "bytes": 29975
     },
     {
@@ -213,7 +213,7 @@
   "support_files": [
     {
       "path": ".github/workflows/ui-shell-genesis-selfhosted.yml",
-      "git_blob_sha": "0700333df6bad10b2497e549cb86081e8dbc5763",
+      "git_blob_sha": "f9d78661bbd56ee4777f4e285c4d6cf038cf56b0",
       "bytes": 3560
     },
     {
