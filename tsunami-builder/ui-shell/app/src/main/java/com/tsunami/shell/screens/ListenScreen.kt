@@ -1,10 +1,12 @@
 package com.tsunami.shell.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -20,11 +22,11 @@ import com.tsunami.shell.theme.*
         item {
             Text("LISTEN",style=Type.micro.copy(color=p.ink3,fontWeight=FontWeight.SemiBold));Spacer(Modifier.height(10.dp))
             Text("Your listening line",style=Type.display.copy(color=p.ink));Spacer(Modifier.height(10.dp))
-            Text("Resume first. Choose second. Nothing here competes with the music already in motion.",style=Type.body.copy(color=p.ink2));Spacer(Modifier.height(18.dp));Rule()
+            Text("Continue where you left off, or move through your library.",style=Type.body.copy(color=p.ink2));Spacer(Modifier.height(18.dp));Rule()
         }
         if(state.loading){ item{ Spacer(Modifier.height(28.dp));Text("Reconstructing the listening context…",style=Type.body.copy(color=p.ink2));Spacer(Modifier.height(14.dp));Rule(color=p.selected,thickness=2.dp) };return@LazyColumn }
-        if(state.sourceError){ item{ SectionHeader("Recovery");Text("The library index could not be read. Playback state is preserved.",style=Type.body.copy(color=p.danger));Text("Retry",style=Type.meta.copy(color=p.selected),modifier=Modifier.heightIn(min=48.dp).clickable{state.sourceError=false;state.diagnosticsFault=false;state.banner="Index recovered"}.wrapContentHeight()); } }
-        if(state.fixture.empty){ item{ SectionHeader("Library");Text("No music is indexed yet.",style=Type.title.copy(color=p.ink));Spacer(Modifier.height(6.dp));Text("The shell stays navigable without inventing recommendations. Add a folder or connect a service from Settings.",style=Type.body.copy(color=p.ink2));Spacer(Modifier.height(12.dp));Row{TextCommand("Add folder",{state.banner="Mock folder chooser opened"});TextCommand("Connect service",{state.settingsExpanded="root"})} } ;return@LazyColumn }
+        if(state.sourceError){ item{ SectionHeader("Recovery");Text("The library index could not be read. Playback state is preserved.",style=Type.body.copy(color=p.danger));TextCommand("Retry",{state.sourceError=false;state.diagnosticsFault=false;state.banner="Index recovered"}); } }
+        if(state.fixture.empty){ item{ SectionHeader("Library");Text("No music is indexed yet.",style=Type.title.copy(color=p.ink));Spacer(Modifier.height(6.dp));Text("Add a music folder or connect a service to begin.",style=Type.body.copy(color=p.ink2));Spacer(Modifier.height(12.dp));Row{TextCommand("Add folder",{state.banner="Folder chooser opened"});TextCommand("Connect service",{state.settingsExpanded="services"})} } ;return@LazyColumn }
         item{SectionHeader("Resume")}
         state.fixture.tracks.take(3).forEachIndexed{index,t-> item(key=t.id){ TrackLedgerRow(t,if(index==0)"${formatTime(state.positionMs)} of ${formatTime(t.durationMs)}" else "Played ${index+1} days ago",onOpen={state.selectTrack(t,false);state.expandedPlayer=true},onPlay={state.selectTrack(t,true)},onFavourite={state.toggleFavourite(t.id)},onDownload={state.toggleDownload(t.id)},forceMissing=state.fixture.missingArtwork||scenario=="no-artwork",onPlayNext={state.playNext(t)},onShuffleNext={state.shuffleNext(t)},onAddToPlaylist={state.addToPlaylist(t)},downloadState=state.downloads[t.id]?:DownloadState.REMOTE) } }
         item{SectionHeader("Pinned to your library")}
@@ -54,7 +56,6 @@ import com.tsunami.shell.theme.*
                 downloadState=state.downloads[t.id]?:DownloadState.REMOTE
             )
         } }
-        item{SectionHeader("Recent changes"); Row(Modifier.fillMaxWidth().padding(vertical=12.dp)){Column(Modifier.weight(1f)){Text("18",style=Type.title.copy(color=p.ink));Text("new tracks",style=Type.meta.copy(color=p.ink3))};Column(Modifier.weight(1f)){Text("7",style=Type.title.copy(color=p.ink));Text("lyrics gained",style=Type.meta.copy(color=p.ink3))};Column(Modifier.weight(1f)){Text("3.2 GB",style=Type.title.copy(color=p.ink));Text("offline",style=Type.meta.copy(color=p.ink3))}};Rule()}
     }
 }
 
