@@ -1,0 +1,26 @@
+name: TSUNAMI Runner Probe
+
+on:
+  push:
+    branches:
+      - build/tsunami-ui-genesis-20260925
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Native runner probe
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo RUNNER_PROBE=PASS
+          uname -a
+          java -version
+          python3 --version
+          command -v sdkmanager || true
+          command -v adb || true
+          command -v gradle || true
