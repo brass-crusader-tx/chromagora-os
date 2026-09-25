@@ -52,6 +52,13 @@ capture 29-find-partial find partial light
 capture 30-settings-audio settings default light "" audio
 capture 31-settings-controls settings default light "" controls
 capture 37-settings-external-controls settings default light "" external-controls
+capture 38-find-empty find search-empty light
+capture 39-find-error find search-error light
+capture 40-player-queue-empty player queue-empty light queue
+capture 41-settings-provider-connecting settings provider-connecting light "" services
+capture 42-settings-provider-error settings provider-error light "" services
+capture 43-settings-downloads-active settings downloads-active light
+capture 44-settings-downloads-error settings downloads-error light
 capture 32-settings-backup settings default dark "" backup
 capture 35-settings-services settings default light "" services
 capture 33-listen-no-artwork listen no-artwork light
@@ -90,5 +97,5 @@ sleep 2
 adb logcat -d -t 1200 > "$OUT/logcat-tail.txt" || true
 for f in "$OUT"/*.png; do test "$(wc -c < "$f")" -gt 10000 || { echo "capture too small: $f"; exit 1; }; done
 BASE_COUNT="$(find "$OUT" -maxdepth 1 -name '[0-9][0-9]-*.png' ! -name '*-mono.png' ! -name '*-squint.png' | wc -l | tr -d ' ')"
-[[ "$BASE_COUNT" == "37" ]] || { echo "expected exactly 37 base captures, found $BASE_COUNT" >&2; exit 1; }
+[[ "$BASE_COUNT" == "44" ]] || { echo "expected exactly 44 base captures, found $BASE_COUNT" >&2; exit 1; }
 printf 'captures=%s\n' "$BASE_COUNT" | tee "$OUT/capture-summary.txt"
