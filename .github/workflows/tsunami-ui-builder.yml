@@ -2,6 +2,12 @@ name: TSUNAMI UI Genesis Builder
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - build/tsunami-ui-genesis-20260925
+    paths:
+      - ".github/workflows/tsunami-ui-builder.yml"
+      - "tsunami-builder/MIRROR-MANIFEST.json"
 
 permissions:
   contents: read
