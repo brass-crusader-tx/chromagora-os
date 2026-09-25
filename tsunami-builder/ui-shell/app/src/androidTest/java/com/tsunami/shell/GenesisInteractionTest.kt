@@ -327,6 +327,17 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Import audit · YouTube Music").assertExists()
     }
 
+    @Test fun nonYouTubeProviderUsesSameImportLifecycle() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithText("Connected services").performClick()
+        compose.onNodeWithText("Apple Music").performScrollTo().performClick()
+        repeat(4) {
+            compose.onNodeWithText("Import Apple Music").performScrollTo().performClick()
+        }
+        compose.onNodeWithText("Apple Music import complete · 428 imported").assertExists()
+        compose.onNodeWithText("Import audit · Apple Music").assertExists()
+    }
+
     @Test fun longformSeparatesAudiobooksAndPodcasts() {
         compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
         compose.onNodeWithText("Longform").performClick()
