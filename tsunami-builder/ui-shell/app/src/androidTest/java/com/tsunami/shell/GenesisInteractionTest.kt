@@ -290,7 +290,7 @@ class GenesisInteractionTest {
 
     @Test fun externalPlaybackSurfacesHaveExplicitMockContracts() {
         compose.onNodeWithContentDescription("Settings").performClick()
-        compose.onNodeWithText("Controls & gestures").performClick()
+        compose.onNodeWithText("External playback surfaces").performClick()
 
         compose.onNodeWithContentDescription("Quick Settings action: Previous").performClick()
         compose.onNodeWithText("Quick Settings exposes two transport actions").assertExists()
