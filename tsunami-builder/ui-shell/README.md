@@ -42,7 +42,7 @@ This installs only `com.tsunami.shell`; the production application is outside th
 `MainActivity` accepts ADB extras for visual QA:
 
 - `--es screen listen|library|find|signal|settings|player`
-- `--es scenario default|onboarding|empty|loading|error|partial|buffering|unavailable|missing-art|missing-lyrics|long-title|longform|small-list|long-list|huge-list|no-artwork|accessibility`
+- `--es scenario default|onboarding|empty|loading|error|partial|buffering|unavailable|missing-art|missing-lyrics|long-title|longform|podcast|small-list|long-list|huge-list|no-artwork|accessibility|search-empty|search-error|queue-empty|provider-connecting|provider-error|downloads-active|downloads-error`
 - `--es theme light|dark`
 - `--es mode queue|lyrics|output|visual` when `screen=player`
 - `--es page audio|controls|backup|lyrics|presentation|…` when `screen=settings` for deterministic depth captures
@@ -57,14 +57,14 @@ Set `TSUNAMI_FORCE_CODESPACE_BUILD=1` to skip the host attempt. Override the des
 
 ## Verification contract
 
-The canonical repository gate is `python3 tools/ui_shell_gate.py` from the repository root. It generates and validates all five TSUNAMI Sans weights, checks required UI glyph coverage and weight metadata, builds the isolated APK, rejects production-facing network/media permissions, runs Compose interaction tests on an Android emulator, captures thirty-seven deterministic visual states, including 40 / 4,008 / 40,008-item library fixtures, compact landscape, 150%/200% font scaling, a high-contrast/56dp control accessibility state, explicit medium-width rail topology, expanded three-pane layouts, no-artwork listening/player states, and progressive settings depths, derives monochrome and blurred “squint” review variants, runs image-level sanity checks, scans the shell log for fatal crashes, and packages the APK, proofs, screenshots and mandatory human visual-review protocol under `build/reports/tsunami/ui-shell/`.
+The canonical repository gate is `python3 tools/ui_shell_gate.py` from the repository root. It generates and validates all five TSUNAMI Sans weights, checks required UI glyph coverage and weight metadata, builds the isolated APK, rejects production-facing network/media permissions, runs Compose interaction tests on an Android emulator, captures forty-four deterministic visual states, including 40 / 4,008 / 40,008-item library fixtures, compact landscape, 150%/200% font scaling, a high-contrast/56dp control accessibility state, explicit medium-width rail topology, expanded three-pane layouts, no-artwork listening/player states, progressive settings depths, empty/failed search, empty queue, provider connecting/error, and active/failed download states, derives monochrome and blurred “squint” review variants, runs image-level sanity checks, scans the shell log for fatal crashes, and packages the APK, proofs, screenshots and mandatory human visual-review protocol under `build/reports/tsunami/ui-shell/`.
 
 The shell intentionally remains backend-free. Queue, downloads, provider imports, playback routing, diagnostics, longform progress and all other consequential states are deterministic prototype state rather than adapters to production services.
 
 
 ## Current verification boundary
 
-Static source/state/type/brand verification is present in-repo, but final acceptance still requires an Android-capable host to assemble the current head, install `com.tsunami.shell`, run the 29 Compose instrumentation tests, execute the 37-state capture matrix, inspect logcat, and complete the human visual-review protocol. GitHub Actions for this repository are currently terminating at `startup_failure` before jobs are created, so a workflow startup failure is not treated as either build success or build failure.
+Static source/state/type/brand verification is present in-repo, but final acceptance still requires an Android-capable host to assemble the current head, install `com.tsunami.shell`, run the 31 Compose instrumentation tests, execute the 44-state capture matrix, inspect logcat, and complete the human visual-review protocol. GitHub Actions for this repository are currently terminating at `startup_failure` before jobs are created, so a workflow startup failure is not treated as either build success or build failure.
 
 
 ## Codespace fallback when GitHub-hosted Actions cannot start
