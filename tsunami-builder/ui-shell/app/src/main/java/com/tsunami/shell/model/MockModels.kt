@@ -99,6 +99,8 @@ fun defaultFixture(scenario: String): ShellFixture {
         tracks = if (scenario == "empty") emptyList() else tracks,
         services = listOf(
             ServiceConnection("YouTube Music", true, "Library available · 1,842 indexed"),
+            ServiceConnection("Apple Music", false, "Not connected"),
+            ServiceConnection("Amazon Music", false, "Not connected"),
             ServiceConnection("TIDAL", false, "Not connected"),
             ServiceConnection("Spotify", true, "History only · enrichment paused"),
         ),
