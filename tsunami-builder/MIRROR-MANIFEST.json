@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "7a8be40697d7350b97a8d304765b21a03d7ecc68",
+  "source_head": "91becaf245b6fdb8266b138154d9bd0061a06c2e",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 8,
-  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 7a8be40697d7350b97a8d304765b21a03d7ecc68. Documentation-only files outside the mirror set are intentionally excluded. Build/device PASS remains contingent on executable Android verification.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 91becaf245b6fdb8266b138154d9bd0061a06c2e. Documentation-only files outside the mirror set are intentionally excluded. Build/device PASS remains contingent on executable Android verification.",
   "files": [
     {
       "path": "ui-shell/README.md",
@@ -101,8 +101,8 @@
     },
     {
       "path": "ui-shell/app/src/main/res/drawable/ic_tsunami_launcher_foreground.xml",
-      "git_blob_sha": "950e3841cbeacf61a00f8ec2f8fe0e04c91dd9dd",
-      "bytes": 659
+      "git_blob_sha": "d24afd67afb55f521efb94a5c9841b6f86eafa5b",
+      "bytes": 679
     },
     {
       "path": "ui-shell/app/src/main/res/drawable/ic_tsunami_mark.xml",
@@ -238,8 +238,8 @@
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md",
-      "git_blob_sha": "2f39255dcdea998bd9fdbd7f0a86678e41b73bda",
-      "bytes": 6481
+      "git_blob_sha": "8325b521a14130b379bc731ba5054cf97d091e70",
+      "bytes": 6479
     },
     {
       "path": "tools/ui_shell_codespace_build.py",
