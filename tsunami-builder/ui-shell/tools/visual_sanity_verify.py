@@ -20,6 +20,9 @@ EXPECTED={
     "26-player-expanded","27-listen-buffering","28-library-unavailable","29-find-partial",
     "30-settings-audio","31-settings-controls","37-settings-external-controls","32-settings-backup","35-settings-services",
     "33-listen-no-artwork","34-player-no-artwork",
+    "38-find-empty","39-find-error","40-player-queue-empty",
+    "41-settings-provider-connecting","42-settings-provider-error",
+    "43-settings-downloads-active","44-settings-downloads-error",
 }
 
 def fail(message:str)->None:
@@ -63,6 +66,9 @@ DISTINCT_GROUPS=(
     ("15-library-40","16-library-4k","17-library-40k"),
     ("21-library-landscape","22-library-medium","25-library-expanded"),
     ("30-settings-audio","31-settings-controls","37-settings-external-controls","32-settings-backup","35-settings-services"),
+    ("03-find-light","38-find-empty","39-find-error"),
+    ("41-settings-provider-connecting","42-settings-provider-error","35-settings-services"),
+    ("07-settings-dark","43-settings-downloads-active","44-settings-downloads-error"),
 )
 for group in DISTINCT_GROUPS:
     group_hashes=[hashes[name] for name in group]
