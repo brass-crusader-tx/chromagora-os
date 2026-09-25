@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 820" role="img" aria-labelledby="title desc">
+  <title id="title">TSUNAMI master mark</title>
+  <desc id="desc">A solid circular body beneath a heavy open circular arch.</desc>
+  <!-- Reconstructed from the supplied 1536 px reference.
+       Outer circle: r 509.61, center (500,509.61)
+       Inner optical counter: r 394.61, center (500,502.69)
+       Terminal cut: y 411.11; inner terminal x 116.16 / 883.84
+       Body: true circle r 289, center (500,531). -->
+  <path fill="currentColor" d="M0 411.11 A509.61 509.61 0 0 1 1000 411.11 L883.84 411.11 A394.61 394.61 0 0 0 116.16 411.11 Z"/>
+  <circle fill="currentColor" cx="500" cy="531" r="289"/>
+</svg>
