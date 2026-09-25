@@ -251,5 +251,10 @@
       "git_blob_sha": "c9b01f23240018cc42cd99b148c7a2843a138787",
       "bytes": 18566
     }
-  ]
+  ],
+  "self_hosted_probe": {
+    "requested_at": "2026-09-25T19:30:00Z",
+    "purpose": "current-head UI Genesis build/device acceptance",
+    "source_head": "e1228007363a62252e64596df7436c781b8ebcd8"
+  }
 }
