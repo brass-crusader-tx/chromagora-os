@@ -89,9 +89,11 @@ def lower(ch,t):
     if ch=='c': return o().difference(R(w*.66,h*.16,w+80,h*.84)),w
     if ch=='d': return U(R(w-m-tl,0,w-m,ASC),translate(o(),xoff=-18)),w
     if ch=='e':
-        aperture=max(.58,.66-(tl-40)/1000)
-        bowl=o().difference(R(w*aperture,h*.31,w+80,h*.71))
-        bar=R(w*.24,h*.47,w*.75,h*.47+tl)
+        # Build e from the o skeleton but cut a genuine right aperture through the bowl.
+        # The previous shallow cut read like a theta at 12–18 px; this construction keeps
+        # the eye/bar relationship unmistakable at every static master.
+        bowl=o().difference(R(w*.64,h*.17,w+80,h*.83))
+        bar=R(w*.22,h*.46,w*.79,h*.46+tl*.88)
         return U(bowl,bar),w
     if ch=='f':
         top_y=ASC-82
@@ -238,15 +240,23 @@ def special(ch,t):
             R(shared,h-t,w-m,h), R(shared,h*.50-t/2,w-m-35,h*.50+t/2), R(shared,0,w-m,t)
         ),w
     if ch=='æ':
-        a,_=lower('a',t); e,_=lower('e',t); w=760
-        return U(scale(a,.76,1,origin=(0,0)),translate(scale(e,.76,1,origin=(0,0)),xoff=350)),w
+        # Two readable bowls with one controlled overlap; do not merely collide scaled a/e.
+        w=760; h=XH; tl=max(34,t*.95)
+        left=ring(195,h/2,150,h*.50,tl)
+        left=U(left,R(315-tl,0,315,h))
+        right=ring(535,h/2,165,h*.50,tl).difference(R(640,h*.17,w+60,h*.83))
+        right=U(right,R(385,h*.46,675,h*.46+tl*.88))
+        return U(left,right),w
     if ch=='Œ':
         w=820; h=CAP; tl=t
         o=ring(250,h/2,205,h*.49,tl)
         return U(o,R(420,0,420+tl,h),R(420,h-t,w-50,h),R(420,h*.50-t/2,w-80,h*.50+t/2),R(420,0,w-50,t)),w
     if ch=='œ':
-        o,_=lower('o',t); e,_=lower('e',t); w=760
-        return U(scale(o,.76,1,origin=(0,0)),translate(scale(e,.76,1,origin=(0,0)),xoff=350)),w
+        w=760; h=XH; tl=max(34,t*.95)
+        left=ring(195,h/2,150,h*.50,tl)
+        right=ring(535,h/2,165,h*.50,tl).difference(R(640,h*.17,w+60,h*.83))
+        right=U(right,R(385,h*.46,675,h*.46+tl*.88))
+        return U(left,right),w
     if ch=='Ø':
         o,w=caps('O',t); return U(o,line(w*.23,CAP*.05,w*.77,CAP*.95,max(26,t*.46))),w
     if ch=='ø':
@@ -306,7 +316,7 @@ def build(style,weight,t):
         order.append(name); glyphs[name]=glyph(sh); metrics[name]=(adv,0); cmap[ord(ch)]=name
     fb=FontBuilder(UPM,isTTF=True); fb.font['head'].created=FONT_TIMESTAMP; fb.font['head'].modified=FONT_TIMESTAMP; fb.setupGlyphOrder(order); fb.setupCharacterMap(cmap); fb.setupGlyf(glyphs); fb.setupHorizontalMetrics(metrics); fb.setupHorizontalHeader(ascent=ASC,descent=DESC,lineGap=110)
     fb.setupOS2(sTypoAscender=ASC,sTypoDescender=DESC,sTypoLineGap=110,usWinAscent=940,usWinDescent=260,usWeightClass=weight,fsSelection=(1<<6 if weight==400 else 0),sxHeight=XH,sCapHeight=CAP,achVendID='TSNM')
-    fb.setupNameTable({'familyName':'TSUNAMI Sans','styleName':style,'uniqueFontIdentifier':f'TSUNAMI Sans {style} 4.7','fullName':f'TSUNAMI Sans {style}','psName':f'TSUNAMISans-{style}','version':'Version 4.700'}); fb.setupPost(); fb.setupMaxp()
+    fb.setupNameTable({'familyName':'TSUNAMI Sans','styleName':style,'uniqueFontIdentifier':f'TSUNAMI Sans {style} 4.8','fullName':f'TSUNAMI Sans {style}','psName':f'TSUNAMISans-{style}','version':'Version 4.800'}); fb.setupPost(); fb.setupMaxp()
     kern_pairs=[('A','V',-40),('A','W',-34),('A','Y',-42),('V','A',-40),('W','A',-30),('Y','A',-44),('T','A',-28),('T','o',-34),('T','e',-34),('T','a',-30),('T','y',-24),('F','o',-22),('F','a',-18),('L','T',-20),('L','Y',-28),('Y','o',-36),('Y','e',-36),('P','a',-18),('r','y',-12)]
     feature_lines=[]
     for left,right,value in kern_pairs:
@@ -319,7 +329,7 @@ def build(style,weight,t):
 def proof(fonts):
     W,H=1700,1510; im=Image.new('RGB',(W,H),'#F4F1EA'); d=ImageDraw.Draw(im)
     def F(wt,size): return ImageFont.truetype(str(fonts[wt]),size)
-    d.text((70,45),'TSUNAMI Sans — Genesis Proof v4.7',font=F('Semibold',54),fill='#111216')
+    d.text((70,45),'TSUNAMI Sans — Genesis Proof v4.8',font=F('Semibold',54),fill='#111216')
     d.text((70,118),'H O n o  ·  optical control glyphs',font=F('Regular',34),fill='#44464C')
     y=185
     samples=[('ABCDEFGHIJKLM','Regular',56),('NOPQRSTUVWXYZ','Regular',56),('abcdefghijklm','Regular',48),('nopqrstuvwxyz','Regular',48),('0123456789  01:42 / 04:19','Medium',46),('S s  G R  a e g r t k y  2 3 5 6 8','Regular',44),('I l 1   O 0   rn m   c e   v y','Regular',42),('S s  G C  R  a e g r t k y   & ? @   [] {}','Regular',36),('Æ æ  Œ œ  Ø ø  Ð ð  Þ þ  ß  Ñ ñ','Regular',34),('ÀÁÂÃÄÅ Ç ÈÉÊË Ï Ö Ü  àáâä ç éêë ï ö ü','Regular',36),('“Afterglow at the edge of the city”','Semibold',46),('Mira Sol · Refractions / Deluxe Edition','Medium',34),('FLAC 24-bit · 96 kHz   OFFLINE   QUEUED','Regular',28)]
