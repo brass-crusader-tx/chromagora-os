@@ -27,7 +27,9 @@ derivatives. Review the contact sheet first, then the full-resolution images.
 
 ### Required adversarial tests
 
-**Artwork-free Index:** inspect `45-library-index` against `15-library-40`. The Index composition deliberately removes cover slots rather than substituting placeholders; title, metadata, alphabetical landmarks, rules and selection geometry must still read as a complete TSUNAMI library.\n\n**Remove the artwork:** inspect `02-library-no-artwork`, `33-listen-no-artwork` and `34-player-no-artwork`. Content slots must be deliberately neutral across browsing and active listening; the screen should still be recognizably TSUNAMI from type, rules, spacing, index behavior and state geometry. The image gate also compares the blurred `01↔33` and `09↔34` pairs, rejecting either an unchanged scenario or an excessive whole-screen structural divergence.
+**Artwork-free Index:** inspect `45-library-index` against `15-library-40`. The Index composition deliberately removes cover slots rather than substituting placeholders; title, metadata, alphabetical landmarks, rules and selection geometry must still read as a complete TSUNAMI library.
+
+**Remove the artwork:** inspect `02-library-no-artwork`, `33-listen-no-artwork` and `34-player-no-artwork`. Content slots must be deliberately neutral across browsing and active listening; the screen should still be recognizably TSUNAMI from type, rules, spacing, index behavior and state geometry. The image gate also compares the blurred `01↔33` and `09↔34` pairs, rejecting either an unchanged scenario or an excessive whole-screen structural divergence.
 
 **Remove the color:** inspect every `*-mono.png` derivative, especially LISTEN, LIBRARY, FIND,
 Expanded Listening and Settings. Selection/hierarchy must remain readable by weight, rules, position
