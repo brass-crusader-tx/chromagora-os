@@ -98,6 +98,7 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Haptic intensity",when(state.hapticStrength){0->"OFF";1->"STANDARD";else->"STRONG"}){state.cycleHapticStrength()}
             ToggleRow("Reduced motion",if(state.reducedMotion)"ON" else "OFF"){state.reducedMotion=!state.reducedMotion}
             ToggleRow("Library density",if(state.denseLibrary)"DENSE" else "COMFORTABLE"){state.denseLibrary=!state.denseLibrary}
+            ActionRow("Experience level",if(state.advancedExperience)"ADVANCED" else "STANDARD"){state.advancedExperience=!state.advancedExperience}
             ActionRow("Presentation","Player geometry · orientation · artwork"){state.settingsExpanded="presentation"}
         }
         item{
@@ -143,7 +144,7 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Listening services","${if(state.listenBrainzEnabled)"ListenBrainz " else ""}${if(state.lastFmEnabled)"Last.fm" else if(!state.listenBrainzEnabled)"OFF" else ""}"){state.settingsExpanded="scrobbling"}
             ActionRow("Clear history","LOCAL PREVIEW DATA"){state.requestClearHistory()}
         }
-        item{
+        if(state.advancedExperience) item{
             IntentSection("Advanced")
             ActionRow("Context rules","${state.contextRules.count{it.enabled}} active · ${state.contextRules.size} total"){state.settingsExpanded="context-rules"}
             ActionRow("Quick actions & sessions",state.activeSession?.let{"SESSION · $it"}?:"No active session"){state.settingsExpanded="quick-actions"}
