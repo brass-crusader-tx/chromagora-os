@@ -16,6 +16,8 @@ SRC = UI / "app/src/main/java/com/tsunami/shell"
 TEST = UI / "app/src/androidTest/java/com/tsunami/shell/GenesisInteractionTest.kt"
 MANIFEST = UI / "app/src/main/AndroidManifest.xml"
 FONT_GEN = UI / "tools/generate_tsunami_sans.py"
+CAPTURE = UI / "tools/capture_verify.sh"
+VISUAL_SANITY = UI / "tools/visual_sanity_verify.py"
 BUILD_GRADLE = UI / "app/build.gradle.kts"
 LAUNCHER_FOREGROUND = UI / "app/src/main/res/drawable/ic_tsunami_launcher_foreground.xml"
 LAUNCHER_ADAPTIVE = UI / "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml"
@@ -48,7 +50,8 @@ REQUIRED = [
     UI / "tools/bootstrap_gradle.sh",
     UI / "tools/build_host.sh",
     UI / "tools/publish_chromagora_apk.sh",
-    UI / "tools/visual_sanity_verify.py",
+    CAPTURE,
+    VISUAL_SANITY,
     UI.parent / "tools/ui_shell_codespace_build.py",
     UI.parent / ".github/workflows/ui-shell-genesis-selfhosted.yml",
     UI.parent / "docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md",
@@ -107,7 +110,7 @@ REQUIRED_ANCHORS = {
         "highContrast", "largeControls", "hapticStrength", "wifiOnlyDownloads", "lyricsAutoFetch", "resumePositions", "playedLongform", "seekRelative(", "togglePlayedLongform(", "listenLens",
         "signalSection", "runGaplessProbe(", "auditLyrics(", "scanDuplicateHashes(", "exportReplay(",
         "excludedGenres", "excludedPlaylistPaths", "swipeUp", "swipeDown", "albumArtistMode", "prepareDeviceMigration(",
-        "miniPlayerExtras", "fullPlayerButtons", "notificationActions", "toggleNotificationAction(", "runPlayerAction(",
+        "miniPlayerExtras", "fullPlayerButtons", "notificationActions", "toggleNotificationAction(", "quickSettingsActions", "toggleQuickSettingsAction(", "widgetLayout", "cycleWidgetLayout(", "wearControlsEnabled", "wearSecondaryAction", "cycleWearSecondaryAction(", "runPlayerAction(",
         "eqBandsDb", "cycleEqBand(", "lyricSourceOrder", "moveLyricSource(", "librarySectionOrder", "moveLibrarySection(",
         'fullPlayerButtons = mutableStateListOf("Favourite","Offline","Share")', 'quickActions = mutableStateListOf("Sleep timer")',
     ],
@@ -131,8 +134,8 @@ REQUIRED_ANCHORS = {
     "screens/SettingsScreen.kt": [
         '"audio"', '"visualizer"', '"shuffle"', '"library-roots"', '"library-sections"',
         '"library-profiles"', '"metadata"', '"scrobbling"', '"backup"', '"controls"',
-        '"context-rules"', '"quick-actions"', '"custom-sections"', '"audio-profiles"', '"lyrics"', '"presentation"', '"services"', '"equalizer"', '"lyric-sources"',
-        "ControlSettings(", "Player action surfaces", "Android notification", "Headset controls", "ContextRuleSettings(", "QuickActionSettings(",
+        '"context-rules"', '"quick-actions"', '"custom-sections"', '"audio-profiles"', '"lyrics"', '"presentation"', '"services"', '"equalizer"', '"lyric-sources"', '"external-controls"',
+        "ControlSettings(", "Player action surfaces", "Headset controls", "ExternalControlSettings(", "Notification transport", "Quick Settings", "Home-screen widget", "Wear transport", "ContextRuleSettings(", "QuickActionSettings(",
         "CustomSectionsSettings(", "AudioProfilesSettings(", "ServicesSettings(", "EqualizerSettings(", "LyricSourcesSettings(", "Library lens order", "Hide $section",
         "Excluded genres", "Excluded playlist paths", "Swipe up", "Swipe down", "TSUNAMI device migration", "Album artist",
     ],
@@ -340,6 +343,7 @@ def main() -> int:
     full_actions=literal_state_list("fullPlayerButtons")
     quick_actions=literal_state_list("quickActions")
     notification_actions=literal_state_list("notificationActions")
+    quick_settings_actions=literal_state_list("quickSettingsActions")
     stable_transport={"Previous","Play/Pause","Next","Shuffle","Repeat"}
     listening_modes={"Queue","Lyrics","Output","Visual"}
     if stable_transport & set(full_actions):
@@ -350,9 +354,17 @@ def main() -> int:
         die(f"quick actions overlap listening modes: {sorted(listening_modes & set(quick_actions))}")
     if not {"Previous","Play/Pause","Next"}.issubset(set(notification_actions)):
         die("notification action defaults lost the stable previous/play-pause/next transport triad")
-    if len(mini_actions)>2 or len(full_actions)>5 or len(notification_actions)>5:
+    if "Play/Pause" not in quick_settings_actions:
+        die("Quick Settings defaults lost the primary play/pause transport action")
+    if len(mini_actions)>2 or len(full_actions)>5 or len(notification_actions)>5 or len(quick_settings_actions)>2:
         die("customizable action-surface defaults exceed their authored capacity")
-    print("LISTENING_ACTION_SURFACES=PASS stable_transport modes object_actions quick_actions notification_actions=separated")
+    if not set(quick_settings_actions).issubset(stable_transport | {"Favourite"}):
+        die(f"Quick Settings contains unsupported action(s): {quick_settings_actions}")
+    print("LISTENING_ACTION_SURFACES=PASS stable_transport modes object_actions quick_actions notification quick_settings widget wear=separated")
+    test_src=TEST.read_text(encoding="utf-8")
+    if "externalPlaybackSurfacesHaveExplicitMockContracts" not in test_src:
+        die("external playback surfaces lost their instrumentation contract")
+    print("EXTERNAL_PLAYBACK_SURFACES=PASS notification quick_settings widget wear")
 
     all_src = "\n".join(source_text.values())
     direct_clickables = len(re.findall(r"\.clickable\b", all_src))
@@ -443,12 +455,34 @@ def main() -> int:
         'test_apk_hash_match',
         'remote_source_verify',
         'remote_accessibility_verify',
-        'if len(base_captures) != 36:',
+        'if len(base_captures) != 37:',
         '--untracked-files=all',
     ):
         if anchor not in codespace_build:
             die(f"Codespaces fallback missing verification anchor: {anchor}")
-    visual_sanity=(UI / "tools/visual_sanity_verify.py").read_text(encoding="utf-8")
+    visual_sanity=VISUAL_SANITY.read_text(encoding="utf-8")
+    capture_script=CAPTURE.read_text(encoding="utf-8")
+    capture_names=[]
+    for line in capture_script.splitlines():
+        line=line.strip()
+        if line.startswith("capture "):
+            fields=line.split()
+            if len(fields)<2:
+                die(f"malformed visual capture row: {line}")
+            capture_names.append(fields[1])
+    expected_match=re.search(r"EXPECTED\s*=\s*\{(?P<body>[\s\S]*?)\n\}",visual_sanity)
+    if not expected_match:
+        die("visual sanity EXPECTED state set could not be parsed")
+    expected_names=set(re.findall(r'"([0-9][0-9]-[^"]+)"',expected_match.group("body")))
+    if len(capture_names)!=37 or len(set(capture_names))!=37 or len(expected_names)!=37:
+        die(f"visual matrix cardinality drift capture={len(capture_names)} unique={len(set(capture_names))} expected={len(expected_names)}")
+    if set(capture_names)!=expected_names:
+        die(
+            "visual capture/verifier state drift "
+            f"capture_only={sorted(set(capture_names)-expected_names)} "
+            f"verifier_only={sorted(expected_names-set(capture_names))}"
+        )
+    print("VISUAL_MATRIX_PARITY=PASS states=37 names=exact")
     for anchor in (
         "ARTWORK_IDENTITY_PAIRS",
         "squint_range < 24",
@@ -463,7 +497,7 @@ def main() -> int:
     for anchor in (
         'bash ui-shell/tools/build_host.sh',
         'bash ui-shell/tools/build_host.sh --verify-device "$SERIAL"',
-        'VISUAL_CAPTURE=PASS states=36',
+        'VISUAL_CAPTURE=PASS states=37',
         'VISUAL_SANITY=PASS',
         'CRASH_SCAN=PASS',
         'instrumentation.txt',
@@ -484,7 +518,7 @@ def main() -> int:
     print("BUILD_STACK_CONTRACT=PASS compileSdk=36 targetSdk=36 compose=1.11.4 agp=9.2.1 builtInKotlin=2.2.10 gradle=9.4.1")
     print("PORTAL_PUBLISH_CONTRACT=PASS host_then_codespace hash_bound atomic_manifested")
     print("VISUAL_IDENTITY_GATE_CONTRACT=PASS monochrome squint hierarchy artwork-removal")
-    print("SELFHOSTED_DEVICE_GATE_CONTRACT=PASS build instrumentation visual36 crash_scan")
+    print("SELFHOSTED_DEVICE_GATE_CONTRACT=PASS build instrumentation visual37 crash_scan")
     print("INTERACTION_COUNTS=" + ",".join(f"{k}:{v}" for k,v in counts.items()))
     return 0
 
