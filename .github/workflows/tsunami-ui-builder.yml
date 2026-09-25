@@ -2,13 +2,23 @@ name: TSUNAMI UI Genesis Builder
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - build/tsunami-ui-genesis-20260925
+    paths:
+      - ".github/workflows/tsunami-ui-builder.yml"
+      - "tsunami-builder/MIRROR-MANIFEST.json"
+
+concurrency:
+  group: tsunami-ui-genesis-hosted-builder
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
