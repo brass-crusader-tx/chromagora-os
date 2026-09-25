@@ -1,0 +1,86 @@
+name: TSUNAMI UI Genesis Public Self Hosted
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - build/tsunami-ui-genesis-20260925
+    paths:
+      - ".github/workflows/tsunami-ui-selfhosted.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: [self-hosted]
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify current mirror binding
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 - <<'PY'
+          import json, pathlib, subprocess
+          root=pathlib.Path("tsunami-builder")
+          manifest=json.loads((root/"MIRROR-MANIFEST.json").read_text())
+          bad=[]
+          for row in manifest["files"]+manifest["support_files"]:
+              p=root/row["path"]
+              actual=subprocess.check_output(["git","hash-object",str(p)],text=True).strip() if p.is_file() else "missing"
+              if actual!=row["git_blob_sha"]: bad.append((row["path"],actual,row["git_blob_sha"]))
+          assert not bad,bad
+          print("MIRROR_BINDING=PASS",manifest["source_head"],len(manifest["files"]),len(manifest["support_files"]))
+          PY
+
+      - name: Canonical static and state gates
+        working-directory: tsunami-builder
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 tools/ui_shell_static_check.py
+          python3 ui-shell/tools/source_verify.py
+          python3 ui-shell/tools/accessibility_verify.py
+          if command -v kotlinc >/dev/null; then bash ui-shell/tools/jvm_state_gate.sh; fi
+
+      - name: Canonical host build
+        working-directory: tsunami-builder
+        shell: bash
+        run: |
+          set -euxo pipefail
+          bash ui-shell/tools/build_host.sh
+          test -s dist/TSUNAMI-UI-Genesis-debug.apk
+          test -s dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
+          cat build/reports/tsunami/ui-shell/host/build.txt
+
+      - name: Motorola acceptance if attached
+        working-directory: tsunami-builder
+        shell: bash
+        run: |
+          set -euxo pipefail
+          SERIAL=ZY22L2PTS5
+          if command -v adb >/dev/null && adb devices | awk 'NR>1 && $2=="device"{print $1}' | grep -qx "$SERIAL"; then
+            bash ui-shell/tools/build_host.sh --verify-device "$SERIAL"
+            grep -q '^DEVICE_VERIFY=PASS' build/reports/tsunami/ui-shell/host/build.txt
+            grep -q '^VISUAL_CAPTURE=PASS states=37' build/reports/tsunami/ui-shell/host/build.txt
+            grep -q '^VISUAL_SANITY=PASS' build/reports/tsunami/ui-shell/host/build.txt
+            grep -q '^CRASH_SCAN=PASS' build/reports/tsunami/ui-shell/host/build.txt
+          else
+            echo "MOTOROLA=NOT_ATTACHED"
+          fi
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TSUNAMI-UI-Genesis-public-selfhosted
+          path: |
+            tsunami-builder/dist/TSUNAMI-UI-Genesis-debug.apk
+            tsunami-builder/dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
+            tsunami-builder/dist/TSUNAMI-Sans-v4.7/
+            tsunami-builder/build/reports/tsunami/ui-shell/host/
+            tsunami-builder/ui-shell/tools/proofs/
+            tsunami-builder/MIRROR-MANIFEST.json
+          if-no-files-found: warn
