@@ -101,6 +101,7 @@ FORBIDDEN_MANIFEST = (
 REQUIRED_ANCHORS = {
     "model/MockModels.kt": [
         '"small-list"', '"long-list"', '"huge-list"', '"missing-art"', '"loading"', '"error"', '"buffering"', '"partial"', '"unavailable"', '"podcast"',
+        '"queue-empty"', '"search-error"', '"provider-connecting"', '"provider-error"', '"downloads-active"', '"downloads-error"',
         "LibraryLens", "SearchKind", "FOLDERS", "SearchIntent", "LongformType", "ProviderImportAuditMock",
         'ServiceConnection("YouTube Music"', 'ServiceConnection("Apple Music"', 'ServiceConnection("Amazon Music"', 'ServiceConnection("TIDAL"', 'ServiceConnection("Spotify"',
     ],
@@ -110,6 +111,7 @@ REQUIRED_ANCHORS = {
         "selectedTrackIds", "addSelectionToPlaylist(", "hiddenLibrarySections", "metadataTemplate", "if(!track.available && play)", "lyricsGlobalDelayMs", "showArtworkInPlayer", "buffering", "togglePlayback(",
         "highContrast", "largeControls", "hapticStrength", "advancedExperience", "wifiOnlyDownloads", "lyricsAutoFetch", "resumePositions", "playedLongform", "seekRelative(", "togglePlayedLongform(", "listenLens",
         "signalSection", "runGaplessProbe(", "auditLyrics(", "scanDuplicateHashes(", "exportReplay(",
+        "searchFault", "downloadsFault", "providerTransient", "retrySearch(", "retryDownloads(", "retryProvider(",
         "excludedGenres", "excludedPlaylistPaths", "swipeUp", "swipeDown", "albumArtistMode", "prepareDeviceMigration(",
         "miniPlayerExtras", "fullPlayerButtons", "notificationActions", "toggleNotificationAction(", "quickSettingsActions", "toggleQuickSettingsAction(", "widgetLayout", "cycleWidgetLayout(", "wearControlsEnabled", "wearSecondaryAction", "cycleWearSecondaryAction(", "runPlayerAction(",
         "eqBandsDb", "cycleEqBand(", "lyricSourceOrder", "moveLyricSource(", "librarySectionOrder", "moveLibrarySection(",
@@ -365,7 +367,11 @@ def main() -> int:
     test_src=TEST.read_text(encoding="utf-8")
     if "externalPlaybackSurfacesHaveExplicitMockContracts" not in test_src:
         die("external playback surfaces lost their instrumentation contract")
+    for name in ("adverseFixtureStatesRecoverWithoutDestroyingContext","emptyQueueFixtureCannotPretendToPlay"):
+        if name not in test_src:
+            die(f"adverse-state instrumentation contract missing: {name}")
     print("EXTERNAL_PLAYBACK_SURFACES=PASS notification quick_settings widget wear")
+    print("ADVERSE_STATE_CONTRACT=PASS search provider downloads queue")
 
     all_src = "\n".join(source_text.values())
     direct_clickables = len(re.findall(r"\.clickable\b", all_src))
@@ -456,7 +462,7 @@ def main() -> int:
         'test_apk_hash_match',
         'remote_source_verify',
         'remote_accessibility_verify',
-        'if len(base_captures) != 37:',
+        'if len(base_captures) != 44:',
         '--untracked-files=all',
     ):
         if anchor not in codespace_build:
@@ -475,7 +481,7 @@ def main() -> int:
     if not expected_match:
         die("visual sanity EXPECTED state set could not be parsed")
     expected_names=set(re.findall(r'"([0-9][0-9]-[^"]+)"',expected_match.group("body")))
-    if len(capture_names)!=37 or len(set(capture_names))!=37 or len(expected_names)!=37:
+    if len(capture_names)!=44 or len(set(capture_names))!=44 or len(expected_names)!=44:
         die(f"visual matrix cardinality drift capture={len(capture_names)} unique={len(set(capture_names))} expected={len(expected_names)}")
     if set(capture_names)!=expected_names:
         die(
@@ -483,7 +489,7 @@ def main() -> int:
             f"capture_only={sorted(set(capture_names)-expected_names)} "
             f"verifier_only={sorted(expected_names-set(capture_names))}"
         )
-    print("VISUAL_MATRIX_PARITY=PASS states=37 names=exact")
+    print("VISUAL_MATRIX_PARITY=PASS states=44 names=exact")
     for anchor in (
         "ARTWORK_IDENTITY_PAIRS",
         "squint_range < 24",
@@ -498,7 +504,7 @@ def main() -> int:
     for anchor in (
         'bash ui-shell/tools/build_host.sh',
         'bash ui-shell/tools/build_host.sh --verify-device "$SERIAL"',
-        'VISUAL_CAPTURE=PASS states=37',
+        'VISUAL_CAPTURE=PASS states=44',
         'VISUAL_SANITY=PASS',
         'CRASH_SCAN=PASS',
         'instrumentation.txt',
@@ -519,7 +525,7 @@ def main() -> int:
     print("BUILD_STACK_CONTRACT=PASS compileSdk=36 targetSdk=36 compose=1.11.4 agp=9.2.1 builtInKotlin=2.2.10 gradle=9.4.1")
     print("PORTAL_PUBLISH_CONTRACT=PASS host_then_codespace hash_bound atomic_manifested")
     print("VISUAL_IDENTITY_GATE_CONTRACT=PASS monochrome squint hierarchy artwork-removal")
-    print("SELFHOSTED_DEVICE_GATE_CONTRACT=PASS build instrumentation visual37 crash_scan")
+    print("SELFHOSTED_DEVICE_GATE_CONTRACT=PASS build instrumentation visual44 crash_scan")
     print("INTERACTION_COUNTS=" + ",".join(f"{k}:{v}" for k,v in counts.items()))
     return 0
 
