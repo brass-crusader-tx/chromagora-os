@@ -438,7 +438,7 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Scrobble threshold","${state.scrobbleThreshold}%"){state.cycleScrobbleThreshold()}
             ActionRow("Threshold cap","${state.scrobbleThresholdCapSeconds}s"){state.cycleScrobbleCap()}
             ActionRow("Import listening history","CSV / JSON preview"){state.banner="History import preview · 128 matched · 7 unmatched"}
-            Text("SIMULATED STATE · no credentials, OAuth, scrobble or network operation.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("SIMULATED STATE · no credentials, authorization handshake, scrobble or network operation.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }

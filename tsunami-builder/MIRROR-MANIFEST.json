@@ -7,7 +7,7 @@
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 8,
-  "note": "Every listed blob is mirrored byte-identically from private Genesis source head b7751c4241907abb3bef9b13e261cbad0d2a2ca1. Build outputs are not claimed until Android assembly succeeds.",
+  "note": "Every listed blob is mirrored byte-identically from private Genesis source head b7751c4241907abb3bef9b13e261cbad0d2a2ca1. Mirror tree revalidated after Settings synchronization; build outputs are not claimed until Android assembly succeeds.",
   "files": [
     {
       "path": "ui-shell/README.md",
