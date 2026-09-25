@@ -63,7 +63,20 @@ import com.tsunami.shell.theme.*
             Text("CONNECTED SOURCE DEGRADED · local and indexed results remain available",style=Type.micro.copy(color=p.possession,fontWeight=FontWeight.SemiBold),modifier=Modifier.padding(vertical=8.dp))
             Rule()
         }
-        if(q.isEmpty() && state.searchIntent==null && state.searchKind==SearchKind.ALL){
+        if(state.searchFault){
+            Spacer(Modifier.height(28.dp))
+            Text("Search source unavailable",style=Type.title.copy(color=p.ink))
+            Spacer(Modifier.height(8.dp))
+            Text("Your indexed library is intact. Connected search failed before results could be resolved.",style=Type.body.copy(color=p.ink2))
+            Spacer(Modifier.height(16.dp))
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+                TextCommand("Retry",{state.retrySearch()})
+                TextCommand("Owned only",{state.searchFault=false;state.searchOwnedOnly=true})
+            }
+            Spacer(Modifier.height(18.dp))
+            Rule()
+            Text("No query or selection was discarded.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
+        }else if(q.isEmpty() && state.searchIntent==null && state.searchKind==SearchKind.ALL){
             SectionHeader("Start with intent")
             listOf(
                 Triple(SearchIntent.UNFINISHED,"Resume something unfinished","history · longform"),
