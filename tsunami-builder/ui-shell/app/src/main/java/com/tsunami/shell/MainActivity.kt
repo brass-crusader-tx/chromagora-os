@@ -39,6 +39,7 @@ class MainActivity:ComponentActivity(){
                 }
                 if(scenario=="search-empty") LaunchedEffect("search-empty"){state.searchQuery="Nocturne Zero"}
                 if(scenario=="search-error") LaunchedEffect("search-error"){state.searchQuery="Refractions"}
+                if(scenario=="library-index") LaunchedEffect("library-index"){state.libraryViewMode="Index";state.sortLabel="Title A–Z"}
                 if(screen=="player" && !state.expandedPlayer) LaunchedEffect(Unit){state.expandedPlayer=true}
                 if(mode.isNotBlank()) LaunchedEffect(mode){ state.playerMode=when(mode){"lyrics"->PlayerMode.LYRICS;"output"->PlayerMode.OUTPUT;"visual"->PlayerMode.VISUAL;else->PlayerMode.QUEUE} }
                 if(screen=="settings" && state.settingsExpanded==null) LaunchedEffect("settings",page){state.settingsExpanded=page.ifBlank{"root"}}
