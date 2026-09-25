@@ -14,6 +14,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     var largeControls by mutableStateOf(false)
     var hapticStrength by mutableIntStateOf(1)
     var denseLibrary by mutableStateOf(false)
+    var libraryViewMode by mutableStateOf("Ledger")
     var advancedExperience by mutableStateOf(true)
     var listenLens by mutableStateOf("Deep cuts")
     var selectionMode by mutableStateOf(false)
