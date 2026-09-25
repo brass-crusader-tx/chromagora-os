@@ -9,6 +9,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -19,12 +24,32 @@ import com.tsunami.shell.theme.*
 
 @Composable fun LibraryScreen(state:ShellState){
     val p=LocalTsunamiPalette.current
-    val lenses=listOf(LibraryLens.TRACKS to "Tracks",LibraryLens.ALBUMS to "Albums",LibraryLens.ARTISTS to "Artists",LibraryLens.PLAYLISTS to "Playlists",LibraryLens.FOLDERS to "Folders",LibraryLens.LONGFORM to "Longform",LibraryLens.RADIO to "Radio").filterNot{it.second in state.hiddenLibrarySections}
+    val lenses=state.librarySectionOrder.mapNotNull{label->
+        val lens=when(label){
+            "Tracks"->LibraryLens.TRACKS
+            "Albums"->LibraryLens.ALBUMS
+            "Artists"->LibraryLens.ARTISTS
+            "Playlists"->LibraryLens.PLAYLISTS
+            "Folders"->LibraryLens.FOLDERS
+            "Longform"->LibraryLens.LONGFORM
+            "Radio"->LibraryLens.RADIO
+            else->null
+        }
+        lens?.let{it to label}
+    }.filterNot{it.second in state.hiddenLibrarySections}
     val offlineIds=if(state.offlineOnly) state.downloads.filterValues{it==DownloadState.DOWNLOADED}.keys.toSet() else emptySet()
     val filtered=remember(state.fixture.tracks,state.offlineOnly,offlineIds){
         if(!state.offlineOnly) state.fixture.tracks else state.fixture.tracks.filter{it.id in offlineIds}
     }
     val ordered=remember(filtered,state.sortLabel){ if(state.sortLabel=="Title A–Z") filtered.sortedBy{it.title.lowercase()} else filtered }
+    val folderRows=remember(ordered){
+        val groups=ordered.filter{it.provenance==Provenance.OWNED}.groupBy(::libraryFolderFor)
+        listOf("/Music/Library","/Music/Field Recordings","/Audiobooks").map{name->
+            val items=groups[name].orEmpty()
+            val noun=if(name=="/Audiobooks") if(items.size==1)"book" else "books" else if(items.size==1)"track" else "tracks"
+            Triple(name,"Folder","${items.size} $noun")
+        }
+    }
     val listState=rememberLazyListState()
     val scope=rememberCoroutineScope()
     val focused=state.focusedObject
@@ -92,11 +117,11 @@ import com.tsunami.shell.theme.*
             LibraryLens.ARTISTS -> ObjectLedger(state,ordered.groupBy{it.artist}.map{(k,v)->Triple(k,"Artist","${v.size} tracks · ${v.map{it.album}.distinct().size} releases")})
             LibraryLens.PLAYLISTS -> ObjectLedger(
                 state,
-                state.playlistTracks.entries.map{(name,ids)->Triple(name,if(name=="Unfinished albums")"Smart list" else "Playlist","${ids.size} tracks · local mock")},
+                state.playlistTracks.entries.map{(name,ids)->Triple(name,if(name=="Unfinished albums")"Smart list" else "Playlist","${ids.size} tracks · local playlist")},
                 playable=true,
                 queueable=true
             )
-            LibraryLens.FOLDERS -> ObjectLedger(state,listOf(Triple("/Music/Library","Folder","3,912 tracks"),Triple("/Music/Field Recordings","Folder","214 tracks"),Triple("/Audiobooks","Folder","17 books")))
+            LibraryLens.FOLDERS -> ObjectLedger(state,folderRows)
             LibraryLens.LONGFORM -> Column(Modifier.weight(1f)){
                 Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
                     TextCommand("All",{state.longformScope=LongformScope.ALL},state.longformScope==LongformScope.ALL)
@@ -107,8 +132,8 @@ import com.tsunami.shell.theme.*
                 val longform=ordered.filter{t->
                     t.longform && when(state.longformScope){
                         LongformScope.ALL->true
-                        LongformScope.BOOKS->t.id.startsWith("book")
-                        LongformScope.PODCASTS->t.id.startsWith("podcast")
+                        LongformScope.BOOKS->t.longformType==LongformType.AUDIOBOOK
+                        LongformScope.PODCASTS->t.longformType==LongformType.PODCAST
                     }
                 }
                 if(longform.isEmpty()){
@@ -127,7 +152,7 @@ import com.tsunami.shell.theme.*
                     )
                 }}
             }
-            LibraryLens.RADIO -> ObjectLedger(state,listOf(Triple("Library radio","Radio","Generated locally · drawn only from your library"),Triple("Night signal","Radio","Connected source · mock"),Triple("Recent favourites","Radio","23-track rotation")),playable=true)
+            LibraryLens.RADIO -> ObjectLedger(state,listOf(Triple("Library radio","Radio","Generated locally · drawn only from your library"),Triple("Night signal","Radio","Connected source · preview"),Triple("Recent favourites","Radio","23-track rotation")),playable=true)
         }
     }
 }
@@ -139,9 +164,23 @@ import com.tsunami.shell.theme.*
             "Playlist","Smart list" -> state.playlistTracks[name]?.firstOrNull()?.let{id->state.fixture.tracks.firstOrNull{it.id==id}}
             else -> state.fixture.tracks.getOrNull(index % state.fixture.tracks.size.coerceAtLeast(1))
         }
-        Column(Modifier.fillMaxWidth().heightIn(min=70.dp).clickable{state.focusedObject=LibraryObject(name,type,meta)}.padding(vertical=12.dp)){
-            Text(name,style=Type.row.copy(color=p.ink));Spacer(Modifier.height(3.dp))
-            Row{Text(type,style=Type.meta.copy(color=p.ink2));Spacer(Modifier.weight(1f));Text(meta,style=Type.meta.copy(color=p.ink3))}
+        var focused by remember(name,type){ mutableStateOf(false) }
+        Column(
+            Modifier.fillMaxWidth().heightIn(min=70.dp)
+                .semantics{role=Role.Button;contentDescription="$name, $type, $meta"}
+                .onFocusChanged{focused=it.isFocused}
+                .clickable{state.focusedObject=LibraryObject(name,type,meta)}
+                .background(if(focused)p.groundAlt else androidx.compose.ui.graphics.Color.Transparent)
+                .padding(vertical=12.dp)
+        ){
+            Row(verticalAlignment=Alignment.CenterVertically){
+                Box(Modifier.width(if(focused)3.dp else 1.dp).height(28.dp).background(if(focused)p.selected else androidx.compose.ui.graphics.Color.Transparent))
+                Spacer(Modifier.width(if(focused)8.dp else 0.dp))
+                Column(Modifier.weight(1f)){
+                    Text(name,style=Type.row.copy(color=p.ink));Spacer(Modifier.height(3.dp))
+                    Row{Text(type,style=Type.meta.copy(color=p.ink2));Spacer(Modifier.weight(1f));Text(meta,style=Type.meta.copy(color=p.ink3))}
+                }
+            }
             if(playable && representative!=null){
                 Spacer(Modifier.height(4.dp))
                 Row{TextCommand("Play",{state.selectTrack(representative,true)});if(queueable)TextCommand("Queue next",{state.playNext(representative)})}
@@ -156,8 +195,7 @@ import com.tsunami.shell.theme.*
     val contents=when{
         obj.kind=="Album" -> filtered.filter{it.album==obj.title}
         obj.kind=="Artist" -> filtered.filter{it.artist==obj.title}
-        obj.kind=="Folder" && obj.title.contains("Audiobooks",ignoreCase=true) -> filtered.filter{it.longform}
-        obj.kind=="Folder" -> filtered
+        obj.kind=="Folder" -> filtered.filter{it.provenance==Provenance.OWNED && libraryFolderFor(it)==obj.title}
         obj.kind=="Playlist" || obj.kind=="Smart list" -> {
             val ids=state.playlistTracks[obj.title].orEmpty().toSet()
             filtered.filter{it.id in ids}
@@ -214,4 +252,11 @@ private fun metadataLine(track:Track,template:String)=when(template){
     "Title · Album · Year" -> "${track.album} · ${track.year}"
     "Title · Format · Source" -> "${track.quality} · ${if(track.provenance==Provenance.OWNED)"OWNED" else track.provenance.name}"
     else -> "${track.artist} · ${track.album}"
+}
+
+
+private fun libraryFolderFor(track:Track)=when{
+    track.longformType==LongformType.AUDIOBOOK -> "/Audiobooks"
+    ((track.id.hashCode() and Int.MAX_VALUE)%9)==0 -> "/Music/Field Recordings"
+    else -> "/Music/Library"
 }
