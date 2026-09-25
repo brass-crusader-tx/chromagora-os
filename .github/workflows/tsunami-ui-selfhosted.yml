@@ -7,6 +7,7 @@ on:
       - build/tsunami-ui-genesis-20260925
     paths:
       - ".github/workflows/tsunami-ui-selfhosted.yml"
+      - "tsunami-builder/MIRROR-MANIFEST.json"
 
 permissions:
   contents: read
@@ -64,7 +65,7 @@ jobs:
           if command -v adb >/dev/null && adb devices | awk 'NR>1 && $2=="device"{print $1}' | grep -qx "$SERIAL"; then
             bash ui-shell/tools/build_host.sh --verify-device "$SERIAL"
             grep -q '^DEVICE_VERIFY=PASS' build/reports/tsunami/ui-shell/host/build.txt
-            grep -q '^VISUAL_CAPTURE=PASS states=37' build/reports/tsunami/ui-shell/host/build.txt
+            grep -q '^VISUAL_CAPTURE=PASS states=44' build/reports/tsunami/ui-shell/host/build.txt
             grep -q '^VISUAL_SANITY=PASS' build/reports/tsunami/ui-shell/host/build.txt
             grep -q '^CRASH_SCAN=PASS' build/reports/tsunami/ui-shell/host/build.txt
           else
