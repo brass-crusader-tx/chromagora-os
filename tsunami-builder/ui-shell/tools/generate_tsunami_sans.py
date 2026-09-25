@@ -8,7 +8,7 @@ from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.feaLib.builder import addOpenTypeFeaturesFromString
 from PIL import Image, ImageDraw, ImageFont
 
-UPM=1000; ASC=800; DESC=-220; CAP=710; XH=500; FONT_TIMESTAMP=3873139200
+UPM=1000; ASC=800; DESC=-220; CAP=710; XH=500; OV_CAP=10; OV_X=8; FONT_TIMESTAMP=3873139200
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'app/src/main/res/font'
 PROOFS=Path(__file__).resolve().parent/'proofs'
@@ -38,8 +38,12 @@ def s_curve(w,h,t):
     return path(pts,t,cap=2)
 
 def Cshape(w,h,t):
-    outer=ring(w/2,h/2,w*.38,h*.49,t)
-    cut=R(w*.70,h*.20,w+100,h*.80)
+    ov=OV_CAP if h>=CAP else OV_X
+    outer=ring(w/2,h/2,w*.38,h/2+ov,t)
+    # Aperture expands slightly as the stroke grows. This prevents C/G from
+    # becoming a nearly closed ring in Semibold/Bold at Android UI sizes.
+    aperture=max(.55, .62-(t-42)/1300)
+    cut=R(w*aperture,h*.12,w+100,h*.88)
     return outer.difference(cut)
 
 def arc_right(x,cy,rx,ry,t):
@@ -55,7 +59,7 @@ def caps(ch,t):
     if ch=='D': return U(R(m,0,m+t,h),arc_right(m+t,h/2,w-m-(m+t),h/2,t)),w
     if ch=='E': return U(R(m,0,m+t,h),R(m,h-t,w-m,h),R(m,mid-t/2,w*.82,mid+t/2),R(m,0,w-m,t)),w
     if ch=='F': return U(R(m,0,m+t,h),R(m,h-t,w-m,h),R(m,mid-t/2,w*.80,mid+t/2)),w
-    if ch=='G': return U(Cshape(w,h,t),R(w*.47,mid-t/2,w-m,mid+t/2),R(w-m-t,h*.24,w-m,mid+t/2)),w
+    if ch=='G': return U(Cshape(w,h,t),R(w*.49,mid-t/2,w*.79,mid+t/2)),w
     if ch=='H': return U(R(m,0,m+t,h),R(w-m-t,0,w-m,h),R(m,mid-t/2,w-m,mid+t/2)),w
     if ch=='I': return U(R(w/2-t/2,0,w/2+t/2,h),R(w/2-105,h-t,w/2+105,h),R(w/2-105,0,w/2+105,t)),w
     if ch=='J': return U(R(w-m-t,h*.22,w-m,h),clip(ring(w*.52,h*.20,w*.28,h*.22,t),m,-50,w-m,h*.25)),w
@@ -63,9 +67,9 @@ def caps(ch,t):
     if ch=='L': return U(R(m,0,m+t,h),R(m,0,w-m,t)),w
     if ch=='M': return U(R(m,0,m+t,h),R(w-m-t,0,w-m,h),line(m+t/2,h,w/2,h*.34,t),line(w/2,h*.34,w-m-t/2,h,t)),w
     if ch=='N': return U(R(m,0,m+t,h),R(w-m-t,0,w-m,h),line(m+t/2,h,w-m-t/2,0,t)),w
-    if ch=='O': return ring(w/2,h/2,w*.38,h*.49,t),w
+    if ch=='O': return ring(w/2,h/2,w*.38,h/2+OV_CAP,t),w
     if ch=='P': return U(R(m,0,m+t,h),arc_right(m+t,h*.72,w-m-(m+t),h*.28,t)),w
-    if ch=='Q': return U(ring(w/2,h/2,w*.38,h*.49,t),line(w*.53,h*.19,w*.84,-h*.05,t)),w
+    if ch=='Q': return U(ring(w/2,h/2,w*.38,h/2+OV_CAP,t),line(w*.53,h*.18,w*.82,-h*.06,t)),w
     if ch=='R': return U(R(m,0,m+t,h),arc_right(m+t,h*.72,w-m-(m+t),h*.28,t),line(m+t,h*.46,w-m,0,t)),w
     if ch=='S': return s_curve(w,h,t),w
     if ch=='T': return U(R(m,h-t,w-m,h),R(w/2-t/2,0,w/2+t/2,h)),w
@@ -79,14 +83,15 @@ def caps(ch,t):
 
 def lower(ch,t):
     h=XH; w=540; m=54; tl=max(34,t*.95)
-    o=lambda: ring(w/2,h/2,w*.39,h*.51,tl)
-    if ch=='a': return U(o(),R(w-m-tl,0,w-m,h)),w
+    o=lambda: ring(w/2,h/2,w*.39,h/2+OV_X,tl)
+    if ch=='a': return U(o(),R(w-m-tl,0,w-m,h*.60)),w
     if ch=='b': return U(R(m,0,m+tl,ASC),translate(o(),xoff=18)),w
     if ch=='c': return o().difference(R(w*.66,h*.16,w+80,h*.84)),w
     if ch=='d': return U(R(w-m-tl,0,w-m,ASC),translate(o(),xoff=-18)),w
     if ch=='e':
-        bowl=o().difference(R(w*.67,h*.32,w+80,h*.68))
-        bar=R(w*.25,h*.46,w*.84,h*.46+tl)
+        aperture=max(.58,.66-(tl-40)/1000)
+        bowl=o().difference(R(w*aperture,h*.31,w+80,h*.71))
+        bar=R(w*.24,h*.47,w*.75,h*.47+tl)
         return U(bowl,bar),w
     if ch=='f':
         top_y=ASC-82
@@ -96,8 +101,8 @@ def lower(ch,t):
         return U(stem,hook,cross),350
     if ch=='g':
         bowl=o()
-        stem=R(w-m-tl,-42,w-m,h*.48)
-        hook_pts=bezier((w-m-tl/2,-42),(w*.79,-150),(w*.43,-190),(w*.27,-92),n=18)
+        stem=R(w-m-tl,-58,w-m,h*.46)
+        hook_pts=bezier((w-m-tl/2,-58),(w*.76,-170),(w*.41,-184),(w*.24,-88),n=20)
         hook=path(hook_pts,tl,cap=2)
         return U(bowl,stem,hook),w
     if ch=='h': return U(R(m,0,m+tl,ASC),arch_top((m+w-m)/2,h*.47,(w-2*m)/2,h*.47,tl),R(w-m-tl,0,w-m,h*.47)),w
@@ -117,9 +122,9 @@ def lower(ch,t):
         return U(R(m,0,m+tl,h),path(shoulder_pts,tl,cap=2)),350
     if ch=='s': return s_curve(w,h,tl),w
     if ch=='t':
-        top_y=XH+105
-        stem=R(w*.45,0,w*.45+tl,top_y)
-        cross=R(w*.18,h*.64,w*.74,h*.64+tl)
+        top_y=XH+112
+        stem=R(w*.47,0,w*.47+tl,top_y)
+        cross=R(w*.24,h*.66,w*.72,h*.66+tl)
         return U(stem,cross),350
     if ch=='u': return U(R(m,h*.18,m+tl,h),R(w-m-tl,h*.18,w-m,h),clip(ring(w/2,h*.18,w*.37,h*.23,tl),m,-65,w-m,h*.22)),w
     if ch=='v': return U(line(m,h,w/2,0,tl),line(w-m,h,w/2,0,tl)),w
@@ -169,7 +174,11 @@ def punct(ch,t):
     if ch==':': return U(dot(w/2,210),dot(w/2,500)),w
     if ch==';': return U(dot(w/2,500),dot(w/2,210),line(w/2,195,w*.42,70,tl*.55)),w
     if ch=='!': return U(R(w/2-tl/2,170,w/2+tl/2,h),dot(w/2,45)),w
-    if ch=='?': return U(path([(w*.22,h*.76),(w*.35,h*.95),(w*.66,h*.95),(w*.80,h*.76),(w*.73,h*.58),(w*.50,h*.46),(w*.50,h*.29)],tl,cap=2),dot(w/2,45)),w
+    if ch=='?':
+        hook=bezier((w*.20,h*.74),(w*.20,h*.96),(w*.42,h*1.02),(w*.62,h*.96),n=14)
+        hook+=bezier((w*.62,h*.96),(w*.84,h*.89),(w*.82,h*.67),(w*.62,h*.56),n=12)[1:]
+        hook+=bezier((w*.62,h*.56),(w*.49,h*.49),(w*.49,h*.39),(w*.49,h*.30),n=9)[1:]
+        return U(path(hook,tl,cap=2),dot(w*.49,45)),w
     if ch in '-‑–−': return R(45,300,w-45,300+tl),w
     if ch=='—': return R(35,300,565,300+tl),600
     if ch=='_': return R(20,-50,w-20,-50+tl),w
@@ -297,7 +306,7 @@ def build(style,weight,t):
         order.append(name); glyphs[name]=glyph(sh); metrics[name]=(adv,0); cmap[ord(ch)]=name
     fb=FontBuilder(UPM,isTTF=True); fb.font['head'].created=FONT_TIMESTAMP; fb.font['head'].modified=FONT_TIMESTAMP; fb.setupGlyphOrder(order); fb.setupCharacterMap(cmap); fb.setupGlyf(glyphs); fb.setupHorizontalMetrics(metrics); fb.setupHorizontalHeader(ascent=ASC,descent=DESC,lineGap=110)
     fb.setupOS2(sTypoAscender=ASC,sTypoDescender=DESC,sTypoLineGap=110,usWinAscent=940,usWinDescent=260,usWeightClass=weight,fsSelection=(1<<6 if weight==400 else 0),sxHeight=XH,sCapHeight=CAP,achVendID='TSNM')
-    fb.setupNameTable({'familyName':'TSUNAMI Sans','styleName':style,'uniqueFontIdentifier':f'TSUNAMI Sans {style} 4.5','fullName':f'TSUNAMI Sans {style}','psName':f'TSUNAMISans-{style}','version':'Version 4.500'}); fb.setupPost(); fb.setupMaxp()
+    fb.setupNameTable({'familyName':'TSUNAMI Sans','styleName':style,'uniqueFontIdentifier':f'TSUNAMI Sans {style} 4.7','fullName':f'TSUNAMI Sans {style}','psName':f'TSUNAMISans-{style}','version':'Version 4.700'}); fb.setupPost(); fb.setupMaxp()
     kern_pairs=[('A','V',-40),('A','W',-34),('A','Y',-42),('V','A',-40),('W','A',-30),('Y','A',-44),('T','A',-28),('T','o',-34),('T','e',-34),('T','a',-30),('T','y',-24),('F','o',-22),('F','a',-18),('L','T',-20),('L','Y',-28),('Y','o',-36),('Y','e',-36),('P','a',-18),('r','y',-12)]
     feature_lines=[]
     for left,right,value in kern_pairs:
@@ -310,7 +319,7 @@ def build(style,weight,t):
 def proof(fonts):
     W,H=1700,1510; im=Image.new('RGB',(W,H),'#F4F1EA'); d=ImageDraw.Draw(im)
     def F(wt,size): return ImageFont.truetype(str(fonts[wt]),size)
-    d.text((70,45),'TSUNAMI Sans — Genesis Proof v4.5',font=F('Semibold',54),fill='#111216')
+    d.text((70,45),'TSUNAMI Sans — Genesis Proof v4.7',font=F('Semibold',54),fill='#111216')
     d.text((70,118),'H O n o  ·  optical control glyphs',font=F('Regular',34),fill='#44464C')
     y=185
     samples=[('ABCDEFGHIJKLM','Regular',56),('NOPQRSTUVWXYZ','Regular',56),('abcdefghijklm','Regular',48),('nopqrstuvwxyz','Regular',48),('0123456789  01:42 / 04:19','Medium',46),('S s  G R  a e g r t k y  2 3 5 6 8','Regular',44),('I l 1   O 0   rn m   c e   v y','Regular',42),('S s  G C  R  a e g r t k y   & ? @   [] {}','Regular',36),('Æ æ  Œ œ  Ø ø  Ð ð  Þ þ  ß  Ñ ñ','Regular',34),('ÀÁÂÃÄÅ Ç ÈÉÊË Ï Ö Ü  àáâä ç éêë ï ö ü','Regular',36),('“Afterglow at the edge of the city”','Semibold',46),('Mira Sol · Refractions / Deluxe Edition','Medium',34),('FLAC 24-bit · 96 kHz   OFFLINE   QUEUED','Regular',28)]
@@ -325,7 +334,7 @@ def proof(fonts):
     u.text((64,42),'TSUNAMI Sans — UI-size proof',font=F('Semibold',38),fill='#111216')
     y=118
     ui_samples=[
-        (12,'Regular','12 px metadata · FLAC 24-bit · 96 kHz · OFFLINE'),
+        (12,'Medium','12 px metadata · FLAC 24-bit · 96 kHz · OFFLINE'),
         (14,'Regular','14 px body · Mira Sol — Refractions · 04:19 remaining'),
         (16,'Medium','16 px row · Afterglow at the Edge of the City'),
         (18,'Medium','18 px command · Play next · Shuffle next · Output'),
