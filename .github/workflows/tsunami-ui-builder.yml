@@ -34,8 +34,9 @@ jobs:
           root=pathlib.Path("tsunami-builder")
           manifest=json.loads((root/"MIRROR-MANIFEST.json").read_text())
           assert manifest["ui_shell_file_count"]==40, manifest
+          assert manifest["support_file_count"]==8, manifest
           mismatches=[]
-          for row in manifest["files"]:
+          for row in manifest["files"] + manifest["support_files"]:
               p=root/row["path"]
               if not p.is_file():
                   mismatches.append((row["path"],"missing",row["git_blob_sha"]))
@@ -44,7 +45,7 @@ jobs:
               if actual!=row["git_blob_sha"]:
                   mismatches.append((row["path"],actual,row["git_blob_sha"]))
           assert not mismatches, mismatches
-          print(f"MIRROR_BINDING=PASS source_head={manifest['source_head']} files={len(manifest['files'])}")
+          print(f"MIRROR_BINDING=PASS source_head={manifest['source_head']} ui={len(manifest['files'])} support={len(manifest['support_files'])}")
           PY
 
       - name: Canonical source, type and Android build
