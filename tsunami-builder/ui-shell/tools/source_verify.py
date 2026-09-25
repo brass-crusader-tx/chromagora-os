@@ -413,7 +413,7 @@ def main() -> int:
         die(f"interaction/test surface unexpectedly collapsed: {collapsed}; current={counts}")
 
     font_src = FONT_GEN.read_text(encoding="utf-8")
-    for anchor in ("TSUNAMI Sans", "WEIGHTS=[('Light',300", "'Bold',700", "addOpenTypeFeaturesFromString", "Version 4.700", "FONT_TIMESTAMP=3873139200"):
+    for anchor in ("TSUNAMI Sans", "WEIGHTS=[('Light',300", "'Bold',700", "addOpenTypeFeaturesFromString", "Version 4.800", "FONT_TIMESTAMP=3873139200"):
         if anchor not in font_src:
             die(f"font generator missing anchor: {anchor}")
 
