@@ -12,7 +12,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
 
@@ -29,34 +29,45 @@ jobs:
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "9.4.1"
-
-      - name: Generate TSUNAMI Sans
-        working-directory: tsunami-builder/ui-shell
+      - name: Verify byte-identical private-source mirror
+        shell: bash
         run: |
-          python3 -m pip install --disable-pip-version-check "fonttools==4.63.0" "shapely==2.1.2" "pillow==12.3.0"
-          python3 tools/prepare_fonts.py
-          test "$(find app/src/main/res/font -name 'tsunami_sans_*.ttf' | wc -l)" -eq 5
-          ls -lh app/src/main/res/font
+          python3 - <<'PY'
+          import json, pathlib, subprocess
+          root=pathlib.Path("tsunami-builder")
+          manifest=json.loads((root/"MIRROR-MANIFEST.json").read_text())
+          assert manifest["ui_shell_file_count"]==40, manifest
+          mismatches=[]
+          for row in manifest["files"]:
+              p=root/row["path"]
+              if not p.is_file():
+                  mismatches.append((row["path"],"missing",row["git_blob_sha"]))
+                  continue
+              actual=subprocess.check_output(["git","hash-object",str(p)],text=True).strip()
+              if actual!=row["git_blob_sha"]:
+                  mismatches.append((row["path"],actual,row["git_blob_sha"]))
+          assert not mismatches, mismatches
+          print(f"MIRROR_BINDING=PASS source_head={manifest['source_head']} files={len(manifest['files'])}")
+          PY
 
-      - name: Assemble shell and instrumentation APKs
-        working-directory: tsunami-builder/ui-shell
+      - name: Canonical source, type and Android build
+        working-directory: tsunami-builder
+        shell: bash
         run: |
-          gradle --no-daemon --console=plain --stacktrace :app:assembleDebug :app:assembleDebugAndroidTest
-          test -s app/build/outputs/apk/debug/app-debug.apk
-          test -s app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
-          sha256sum app/build/outputs/apk/debug/app-debug.apk | tee build-apk.sha256
-          sha256sum app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk | tee test-apk.sha256
+          bash ui-shell/tools/build_host.sh
+          test -s dist/TSUNAMI-UI-Genesis-debug.apk
+          test -s dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
+          cat build/reports/tsunami/ui-shell/host/build.txt
 
-      - name: Upload APKs
+      - name: Upload APKs and host evidence
         uses: actions/upload-artifact@v4
         with:
           name: TSUNAMI-UI-Genesis-crossrepo
           path: |
-            tsunami-builder/ui-shell/app/build/outputs/apk/debug/app-debug.apk
-            tsunami-builder/ui-shell/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
-            tsunami-builder/ui-shell/build-apk.sha256
-            tsunami-builder/ui-shell/test-apk.sha256
+            tsunami-builder/dist/TSUNAMI-UI-Genesis-debug.apk
+            tsunami-builder/dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
+            tsunami-builder/dist/TSUNAMI-Sans-v4.7/
+            tsunami-builder/build/reports/tsunami/ui-shell/host/
+            tsunami-builder/ui-shell/tools/proofs/
+            tsunami-builder/MIRROR-MANIFEST.json
           if-no-files-found: error
