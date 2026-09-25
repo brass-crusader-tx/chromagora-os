@@ -29,6 +29,7 @@ import com.tsunami.shell.state.ShellState
 fun ok(v:Boolean,m:String){if(!v) error(m)}
 fun main(){
  val f=defaultFixture("default"); val s=ShellState(f)
+ ok(f.services.map{it.name}==listOf("YouTube Music","Apple Music","Amazon Music","TIDAL","Spotify"),"provider fixture parity")
  ok(s.currentTrack?.id=="afterglow","initial current")
  val serein=f.tracks.first{it.id=="serein"}; s.playNext(serein); ok(s.queue.getOrNull(1)?.id=="serein","playNext"); ok(s.currentTrack?.id=="afterglow","preserve current")
  s.shuffleMode="Album-aware"; val slow=f.tracks.first{it.id=="slowarc"}; s.shuffleNext(slow); ok(s.queue.any{it.id=="slowarc"},"shuffleNext")
