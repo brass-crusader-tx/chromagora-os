@@ -130,7 +130,15 @@ private fun settingsTitle(page:String)=when(page){
             ToggleRow("Wi‑Fi downloads",if(state.wifiOnlyDownloads)"ONLY" else "ANY NETWORK"){state.wifiOnlyDownloads=!state.wifiOnlyDownloads}
             ToggleRow("Online library on mobile data",if(state.showOnlineOnMobileData)"VISIBLE" else "HIDDEN"){state.showOnlineOnMobileData=!state.showOnlineOnMobileData}
             ActionRow("Download quality",state.downloadQuality){state.cycleDownloadQuality()}
-            ActionRow("Downloads","3.2 GB · ${if(state.wifiOnlyDownloads)"Wi‑Fi preferred" else "network allowed"}"){state.banner="Download policy · ${state.downloadQuality}"}
+            val activeDownloads=state.downloads.values.count{it==DownloadState.DOWNLOADING}
+            ActionRow(
+                "Downloads",
+                when{
+                    state.downloadsFault -> "ATTENTION · transfer failed"
+                    activeDownloads>0 -> "$activeDownloads active · 3.2 GB offline"
+                    else -> "3.2 GB · ${if(state.wifiOnlyDownloads)"Wi‑Fi preferred" else "network allowed"}"
+                }
+            ){if(state.downloadsFault)state.retryDownloads() else state.banner="Download policy · ${state.downloadQuality}"}
         }
         item{
             IntentSection("Services")
@@ -163,8 +171,18 @@ private fun settingsTitle(page:String)=when(page){
             state.services.forEachIndexed{i,s->
                 val progress=state.importProgress[s.name]
                 val audit=state.importAudits[s.name]
-                ActionRow(s.name,if(s.connected)"CONNECTED · ${s.detail}" else s.detail.uppercase()){state.toggleService(i)}
-                if(s.connected){
+                val transient=if(s.name=="Apple Music")state.providerTransient else ""
+                ActionRow(
+                    s.name,
+                    when(transient){
+                        "connecting" -> "CONNECTING · awaiting authorization"
+                        "error" -> "CONNECTION FAILED · retry available"
+                        else -> if(s.connected)"CONNECTED · ${s.detail}" else s.detail.uppercase()
+                    }
+                ){
+                    if(transient.isNotBlank()) state.retryProvider() else state.toggleService(i)
+                }
+                if(s.connected && transient.isBlank()){
                     ActionRow("Import ${s.name}",when(progress){null->"READY";100->"COMPLETE · tap to re-audit";else->"${progress}% · tap to continue"}){state.advanceImport(i)}
                 }
                 if(audit!=null){
