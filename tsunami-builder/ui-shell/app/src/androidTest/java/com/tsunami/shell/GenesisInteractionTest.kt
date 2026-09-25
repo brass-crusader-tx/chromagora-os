@@ -435,6 +435,46 @@ class GenesisInteractionTest {
         assertTrue(state.banner == "Queue empty")
     }
 
+
+    @Test fun adverseFixtureStatesRecoverWithoutDestroyingContext() {
+        val search = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("search-error"))
+        assertTrue(search.searchFault)
+        search.searchQuery = "Refractions"
+        search.retrySearch()
+        assertFalse(search.searchFault)
+        assertTrue(search.searchQuery == "Refractions")
+
+        val connecting = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("provider-connecting"))
+        assertTrue(connecting.providerTransient == "connecting")
+        connecting.retryProvider()
+        assertTrue(connecting.providerTransient.isEmpty())
+
+        val providerError = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("provider-error"))
+        assertTrue(providerError.providerTransient == "error")
+        providerError.retryProvider()
+        assertTrue(providerError.providerTransient.isEmpty())
+
+        val downloads = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("downloads-error"))
+        assertTrue(downloads.downloadsFault)
+        downloads.retryDownloads()
+        assertFalse(downloads.downloadsFault)
+
+        val active = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("downloads-active"))
+        assertTrue(active.downloads.values.any { it == com.tsunami.shell.model.DownloadState.DOWNLOADING })
+    }
+
+    @Test fun emptyQueueFixtureCannotPretendToPlay() {
+        val state = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("queue-empty"))
+        assertTrue(state.queue.isEmpty())
+        assertTrue(state.currentTrack == null)
+        assertFalse(state.playing)
+        assertFalse(state.buffering)
+        assertTrue(state.positionMs == 0L)
+        state.runPlayerAction("Play/Pause")
+        assertFalse(state.playing)
+        assertTrue(state.currentTrack == null)
+    }
+
     @Test fun libraryAndSearchStateRespond() {
         compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
         compose.onNodeWithText("Offline").performClick()
