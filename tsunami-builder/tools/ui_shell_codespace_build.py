@@ -265,7 +265,7 @@ def build(serial: str | None, capture_matrix: bool, instrument: bool) -> dict:
                     if "-mono" not in p.stem and "-squint" not in p.stem
                 )
                 evidence["device_capture_count"] = len(base_captures)
-                if len(base_captures) != 44:
+                if len(base_captures) != 45:
                     raise BuildError(f"device visual matrix incomplete: {len(base_captures)} base captures")
                 logcat = verification / "logcat-tail.txt"
                 if logcat.is_file():
