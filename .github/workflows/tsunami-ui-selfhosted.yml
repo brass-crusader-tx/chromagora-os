@@ -84,7 +84,7 @@ jobs:
           path: |
             tsunami-builder/dist/TSUNAMI-UI-Genesis-debug.apk
             tsunami-builder/dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
-            tsunami-builder/dist/TSUNAMI-Sans-v4.7/
+            tsunami-builder/dist/TSUNAMI-Sans-v4.8/
             tsunami-builder/build/reports/tsunami/ui-shell/host/
             tsunami-builder/ui-shell/tools/proofs/
             tsunami-builder/MIRROR-MANIFEST.json
