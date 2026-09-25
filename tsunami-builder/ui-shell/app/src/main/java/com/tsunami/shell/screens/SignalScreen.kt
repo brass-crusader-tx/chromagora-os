@@ -20,7 +20,7 @@ import com.tsunami.shell.theme.*
         Spacer(Modifier.height(8.dp))
         Text(signalTitle(state),style=Type.display.copy(color=if(state.diagnosticsFault)p.danger else p.ink))
         Spacer(Modifier.height(8.dp))
-        Text("Technical information appears only where it changes understanding, trust, or recovery.",style=Type.body.copy(color=p.ink2))
+        Text("Source, route, integrity and recovery status.",style=Type.body.copy(color=p.ink2))
         Spacer(Modifier.height(14.dp))
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
             listOf("Summary","Audio","Library","History","Logs").forEach{section->
@@ -104,17 +104,17 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
             SectionHeader("Source capability")
             SignalLine("Track",t?.let{"${it.artist} — ${it.title}"}?:"Nothing playing")
             SignalLine("Container",t?.quality?.substringBefore(" ·")?:"Unknown")
-            SignalLine("Bitrate","Mock source metadata · truthful when known")
+            SignalLine("Bitrate","Sample source metadata · truthful when known")
             SignalLine("Sample rate",t?.quality?.substringAfter("·",missingDelimiterValue="Unknown")?.trim()?:"Unknown")
             SignalLine("Bit depth",if(t?.quality?.contains("24")==true)"24-bit" else if(t?.quality?.contains("16")==true)"16-bit" else "Unknown / not exposed")
             SignalLine("Provider",if(t?.provenance?.name=="CATALOGUE")"Connected catalogue" else "Local / indexed")
         }
         item{
             SectionHeader("Cloud byte source")
-            SignalLine("Effective provider",if(t?.provenance?.name=="CATALOGUE")"Mock provider transport" else "Not applicable")
-            SignalLine("Verified bytes",if(t?.provenance?.name=="CATALOGUE")"YES · deterministic fixture" else "Local / platform source")
-            SignalLine("Seekability","Verified timeline in prototype")
-            SignalLine("Cloud cache","384 MiB / 2 GiB mock")
+            SignalLine("Effective provider",if(t?.provenance?.name=="CATALOGUE")"Preview provider transport" else "Not applicable")
+            SignalLine("Verified bytes",if(t?.provenance?.name=="CATALOGUE")"YES · sample fixture" else "Local / platform source")
+            SignalLine("Seekability","Verified sample timeline")
+            SignalLine("Cloud cache","384 MiB / 2 GiB sample cache")
         }
         item{
             SectionHeader("Output route")
@@ -129,7 +129,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
             SectionHeader("Audio pipeline")
             listOf(
                 "1 · Source" to (t?.quality?:"Nothing playing"),
-                "2 · Decoder" to "Mock decode · timeline available",
+                "2 · Decoder" to "Simulated decode · timeline available",
                 "3 · TSUNAMI DSP" to if(state.dspEnabled)"ACTIVE · samples would be altered" else "Transparent / inactive",
                 "4 · AudioTrack" to "96 kHz · PCM float",
                 "5 · Android mixer" to "Nominal 96 kHz",
@@ -148,7 +148,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
                 TextCommand(if(state.gaplessProbeResult=="Not run")"Test next transition" else "Retest transition",{state.runGaplessProbe()})
                 TextCommand("Reset counters",{state.resetDiagnosticCounters()})
             }
-            Text("All values are deterministic prototype state. SIGNAL never implies that real device telemetry was sampled.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
+            Text("SIMULATED TELEMETRY · no live device telemetry is sampled.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
         }
     }
 }
@@ -176,13 +176,13 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
                 TextCommand(if(state.lyricAuditStatus=="Not audited")"Audit library" else "Reaudit",{state.auditLyrics()})
                 TextCommand("Fetch missing",{state.fetchMissingLyrics()},enabled=state.lyricMissingCount>0)
-                TextCommand("Export lyrics",{state.banner="Lyrics archive export ready · mock"})
-                TextCommand("Import lyrics",{state.banner="Lyrics archive import preview · mock"})
+                TextCommand("Export lyrics",{state.banner="Lyrics archive export ready"})
+                TextCommand("Import lyrics",{state.banner="Lyrics archive import preview"})
             }
         }
         item{
             SectionHeader("Exact duplicate hashes")
-            SignalLine("Method","SHA-256 over deterministic mock audio bytes")
+            SignalLine("Method","SHA-256 over sample audio bytes")
             SignalLine("Groups",if(state.duplicateGroups<0)"Not scanned" else state.duplicateGroups.toString())
             TextCommand(if(state.duplicateGroups<0)"Scan hashes" else "Rescan hashes",{state.scanDuplicateHashes()})
         }
@@ -196,7 +196,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
             SectionHeader("ReplayGain & local analysis")
             SignalLine("State",state.analysisStatus)
             state.currentTrack?.let{t->
-                SignalLine("Track ReplayGain",if(state.replayGainMode=="Off")"Not applied" else "−6.20 dB mock")
+                SignalLine("Track ReplayGain",if(state.replayGainMode=="Off")"Not applied" else "−6.20 dB sample")
                 SignalLine("Detected features","118 BPM · C minor · energy 64%")
                 SignalLine("Current",t.title)
             }
@@ -215,13 +215,26 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
                 "96 KHZ" to "2",
                 "UNKNOWN" to "1"
             ))
-            Text("Format counts describe the deterministic fixture, not the production library.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
+            Text("SAMPLE LIBRARY · format counts describe this preview library.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
         }
     }
 }
 
 @Composable private fun ColumnScope.HistorySignal(state:ShellState){
     val p=LocalTsunamiPalette.current
+    if(state.historyCleared){
+        LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=28.dp)){
+            item{
+                SectionHeader("Listening history")
+                Text("No listening history in this preview.",style=Type.title.copy(color=p.ink),modifier=Modifier.padding(top=18.dp))
+                Spacer(Modifier.height(6.dp))
+                Text("New listening activity will repopulate this workspace.",style=Type.body.copy(color=p.ink2))
+                Spacer(Modifier.height(18.dp))
+                Rule()
+            }
+        }
+        return
+    }
     LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=28.dp)){
         item{
             SectionHeader("Listening totals")
@@ -272,7 +285,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
             SignalLine("Yesterday · 23:14","Playlist paths remapped · 18 entries")
             SignalLine("Yesterday · 22:51","Artwork changed · Refractions")
             SignalLine("Yesterday · 21:09","Lyrics gained · Serein")
-            Text("History is local mock state and remains governed by the Listening history preference.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
+            Text("SAMPLE HISTORY · listening history follows the History preference.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
         }
     }
 }
@@ -283,7 +296,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
         item{
             SectionHeader("Diagnostics")
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
-                TextCommand("Copy summary",{state.banner="Diagnostic summary copied · mock"})
+                TextCommand("Copy summary",{state.banner="Diagnostic summary copied"})
                 TextCommand("Export bundle",{state.exportDiagnostics()})
                 TextCommand("Clear log",{state.clearDiagnosticLog()},enabled=state.diagnosticLog.isNotEmpty())
                 TextCommand(if(state.diagnosticsFault)"Retry" else "Simulate fault",{
@@ -301,7 +314,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
                 },state.diagnosticsFault)
             }
             Spacer(Modifier.height(8.dp))
-            Text(if(state.diagnosticsFault)"Decoder route recovered after mock underruns. Library cache requires review." else "No active playback fault. Audio route, queue state and library index agree.",style=Type.body.copy(color=if(state.diagnosticsFault)p.danger else p.ink2))
+            Text(if(state.diagnosticsFault)"Decoder route recovered after simulated underruns. Library cache requires review." else "No active playback fault. Audio route, queue state and library index agree.",style=Type.body.copy(color=if(state.diagnosticsFault)p.danger else p.ink2))
         }
         item{
             SectionHeader("Recent log")
