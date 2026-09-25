@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "8113a4627a931d6ce792e44748962a86cfeafc71",
+  "source_head": "4c658aa331036fffaf6ffbac1eb5dda43d6f9cef",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 8,
-  "note": "Every listed blob is mirrored byte-identically from private Genesis source head 8113a4627a931d6ce792e44748962a86cfeafc71. Hosted workflow execution remains unavailable while Actions fails before step allocation. Build outputs are not claimed until Android assembly succeeds.",
+  "note": "Every listed blob is mirrored byte-identically from private Genesis source head 4c658aa331036fffaf6ffbac1eb5dda43d6f9cef. Hosted workflow execution remains unavailable while Actions fails before step allocation. Build outputs are not claimed until Android assembly succeeds.",
   "files": [
     {
       "path": "ui-shell/README.md",
@@ -91,8 +91,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/state/ShellState.kt",
-      "git_blob_sha": "611202a7b31204217fe1e8d6af1701a173f97628",
-      "bytes": 39413
+      "git_blob_sha": "27b3bcff17666727bb8c897b5ac4d00fa1f1d154",
+      "bytes": 39625
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/theme/TsunamiTheme.kt",
@@ -238,8 +238,8 @@
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md",
-      "git_blob_sha": "a9b14f77b19f3b9d0256df798c7144e9992f512a",
-      "bytes": 5627
+      "git_blob_sha": "7d85374b29fbac860622c02ddfb1e5808cf8500c",
+      "bytes": 6191
     },
     {
       "path": "tools/ui_shell_codespace_build.py",
