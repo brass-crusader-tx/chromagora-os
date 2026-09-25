@@ -93,7 +93,7 @@ jobs:
           path: |
             dist/TSUNAMI-UI-Genesis-debug.apk
             dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
-            dist/TSUNAMI-Sans-v4.7/
+            dist/TSUNAMI-Sans-v4.8/
             build/reports/tsunami/ui-shell/host/
             ui-shell/tools/proofs/
           if-no-files-found: warn
