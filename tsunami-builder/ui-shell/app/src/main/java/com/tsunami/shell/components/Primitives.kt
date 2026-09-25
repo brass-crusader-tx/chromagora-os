@@ -166,7 +166,7 @@ enum class Glyph { PLAY, PAUSE, NEXT, PREVIOUS, STAR, DOWNLOAD, SEARCH, SETTINGS
 }
 
 @OptIn(ExperimentalFoundationApi::class)
-@Composable fun TrackLedgerRow(track:Track,stateLabel:String,onOpen:()->Unit,onPlay:()->Unit,onFavourite:()->Unit,onDownload:()->Unit,compact:Boolean=false,forceMissing:Boolean=false,onPlayNext:(()->Unit)?=null,onShuffleNext:(()->Unit)?=null,onAddToPlaylist:(()->Unit)?=null,selected:Boolean=false,selectionMode:Boolean=false,secondaryLabel:String?=null,downloadState:DownloadState=DownloadState.REMOTE){
+@Composable fun TrackLedgerRow(track:Track,stateLabel:String,onOpen:()->Unit,onPlay:()->Unit,onFavourite:()->Unit,onDownload:()->Unit,compact:Boolean=false,forceMissing:Boolean=false,onPlayNext:(()->Unit)?=null,onShuffleNext:(()->Unit)?=null,onAddToPlaylist:(()->Unit)?=null,selected:Boolean=false,selectionMode:Boolean=false,secondaryLabel:String?=null,downloadState:DownloadState=DownloadState.REMOTE,showArtwork:Boolean=true){
     val p=LocalTsunamiPalette.current
     val unavailable=!track.available
     val effectiveState=if(unavailable)"UNAVAILABLE · $stateLabel" else stateLabel
@@ -188,8 +188,12 @@ enum class Glyph { PLAY, PAUSE, NEXT, PREVIOUS, STAR, DOWNLOAD, SEARCH, SETTINGS
         Row(verticalAlignment=Alignment.CenterVertically){
             Box(Modifier.width(if(selected||focused)3.dp else 1.dp).height(if(compact)24.dp else 32.dp).background(if(selected||focused)p.selected else Color.Transparent))
             Spacer(Modifier.width(if(selected)7.dp else 0.dp))
-            Artwork(track,Modifier.size(if(compact)42.dp else 52.dp),forceMissing)
-            Spacer(Modifier.width(12.dp))
+            if(showArtwork){
+                Artwork(track,Modifier.size(if(compact)42.dp else 52.dp).semantics{contentDescription="Artwork for ${track.title}"},forceMissing)
+                Spacer(Modifier.width(12.dp))
+            }else{
+                Spacer(Modifier.width(10.dp))
+            }
             Column(Modifier.weight(1f)){
                 Text(track.title,style=Type.row.copy(color=if(unavailable)p.ink3 else p.ink),maxLines=if(compact)1 else 2,overflow=TextOverflow.Ellipsis)
                 Spacer(Modifier.height(2.dp))
@@ -210,7 +214,7 @@ enum class Glyph { PLAY, PAUSE, NEXT, PREVIOUS, STAR, DOWNLOAD, SEARCH, SETTINGS
         }
         if(!compact){ 
             Spacer(Modifier.height(8.dp))
-            Row(Modifier.padding(start=64.dp),verticalAlignment=Alignment.CenterVertically){
+            Row(Modifier.padding(start=if(showArtwork)64.dp else 14.dp),verticalAlignment=Alignment.CenterVertically){
                 Text(track.quality,style=Type.micro.copy(color=p.ink3)); Spacer(Modifier.weight(1f)); Text(effectiveState,style=Type.micro.copy(color=if(unavailable)p.danger else p.ink3)); Spacer(Modifier.width(8.dp))
                 Box(
                     Modifier
@@ -240,7 +244,7 @@ enum class Glyph { PLAY, PAUSE, NEXT, PREVIOUS, STAR, DOWNLOAD, SEARCH, SETTINGS
             }
         }
         if(showActions && !selectionMode){
-            Row(Modifier.padding(start=64.dp).fillMaxWidth().horizontalScroll(rememberScrollState()),verticalAlignment=Alignment.CenterVertically){
+            Row(Modifier.padding(start=if(showArtwork)64.dp else 14.dp).fillMaxWidth().horizontalScroll(rememberScrollState()),verticalAlignment=Alignment.CenterVertically){
                 TextCommand("Favourite",onFavourite)
                 TextCommand(when(downloadState){DownloadState.REMOTE->"Make offline";DownloadState.DOWNLOADING->"Finish download";DownloadState.DOWNLOADED->"Remove offline"},onDownload,downloadState==DownloadState.DOWNLOADED,enabled=!unavailable)
                 onPlayNext?.let{ TextCommand("Play next",it,enabled=!unavailable) }
