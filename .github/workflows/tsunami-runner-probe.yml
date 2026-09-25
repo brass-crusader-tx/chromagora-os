@@ -10,17 +10,19 @@ permissions:
   contents: read
 
 jobs:
-  probe:
+  ubuntu:
     runs-on: ubuntu-latest
     steps:
-      - name: Native runner probe
-        shell: bash
-        run: |
-          set -euxo pipefail
-          echo RUNNER_PROBE=PASS
-          uname -a
-          java -version
-          python3 --version
-          command -v sdkmanager || true
-          command -v adb || true
-          command -v gradle || true
+      - name: Ubuntu native runner probe
+        run: echo RUNNER_PROBE_UBUNTU=PASS
+  macos:
+    runs-on: macos-latest
+    steps:
+      - name: macOS native runner probe
+        run: echo RUNNER_PROBE_MACOS=PASS
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: Windows native runner probe
+        shell: pwsh
+        run: Write-Output "RUNNER_PROBE_WINDOWS=PASS"
