@@ -310,6 +310,11 @@ class GenesisInteractionTest {
     @Test fun providerImportAuditPreservesLibraryAcrossDisconnect() {
         compose.onNodeWithContentDescription("Settings").performClick()
         compose.onNodeWithText("Connected services").performClick()
+        compose.onNodeWithText("YouTube Music").assertExists()
+        compose.onNodeWithText("Apple Music").assertExists()
+        compose.onNodeWithText("Amazon Music").assertExists()
+        compose.onNodeWithText("Spotify").assertExists()
+        compose.onNodeWithText("TIDAL").assertExists()
         compose.onNodeWithText("Import YouTube Music").performScrollTo().performClick()
         compose.onNodeWithText("Import YouTube Music").performClick()
         compose.onNodeWithText("Import YouTube Music").performClick()
