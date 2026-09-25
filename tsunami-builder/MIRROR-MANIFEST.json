@@ -2,13 +2,18 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "f1097c707b99713bb8f1767a8b95de2c284b39ab",
+  "source_head": "734280e308d6138c43d7d56e7a9247f3d834fb7e",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 8,
-  "note": "Every listed blob is mirrored byte-identically from private Genesis source head f1097c707b99713bb8f1767a8b95de2c284b39ab. Hosted workflow execution remains unavailable while Actions fails before step allocation. Build outputs are not claimed until Android assembly succeeds.",
+  "note": "Every listed blob is mirrored byte-identically from private Genesis source head 734280e308d6138c43d7d56e7a9247f3d834fb7e. Hosted workflow execution remains unavailable while Actions fails before step allocation. Build outputs are not claimed until Android assembly succeeds.",
   "files": [
+    {
+      "path": "ui-shell/README.md",
+      "git_blob_sha": "c71803353b94dd516ec630ea7b366291671dea4f",
+      "bytes": 8130
+    },
     {
       "path": "ui-shell/app/build.gradle.kts",
       "git_blob_sha": "eddc323f896963d8613061eae19194c599d9a9de",
@@ -16,13 +21,18 @@
     },
     {
       "path": "ui-shell/app/src/androidTest/java/com/tsunami/shell/GenesisInteractionTest.kt",
-      "git_blob_sha": "18175cee41ddc663307262b30557a573c2334b17",
-      "bytes": 24560
+      "git_blob_sha": "11c48eafa5cbe79209f07aab0e98810439003f34",
+      "bytes": 26497
     },
     {
       "path": "ui-shell/app/src/main/AndroidManifest.xml",
       "git_blob_sha": "6ee4abf3fc963d0882ca0b540de8247a3eaaca6c",
       "bytes": 872
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/MainActivity.kt",
+      "git_blob_sha": "f691476a3335cda4aa33c364e0d15e25b4da4135",
+      "bytes": 2763
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/brand/TsunamiMark.kt",
@@ -33,11 +43,6 @@
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/components/Primitives.kt",
       "git_blob_sha": "60e5e2b30a92951d0919c7ab4c5e4bdd1d21dc3c",
       "bytes": 19691
-    },
-    {
-      "path": "ui-shell/app/src/main/java/com/tsunami/shell/MainActivity.kt",
-      "git_blob_sha": "ce6dc19c07ebf7053a6ecfa006609cd9dedd3be0",
-      "bytes": 2543
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/model/MockModels.kt",
@@ -86,8 +91,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/state/ShellState.kt",
-      "git_blob_sha": "f134d73e272ad7e7f4a22f63f74a3bfff9b54b84",
-      "bytes": 39360
+      "git_blob_sha": "611202a7b31204217fe1e8d6af1701a173f97628",
+      "bytes": 39413
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/theme/TsunamiTheme.kt",
@@ -105,22 +110,22 @@
       "bytes": 483
     },
     {
-      "path": "ui-shell/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
-      "git_blob_sha": "850dd1fada95ccb096761de2a209450986c1c259",
-      "bytes": 279
-    },
-    {
       "path": "ui-shell/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
       "git_blob_sha": "850dd1fada95ccb096761de2a209450986c1c259",
       "bytes": 279
     },
     {
-      "path": "ui-shell/app/src/main/res/mipmap-anydpi/ic_launcher_round.xml",
+      "path": "ui-shell/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
+      "git_blob_sha": "850dd1fada95ccb096761de2a209450986c1c259",
+      "bytes": 279
+    },
+    {
+      "path": "ui-shell/app/src/main/res/mipmap-anydpi/ic_launcher.xml",
       "git_blob_sha": "42d013cdda4d2c171fd6ba5dc339376af4ff1be6",
       "bytes": 741
     },
     {
-      "path": "ui-shell/app/src/main/res/mipmap-anydpi/ic_launcher.xml",
+      "path": "ui-shell/app/src/main/res/mipmap-anydpi/ic_launcher_round.xml",
       "git_blob_sha": "42d013cdda4d2c171fd6ba5dc339376af4ff1be6",
       "bytes": 741
     },
@@ -145,11 +150,6 @@
       "bytes": 100
     },
     {
-      "path": "ui-shell/README.md",
-      "git_blob_sha": "eb999adf6f416801790aad5cc0b84fbcabbc4c79",
-      "bytes": 7926
-    },
-    {
       "path": "ui-shell/settings.gradle.kts",
       "git_blob_sha": "61c5c69403e075060967c135ab48d25620674cfa",
       "bytes": 338
@@ -166,13 +166,13 @@
     },
     {
       "path": "ui-shell/tools/build_host.sh",
-      "git_blob_sha": "788186bba9f90aaf168552687d5e11e8a0d13c9f",
+      "git_blob_sha": "aa12bcfbb9dc5f230f3af844b571e87e03223846",
       "bytes": 9577
     },
     {
       "path": "ui-shell/tools/capture_verify.sh",
-      "git_blob_sha": "226e3610c9403fa1a72673fe502d2a39f460f61f",
-      "bytes": 4178
+      "git_blob_sha": "06855a9f27fbf48ad401f00794d1c0488f13b6ca",
+      "bytes": 4631
     },
     {
       "path": "ui-shell/tools/derive_review_images.py",
@@ -186,8 +186,8 @@
     },
     {
       "path": "ui-shell/tools/jvm_state_gate.sh",
-      "git_blob_sha": "36ba9c8f1fb489087f10160ebe2281662cd9208e",
-      "bytes": 9734
+      "git_blob_sha": "6b26408a9664de69c7bbbc16d479d1eb10db4851",
+      "bytes": 10987
     },
     {
       "path": "ui-shell/tools/prepare_fonts.py",
@@ -201,19 +201,19 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "91078d8f22f75bd6dd7140a926b681b1a9d97ab0",
-      "bytes": 27708
+      "git_blob_sha": "7da38d8c877ffd9fa9d1927756927a6c8e7d3cf3",
+      "bytes": 28247
     },
     {
       "path": "ui-shell/tools/visual_sanity_verify.py",
-      "git_blob_sha": "c2f1530af95508fafdce3c6e8ac0422e5fce7cc0",
-      "bytes": 6867
+      "git_blob_sha": "5888147c2aebff3d3c9a1f05a9b1064aab2dd54a",
+      "bytes": 7297
     }
   ],
   "support_files": [
     {
       "path": ".github/workflows/ui-shell-genesis-selfhosted.yml",
-      "git_blob_sha": "911fa3410ea93a08bbb1c53b8ba7144652277041",
+      "git_blob_sha": "a19e0b3cd44576ddcca192223174c31857f8e51e",
       "bytes": 3480
     },
     {
@@ -238,17 +238,17 @@
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md",
-      "git_blob_sha": "92a7999f913ed204727bca625675e103e60353e1",
-      "bytes": 5215
+      "git_blob_sha": "a9b14f77b19f3b9d0256df798c7144e9992f512a",
+      "bytes": 5627
     },
     {
       "path": "tools/ui_shell_codespace_build.py",
-      "git_blob_sha": "8b5a1100d5a28c53d08548d9b8f7324be2c67f94",
+      "git_blob_sha": "b38691881d616beca1acb780afa8fdb561ef3706",
       "bytes": 15840
     },
     {
       "path": "tools/ui_shell_static_check.py",
-      "git_blob_sha": "92a75f8fe9913a98a408b36730f628a26f0a97c1",
+      "git_blob_sha": "b7320ea81dc14eadb968c3f5884cca0e4a0d5cf6",
       "bytes": 18404
     }
   ]
