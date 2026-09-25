@@ -9,6 +9,10 @@ on:
       - ".github/workflows/tsunami-ui-selfhosted.yml"
       - "tsunami-builder/MIRROR-MANIFEST.json"
 
+concurrency:
+  group: tsunami-ui-genesis-selfhosted
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
