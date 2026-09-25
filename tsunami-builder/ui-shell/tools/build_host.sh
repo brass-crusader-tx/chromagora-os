@@ -108,7 +108,7 @@ for p in fonts:
         family=next(n.toUnicode() for n in f['name'].names if n.nameID==1)
         version=next(n.toUnicode() for n in f['name'].names if n.nameID==5)
         assert family=='TSUNAMI Sans', (p,family)
-        assert version=='Version 4.700', (p,version)
+        assert version=='Version 4.800', (p,version)
         weights.add(int(f['OS/2'].usWeightClass))
         assert 'GPOS' in f, f"{p}: missing GPOS"
     finally:
@@ -128,14 +128,14 @@ print("FONT_GENERATION=PASS")
 print("FONT_CANONICAL_HASHES=PASS")
 PY
 
-FONT_DIST="$DIST/TSUNAMI-Sans-v4.7"
+FONT_DIST="$DIST/TSUNAMI-Sans-v4.8"
 rm -rf "$FONT_DIST"
 mkdir -p "$FONT_DIST"
 cp app/src/main/res/font/tsunami_sans_*.ttf "$FONT_DIST/"
 cp tools/proofs/tsunami-sans-proof.png tools/proofs/tsunami-sans-ui-proof.png "$FONT_DIST/"
 cp "$REPO_ROOT/brand/tsunami-mark.svg" "$REPO_ROOT/brand/tsunami-mark-inverse.svg" "$FONT_DIST/"
 {
-  echo "TSUNAMI Sans v4.7"
+  echo "TSUNAMI Sans v4.8"
   echo "Generated from ui-shell/tools/generate_tsunami_sans.py"
   echo "Family: TSUNAMI Sans"
   echo "Weights: 300 400 500 600 700"
