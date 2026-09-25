@@ -1,0 +1,212 @@
+{
+  "artifact": "TSUNAMI UI Genesis public build mirror",
+  "source_repository": "brass-crusader-tx/TSUNAMI",
+  "source_branch": "genesis/ui-shell-20260923",
+  "source_head": "22ffa576c2c00f2ce13c769f53bcea13bb2d9709",
+  "mirror_repository": "brass-crusader-tx/chromagora-os",
+  "mirror_branch": "build/tsunami-ui-genesis-20260925",
+  "ui_shell_file_count": 40,
+  "note": "Every ui-shell blob listed here was mirrored byte-identically using Git blob SHA comparison. Build outputs are not claimed until an Android build actually succeeds.",
+  "files": [
+    {
+      "path": "ui-shell/app/build.gradle.kts",
+      "git_blob_sha": "eddc323f896963d8613061eae19194c599d9a9de",
+      "bytes": 2332
+    },
+    {
+      "path": "ui-shell/app/src/androidTest/java/com/tsunami/shell/GenesisInteractionTest.kt",
+      "git_blob_sha": "e20d2f55bc777cfed2ca9bc561a7cff11b91a61e",
+      "bytes": 22163
+    },
+    {
+      "path": "ui-shell/app/src/main/AndroidManifest.xml",
+      "git_blob_sha": "6ee4abf3fc963d0882ca0b540de8247a3eaaca6c",
+      "bytes": 872
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/brand/TsunamiMark.kt",
+      "git_blob_sha": "b9ef7fdd2dc9690c4048c61bda4c5c32dadde7be",
+      "bytes": 2168
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/components/Primitives.kt",
+      "git_blob_sha": "60e5e2b30a92951d0919c7ab4c5e4bdd1d21dc3c",
+      "bytes": 19691
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/MainActivity.kt",
+      "git_blob_sha": "ce6dc19c07ebf7053a6ecfa006609cd9dedd3be0",
+      "bytes": 2543
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/model/MockModels.kt",
+      "git_blob_sha": "9ffb528611f95b400ea1895de2b616a2b5331c27",
+      "bytes": 6622
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/navigation/GenesisShell.kt",
+      "git_blob_sha": "de05429e4f20eaefc355a778e3720eb33775ea35",
+      "bytes": 17027
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/ExpandedListening.kt",
+      "git_blob_sha": "aa99dc9fed0375c131c402c5162d737d43ba97a4",
+      "bytes": 22699
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/FindScreen.kt",
+      "git_blob_sha": "5a0821347b8cc21d9cf7777b61607797b6317d62",
+      "bytes": 13662
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/LibraryScreen.kt",
+      "git_blob_sha": "db79b092f358c73378d94a1de1e785071a209679",
+      "bytes": 15722
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/ListenScreen.kt",
+      "git_blob_sha": "f74d4fc447c20f0b2649d950483ca94a3868dfca",
+      "bytes": 5334
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/OnboardingScreen.kt",
+      "git_blob_sha": "1bbeaf50bc55f5794cd4ebfa2ff3bba01c2e5fb1",
+      "bytes": 3164
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/SettingsScreen.kt",
+      "git_blob_sha": "68dd5207c4843d738a04d11e2ae1c47ed5b5a4a4",
+      "bytes": 42936
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/SignalScreen.kt",
+      "git_blob_sha": "eac8e8c9a8e5f3a63c0b847e38c24a88917fcd94",
+      "bytes": 17804
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/state/ShellState.kt",
+      "git_blob_sha": "5732ef281e6ce760a86b85688bd7cb1da4ccba7e",
+      "bytes": 37637
+    },
+    {
+      "path": "ui-shell/app/src/main/java/com/tsunami/shell/theme/TsunamiTheme.kt",
+      "git_blob_sha": "4379d4c9a84795804c9c7480c0cac3684c088aee",
+      "bytes": 3527
+    },
+    {
+      "path": "ui-shell/app/src/main/res/drawable/ic_tsunami_launcher_foreground.xml",
+      "git_blob_sha": "950e3841cbeacf61a00f8ec2f8fe0e04c91dd9dd",
+      "bytes": 659
+    },
+    {
+      "path": "ui-shell/app/src/main/res/drawable/ic_tsunami_mark.xml",
+      "git_blob_sha": "d4f6a4e14d428f7f1ba836f06900948c2e2c65e7",
+      "bytes": 483
+    },
+    {
+      "path": "ui-shell/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
+      "git_blob_sha": "850dd1fada95ccb096761de2a209450986c1c259",
+      "bytes": 279
+    },
+    {
+      "path": "ui-shell/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+      "git_blob_sha": "850dd1fada95ccb096761de2a209450986c1c259",
+      "bytes": 279
+    },
+    {
+      "path": "ui-shell/app/src/main/res/mipmap-anydpi/ic_launcher_round.xml",
+      "git_blob_sha": "42d013cdda4d2c171fd6ba5dc339376af4ff1be6",
+      "bytes": 741
+    },
+    {
+      "path": "ui-shell/app/src/main/res/mipmap-anydpi/ic_launcher.xml",
+      "git_blob_sha": "42d013cdda4d2c171fd6ba5dc339376af4ff1be6",
+      "bytes": 741
+    },
+    {
+      "path": "ui-shell/app/src/main/res/values/colors.xml",
+      "git_blob_sha": "10392320061c0200ea36f5a74b0d40dae9f5b5d2",
+      "bytes": 122
+    },
+    {
+      "path": "ui-shell/app/src/main/res/values/styles.xml",
+      "git_blob_sha": "9fd584508be4dec468c747819227f0164a74cb3c",
+      "bytes": 674
+    },
+    {
+      "path": "ui-shell/build.gradle.kts",
+      "git_blob_sha": "e93063f9a5f05000c60942cec0954a0a67d0a27c",
+      "bytes": 304
+    },
+    {
+      "path": "ui-shell/gradle.properties",
+      "git_blob_sha": "2430f7ad2eea8cb2f5f18dc918246e09626d8687",
+      "bytes": 100
+    },
+    {
+      "path": "ui-shell/README.md",
+      "git_blob_sha": "8b29497d5aff70f6455723b7e38610e62fb6d49d",
+      "bytes": 7924
+    },
+    {
+      "path": "ui-shell/settings.gradle.kts",
+      "git_blob_sha": "61c5c69403e075060967c135ab48d25620674cfa",
+      "bytes": 338
+    },
+    {
+      "path": "ui-shell/tools/accessibility_verify.py",
+      "git_blob_sha": "3db92e7cc16eff516c05ffe0e23adfea9a2cad5c",
+      "bytes": 8190
+    },
+    {
+      "path": "ui-shell/tools/bootstrap_gradle.sh",
+      "git_blob_sha": "bcba3a52af1a6c3a25a760c16fb6313b21d27c9c",
+      "bytes": 2805
+    },
+    {
+      "path": "ui-shell/tools/build_host.sh",
+      "git_blob_sha": "886102c6f316efa7036a294b3e17dfca0861c257",
+      "bytes": 9577
+    },
+    {
+      "path": "ui-shell/tools/capture_verify.sh",
+      "git_blob_sha": "6e0a1cab108c51b280bce3bfb3ca77bc4aec3b64",
+      "bytes": 4096
+    },
+    {
+      "path": "ui-shell/tools/derive_review_images.py",
+      "git_blob_sha": "bd8279b59afc696f63f35733591ed92368457f8a",
+      "bytes": 1116
+    },
+    {
+      "path": "ui-shell/tools/generate_tsunami_sans.py",
+      "git_blob_sha": "51a391fecf19226b9653c084c33a4395cfc8923b",
+      "bytes": 23647
+    },
+    {
+      "path": "ui-shell/tools/jvm_state_gate.sh",
+      "git_blob_sha": "c36a83d4be6e0585f854cbde0180b124e44d4030",
+      "bytes": 9506
+    },
+    {
+      "path": "ui-shell/tools/prepare_fonts.py",
+      "git_blob_sha": "f7a3f8e79e4ee01b977dd9b8cb8438d12e14000d",
+      "bytes": 156
+    },
+    {
+      "path": "ui-shell/tools/publish_chromagora_apk.sh",
+      "git_blob_sha": "04569fcb4d07241aecd4df4160656a8a6b690a35",
+      "bytes": 5068
+    },
+    {
+      "path": "ui-shell/tools/source_verify.py",
+      "git_blob_sha": "d6cabac345adb89f08e310c46adf88193ef6c015",
+      "bytes": 25281
+    },
+    {
+      "path": "ui-shell/tools/visual_sanity_verify.py",
+      "git_blob_sha": "f615eaf257ccd410e970b05221be41204d1a9489",
+      "bytes": 6803
+    }
+  ]
+}
