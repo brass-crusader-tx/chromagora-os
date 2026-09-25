@@ -1,15 +1,31 @@
 package com.tsunami.shell
 
+import android.content.pm.ActivityInfo
+
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class GenesisInteractionTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
+
+    @Test fun rotationPreservesLibraryAndListeningContext() {
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("owned + indexed").assertExists()
+        compose.activity.requestedOrientation=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        compose.waitForIdle()
+        compose.onNodeWithText("owned + indexed").assertExists()
+        compose.onAllNodesWithText("Afterglow at the Edge of the City").onFirst().assertExists()
+        compose.activity.requestedOrientation=ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        compose.waitForIdle()
+        compose.onNodeWithText("owned + indexed").assertExists()
+    }
 
     @Test fun primaryIndexChangesWorkspaceAndBackPreservesPlaybackContext() {
         compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
@@ -34,7 +50,7 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Timestamp ready · 1:34").assertExists()
         compose.onAllNodesWithText("Lyrics").onFirst().performClick()
         compose.onNodeWithText("Streetlights fold into the rain").assertExists()
-        compose.onAllNodesWithText("Output").onFirst().performClick()
+        compose.onNodeWithText("Output").performClick()
         compose.onNodeWithText("Sony WH-1000X").performClick()
         compose.onNodeWithText("Output: Sony WH-1000X").assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
@@ -49,6 +65,18 @@ class GenesisInteractionTest {
         compose.onAllNodesWithText("Offline").onLast().performClick()
         compose.onNodeWithText("1 available offline").assertExists()
         compose.onNodeWithText("Select").assertExists()
+    }
+
+
+    @Test fun folderObjectsUseFixtureTruthAndDistinctContents() {
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Folders").performClick()
+        compose.onNodeWithText("3,912 tracks").assertDoesNotExist()
+        compose.onNodeWithText("/Audiobooks").performClick()
+        compose.onNodeWithText("The Cartographer's Sleep").assertExists()
+        compose.onNodeWithText("Designing for Interruption").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Back to library").performClick()
+        compose.onNodeWithText("owned + indexed").assertExists()
     }
 
     @Test fun libraryObjectsHaveReversibleDepth() {
@@ -125,14 +153,14 @@ class GenesisInteractionTest {
         compose.onNodeWithText("TSUNAMI Replay · CSV export ready").assertExists()
         compose.onNodeWithText("Logs").performClick()
         compose.onNodeWithText("Export bundle").performClick()
-        compose.onNodeWithText("Diagnostics bundle ready · mock").assertExists()
+        compose.onNodeWithText("Diagnostics bundle preview ready").assertExists()
     }
 
     @Test fun settingsPlaybackStateResponds() {
         compose.onNodeWithContentDescription("Settings").performClick()
         compose.onNodeWithText("Settings").assertExists()
-        compose.onNodeWithText("Gapless").performClick()
-        compose.onNodeWithText("Crossfade").performClick()
+        compose.onNodeWithText("Gapless").assertHasClickAction().performClick()
+        compose.onNodeWithText("Crossfade").assertHasClickAction().performClick()
         compose.onNodeWithText("3s").assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
         compose.onNodeWithText("Your listening line").assertExists()
@@ -148,9 +176,24 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Added to Late driving · Serein").assertExists()
         compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
         compose.onNodeWithText("Playlists").performClick()
-        compose.onNodeWithText("5 tracks · local mock").assertExists()
+        compose.onNodeWithText("5 tracks · local playlist").assertExists()
         compose.onNodeWithText("Late driving").performClick()
         compose.onNodeWithText("Serein").assertExists()
+    }
+
+    @Test fun consequentialHistoryClearRequiresConfirmation() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithText("Clear history").performClick()
+        compose.onNodeWithText("Clear listening history?").assertExists()
+        compose.onNodeWithText("Cancel").performClick()
+        compose.onNodeWithText("Clear listening history?").assertDoesNotExist()
+        compose.onNodeWithText("Clear history").performClick()
+        compose.onNodeWithText("Clear").performClick()
+        compose.onNodeWithText("Listening history cleared").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithText("Signal", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("History").performClick()
+        compose.onNodeWithText("No listening history in this preview.").assertExists()
     }
 
     @Test fun advancedSettingsUseProgressiveDisclosure() {
@@ -159,9 +202,13 @@ class GenesisInteractionTest {
         compose.onNodeWithText("ReplayGain").assertExists()
         compose.onNodeWithText("Track").performClick()
         compose.onNodeWithText("Album").assertExists()
+        compose.onNodeWithText("10-band equalizer").performClick()
+        compose.onNodeWithText("31 Hz").performClick()
+        compose.onNodeWithText("+3 dB").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithText("Audio processing").assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
         compose.onNodeWithText("Settings").assertExists()
-        compose.onNodeWithText("Audio processing").assertExists()
     }
 
     @Test fun lyricsTimingAndPresentationSettingsAreStateful() {
@@ -171,6 +218,11 @@ class GenesisInteractionTest {
         compose.onNodeWithText("250 ms").assertExists()
         compose.onNodeWithText("Word timing").performClick()
         compose.onNodeWithText("LINE").assertExists()
+        compose.onNodeWithText("Source priority").performClick()
+        compose.onNodeWithContentDescription("Move LRC sidecar up").performClick()
+        compose.onNodeWithText("Lyrics priority updated").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithText("Lyrics & timing").assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
         compose.onNodeWithText("Presentation").performClick()
         compose.onNodeWithText("Artwork").performClick()
@@ -190,8 +242,10 @@ class GenesisInteractionTest {
     @Test fun librarySectionVisibilityAndMetadataTemplateAffectLibrary() {
         compose.onNodeWithContentDescription("Settings").performClick()
         compose.onNodeWithText("Library sections").performClick()
-        compose.onNodeWithText("Albums").performClick()
-        compose.onNodeWithText("HIDDEN").assertExists()
+        compose.onNodeWithContentDescription("Move Albums up").performClick()
+        compose.onNodeWithText("Library order updated · Albums").assertExists()
+        compose.onNodeWithText("Hide Albums").performClick()
+        compose.onNodeWithText("Show Albums").assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
         compose.onNodeWithText("Metadata template").performClick()
         compose.onNodeWithText("Track rows").performClick()
@@ -230,7 +284,23 @@ class GenesisInteractionTest {
         compose.onNodeWithText("TSUNAMI device migration").performClick()
         compose.onNodeWithText("Ready to send").assertExists()
         compose.onNodeWithText("Share TSUNAMI APK").performClick()
-        compose.onNodeWithText("TSUNAMI APK share sheet opened · mock").assertExists()
+        compose.onNodeWithText("TSUNAMI APK share handoff preview").assertExists()
+    }
+
+
+    @Test fun providerImportAuditPreservesLibraryAcrossDisconnect() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithText("Connected services").performClick()
+        compose.onNodeWithText("Import YouTube Music").performScrollTo().performClick()
+        compose.onNodeWithText("Import YouTube Music").performClick()
+        compose.onNodeWithText("Import YouTube Music").performClick()
+        compose.onNodeWithText("Import YouTube Music").performClick()
+        compose.onNodeWithText("YouTube Music import complete · 1842 imported").assertExists()
+        compose.onNodeWithText("Import audit · YouTube Music").performClick()
+        compose.onNodeWithText("YouTube Music: 1842 imported · Shorts 38 · video-only 19 · samples 7 · unmatched 4").assertExists()
+        compose.onNodeWithText("YouTube Music").performClick()
+        compose.onNodeWithText("DISCONNECTED · IMPORTED LIBRARY KEPT").assertExists()
+        compose.onNodeWithText("Import audit · YouTube Music").assertExists()
     }
 
     @Test fun longformSeparatesAudiobooksAndPodcasts() {
@@ -242,6 +312,84 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Podcasts").performClick()
         compose.onNodeWithText("Designing for Interruption").assertExists()
         compose.onNodeWithText("The Cartographer's Sleep").assertDoesNotExist()
+
+        compose.onNodeWithText("Designing for Interruption").performClick()
+        compose.onNodeWithText("PODCAST").assertExists()
+        compose.onNodeWithText("Back 30 sec").performClick()
+        compose.onNodeWithText("Back 30 seconds").assertExists()
+        compose.onNodeWithText("Mark played").performClick()
+        compose.onNodeWithText("Marked played · Designing for Interruption").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+
+        compose.onNodeWithText("Audiobooks").performClick()
+        compose.onNodeWithText("The Cartographer's Sleep").performClick()
+        compose.onNodeWithText("AUDIOBOOK").assertExists()
+        compose.onNodeWithContentDescription("Add bookmark").performClick()
+        compose.onNodeWithText("Bookmark added").assertExists()
+    }
+
+
+
+
+    @Test fun fullPlayerObjectActionsDriveListeningCore() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithText("Controls & gestures").performClick()
+        compose.onNodeWithContentDescription("Full player action: Share").performClick()
+        compose.onNodeWithContentDescription("Full player action: Add to playlist").performClick()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithContentDescription("Open listening environment").performClick()
+        compose.onNodeWithText("Add to playlist").assertExists()
+        compose.onNodeWithText("Share 1:34").assertDoesNotExist()
+        compose.onNodeWithText("Add to playlist").performClick()
+        compose.onNodeWithText("Already in Late driving").assertExists()
+    }
+
+    @Test fun miniPlayerActionCustomizationChangesPersistentSpine() {
+        compose.onNodeWithContentDescription("Previous").assertExists()
+        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithText("Controls & gestures").performClick()
+        compose.onNodeWithContentDescription("Mini player extra: Favourite").performClick()
+        compose.onNodeWithContentDescription("Mini player extra: Queue").performClick()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithText("Queue").assertExists()
+        compose.onNodeWithText("Lyrics").assertExists()
+        compose.onNodeWithText("Queue").performClick()
+        compose.onNodeWithText("QUEUE").assertExists()
+    }
+
+    @Test fun unavailableTrackCanOpenWithoutPretendingToPlay() {
+        val state = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("unavailable"))
+        val blocked = state.fixture.tracks.first { !it.available }
+        state.selectTrack(blocked, false)
+        assertTrue(state.currentTrack?.id == blocked.id)
+        assertFalse(state.playing)
+        assertFalse(state.buffering)
+        assertTrue(state.banner == "Unavailable · ${blocked.title}")
+        state.runPlayerAction("Play/Pause")
+        assertFalse(state.playing)
+        assertTrue(state.banner?.startsWith("Unavailable · ") == true)
+    }
+
+    @Test fun customizedPlayPauseHonorsUnavailableTrackState() {
+        val state = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("unavailable"))
+        val blocked = state.fixture.tracks.first { !it.available }
+        state.selectTrack(blocked, true)
+        state.runPlayerAction("Play/Pause")
+        assertFalse(state.playing)
+        assertTrue(state.banner?.startsWith("Unavailable · ") == true)
+    }
+
+    @Test fun removingCurrentQueueItemAdvancesLocallyAndEmptyQueueStopsPlayback() {
+        val state = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("default"))
+        val expectedNext = state.queue[1].id
+        state.removeFromQueue(0)
+        assertTrue(state.currentTrack?.id == expectedNext)
+        while (state.queue.isNotEmpty()) state.removeFromQueue(0)
+        assertTrue(state.currentTrack == null)
+        assertFalse(state.playing)
+        assertTrue(state.banner == "Queue empty")
     }
 
     @Test fun libraryAndSearchStateRespond() {
