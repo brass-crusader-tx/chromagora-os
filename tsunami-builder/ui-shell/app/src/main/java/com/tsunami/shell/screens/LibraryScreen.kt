@@ -65,6 +65,8 @@ import com.tsunami.shell.theme.*
         Row(Modifier.fillMaxWidth(),verticalAlignment=androidx.compose.ui.Alignment.CenterVertically){
             TextCommand(state.sortLabel,{state.sortLabel=if(state.sortLabel=="Recently played")"Title A–Z" else "Recently played"},true)
             TextCommand("Offline",{state.offlineOnly=!state.offlineOnly},state.offlineOnly)
+            TextCommand("Ledger",{state.libraryViewMode="Ledger";state.banner="Library view · Ledger"},state.libraryViewMode=="Ledger")
+            TextCommand("Index",{state.libraryViewMode="Index";state.sortLabel="Title A–Z";state.banner="Library view · Index"},state.libraryViewMode=="Index")
             TextCommand(if(state.denseLibrary)"Comfortable" else "Dense",{state.denseLibrary=!state.denseLibrary},state.denseLibrary)
             if(state.libraryLens==LibraryLens.TRACKS) TextCommand(if(state.selectionMode)"Selecting" else "Select",{
                 state.selectionMode=!state.selectionMode
@@ -91,27 +93,63 @@ import com.tsunami.shell.theme.*
                     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
                         letters.forEach{letter->TextCommand(letter.toString(),{
                             val index=ordered.indexOfFirst{it.title.startsWith(letter,ignoreCase=true)}
-                            if(index>=0) scope.launch{listState.animateScrollToItem(index)}
+                            if(index>=0) scope.launch{listState.animateScrollToItem(if(state.libraryViewMode=="Index") index + letters.count{it < letter} else index)}
                         })}
                     }
                     Rule()
                 }
-                LazyColumn(Modifier.weight(1f),state=listState){items(ordered,key={it.id}){t->TrackLedgerRow(
-                    t,
-                    buildString{append(t.year);append(" · ");append(formatTime(t.durationMs));append(" · ");append(if(t.provenance==Provenance.OWNED)"OWNED" else t.provenance.name)},
-                    onOpen={if(state.selectionMode) state.toggleSelection(t.id) else {state.selectTrack(t,false);state.expandedPlayer=true}},
-                    onPlay={if(state.selectionMode) state.toggleSelection(t.id) else state.selectTrack(t,true)},
-                    onFavourite={state.toggleFavourite(t.id)},
-                    onDownload={state.toggleDownload(t.id)},
-                    compact=state.denseLibrary,
-                    forceMissing=state.fixture.missingArtwork,
-                    onPlayNext={state.playNext(t)},
-                    onShuffleNext={state.shuffleNext(t)},
+                if(state.libraryViewMode=="Index"){
+                    val groups=remember(ordered){ordered.groupBy{it.title.firstOrNull()?.uppercaseChar()?.takeIf(Char::isLetter) ?: '#'}}
+                    LazyColumn(Modifier.weight(1f),state=listState){
+                        groups.toSortedMap().forEach{(letter,tracks)->
+                            item("index-$letter"){
+                                Row(Modifier.fillMaxWidth().padding(top=18.dp,bottom=6.dp),verticalAlignment=Alignment.CenterVertically){
+                                    Text(letter.toString(),style=Type.title.copy(color=p.ink),modifier=Modifier.width(42.dp))
+                                    Box(Modifier.weight(1f).height(1.dp).background(p.rule))
+                                    Text("${tracks.size}",style=Type.numeric.copy(color=p.ink3),modifier=Modifier.padding(start=10.dp))
+                                }
+                            }
+                            items(tracks,key={it.id}){t->
+                                TrackLedgerRow(
+                                    t,
+                                    buildString{append(t.year);append(" · ");append(formatTime(t.durationMs));append(" · ");append(if(t.provenance==Provenance.OWNED)"OWNED" else t.provenance.name)},
+                                    onOpen={if(state.selectionMode) state.toggleSelection(t.id) else {state.selectTrack(t,false);state.expandedPlayer=true}},
+                                    onPlay={if(state.selectionMode) state.toggleSelection(t.id) else state.selectTrack(t,true)},
+                                    onFavourite={state.toggleFavourite(t.id)},
+                                    onDownload={state.toggleDownload(t.id)},
+                                    compact=true,
+                                    forceMissing=state.fixture.missingArtwork,
+                                    onPlayNext={state.playNext(t)},
+                                    onShuffleNext={state.shuffleNext(t)},
+                                    onAddToPlaylist={state.addToPlaylist(t)},
+                                    downloadState=state.downloads[t.id]?:DownloadState.REMOTE,
+                                    selected=t.id in state.selectedTrackIds,
+                                    selectionMode=state.selectionMode,
+                                    secondaryLabel=metadataLine(t,state.metadataTemplate),
+                                    showArtwork=false
+                                )
+                            }
+                        }
+                    }
+                }else{
+                    LazyColumn(Modifier.weight(1f),state=listState){items(ordered,key={it.id}){t->TrackLedgerRow(
+                        t,
+                        buildString{append(t.year);append(" · ");append(formatTime(t.durationMs));append(" · ");append(if(t.provenance==Provenance.OWNED)"OWNED" else t.provenance.name)},
+                        onOpen={if(state.selectionMode) state.toggleSelection(t.id) else {state.selectTrack(t,false);state.expandedPlayer=true}},
+                        onPlay={if(state.selectionMode) state.toggleSelection(t.id) else state.selectTrack(t,true)},
+                        onFavourite={state.toggleFavourite(t.id)},
+                        onDownload={state.toggleDownload(t.id)},
+                        compact=state.denseLibrary,
+                        forceMissing=state.fixture.missingArtwork,
+                        showArtwork=state.libraryViewMode=="Ledger",
+                        onPlayNext={state.playNext(t)},
+                        onShuffleNext={state.shuffleNext(t)},
                         onAddToPlaylist={state.addToPlaylist(t)},downloadState=state.downloads[t.id]?:DownloadState.REMOTE,
-                    selected=t.id in state.selectedTrackIds,
-                    selectionMode=state.selectionMode,
-                    secondaryLabel=metadataLine(t,state.metadataTemplate)
-                )}}
+                        selected=t.id in state.selectedTrackIds,
+                        selectionMode=state.selectionMode,
+                        secondaryLabel=metadataLine(t,state.metadataTemplate)
+                    )}}
+                }
             }
             LibraryLens.ALBUMS -> ObjectLedger(state,ordered.groupBy{it.album}.map{(k,v)->Triple(k,"Album","${v.first().artist} · ${v.size} tracks · ${v.first().year}")})
             LibraryLens.ARTISTS -> ObjectLedger(state,ordered.groupBy{it.artist}.map{(k,v)->Triple(k,"Artist","${v.size} tracks · ${v.map{it.album}.distinct().size} releases")})
@@ -234,8 +272,9 @@ import com.tsunami.shell.theme.*
                         onPlay={state.selectTrack(t,true)},
                         onFavourite={state.toggleFavourite(t.id)},
                         onDownload={state.toggleDownload(t.id)},
-                        compact=state.denseLibrary,
+                        compact=state.denseLibrary || state.libraryViewMode=="Index",
                         forceMissing=state.fixture.missingArtwork,
+                        showArtwork=state.libraryViewMode=="Ledger",
                         onPlayNext={state.playNext(t)},
                         onShuffleNext={state.shuffleNext(t)},
                         onAddToPlaylist={state.addToPlaylist(t)},downloadState=state.downloads[t.id]?:DownloadState.REMOTE,
