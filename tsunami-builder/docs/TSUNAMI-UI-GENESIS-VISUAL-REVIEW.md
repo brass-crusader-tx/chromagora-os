@@ -4,7 +4,7 @@ This is the mandatory human review pass for the generated verification matrix. T
 
 ## Review set
 
-The canonical capture matrix contains 36 base screenshots plus monochrome and blurred “squint”
+The canonical capture matrix contains 37 base screenshots plus monochrome and blurred “squint”
 derivatives. Review the contact sheet first, then the full-resolution images.
 
 ### Product topology
@@ -17,6 +17,7 @@ derivatives. Review the contact sheet first, then the full-resolution images.
 - `09-player-dark-queue`, `10-player-lyrics`, `11-player-output`, `12-player-visual`: Expanded
   Listening remains one coherent environment across modes.
 - `06-player-longform` and `36-player-podcast`: the same listening architecture adapts semantically—chapter/bookmark affordances for audiobooks, skip/played-state affordances for podcasts—without becoming two unrelated players.
+- `31-settings-controls` and `37-settings-external-controls`: in-app gesture/headset customization and off-app notification/Quick Settings/widget/Wear contracts remain distinct progressive settings depths rather than a single overloaded control dashboard.
 - `30-settings-audio`, `31-settings-controls`, `32-settings-backup`, `35-settings-services`: progressive settings retain
   the same typographic/rule grammar instead of falling back to stock settings rows.
 
