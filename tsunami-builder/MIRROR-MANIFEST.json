@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "734280e308d6138c43d7d56e7a9247f3d834fb7e",
+  "source_head": "8113a4627a931d6ce792e44748962a86cfeafc71",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 8,
-  "note": "Every listed blob is mirrored byte-identically from private Genesis source head 734280e308d6138c43d7d56e7a9247f3d834fb7e. Hosted workflow execution remains unavailable while Actions fails before step allocation. Build outputs are not claimed until Android assembly succeeds.",
+  "note": "Every listed blob is mirrored byte-identically from private Genesis source head 8113a4627a931d6ce792e44748962a86cfeafc71. Hosted workflow execution remains unavailable while Actions fails before step allocation. Build outputs are not claimed until Android assembly succeeds.",
   "files": [
     {
       "path": "ui-shell/README.md",
@@ -201,7 +201,7 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "7da38d8c877ffd9fa9d1927756927a6c8e7d3cf3",
+      "git_blob_sha": "b2f2f58670ae689449844dbee0e4072133b6b513",
       "bytes": 28247
     },
     {
@@ -213,8 +213,8 @@
   "support_files": [
     {
       "path": ".github/workflows/ui-shell-genesis-selfhosted.yml",
-      "git_blob_sha": "a19e0b3cd44576ddcca192223174c31857f8e51e",
-      "bytes": 3480
+      "git_blob_sha": "bf2b560951f4af1287dbcdfb184e00c5d2f5a830",
+      "bytes": 3560
     },
     {
       "path": "brand/TSUNAMI-MARK-GEOMETRY.md",
