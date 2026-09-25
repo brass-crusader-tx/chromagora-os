@@ -102,6 +102,7 @@ REQUIRED_ANCHORS = {
     "model/MockModels.kt": [
         '"small-list"', '"long-list"', '"huge-list"', '"missing-art"', '"loading"', '"error"', '"buffering"', '"partial"', '"unavailable"', '"podcast"',
         "LibraryLens", "SearchKind", "FOLDERS", "SearchIntent", "LongformType", "ProviderImportAuditMock",
+        'ServiceConnection("YouTube Music"', 'ServiceConnection("Apple Music"', 'ServiceConnection("Amazon Music"', 'ServiceConnection("TIDAL"', 'ServiceConnection("Spotify"',
     ],
     "state/ShellState.kt": [
         "playNext(", "shuffleNext(", "moveQueue(", "toggleDownload(", "addToPlaylist(",
