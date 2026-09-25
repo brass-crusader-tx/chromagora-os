@@ -1,0 +1,113 @@
+name: TSUNAMI UI Genesis Self Hosted
+
+on:
+  push:
+    branches: [genesis/ui-shell-20260923]
+    paths:
+      - ".github/workflows/ui-shell-genesis-selfhosted.yml"
+      - "ui-shell/**"
+      - "brand/**"
+      - "docs/TSUNAMI-UI-GENESIS-*.md"
+      - "tools/ui_shell_gate.py"
+      - "tools/ui_shell_codespace_build.py"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/ui-shell-genesis-selfhosted.yml"
+      - "ui-shell/**"
+      - "brand/**"
+      - "docs/TSUNAMI-UI-GENESIS-*.md"
+      - "tools/ui_shell_gate.py"
+      - "tools/ui_shell_codespace_build.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-mac:
+    runs-on: [self-hosted]
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Host identity
+        shell: bash
+        run: |
+          set -euxo pipefail
+          uname -a
+          sw_vers || true
+          java -version
+          python3 --version
+          command -v adb || true
+          command -v sdkmanager || true
+          command -v kotlinc || true
+
+      - name: Canonical source and accessibility gates
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 tools/ui_shell_static_check.py
+          python3 ui-shell/tools/source_verify.py
+          python3 ui-shell/tools/accessibility_verify.py
+          if command -v kotlinc >/dev/null; then
+            bash ui-shell/tools/jvm_state_gate.sh
+          fi
+
+      - name: Canonical host build
+        shell: bash
+        run: |
+          set -euxo pipefail
+          bash ui-shell/tools/build_host.sh
+          test -s dist/TSUNAMI-UI-Genesis-debug.apk
+          test -s dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
+          cat build/reports/tsunami/ui-shell/host/build.txt
+
+      - name: Full Motorola acceptance gate when attached
+        id: motorola
+        shell: bash
+        run: |
+          set -euxo pipefail
+          SERIAL="ZY22L2PTS5"
+          if ! command -v adb >/dev/null; then
+            echo "attached=false" >> "$GITHUB_OUTPUT"
+            echo "ADB unavailable; physical-device acceptance remains outstanding."
+            exit 0
+          fi
+          if ! adb devices | awk 'NR>1 && $2=="device"{print $1}' | grep -qx "$SERIAL"; then
+            echo "attached=false" >> "$GITHUB_OUTPUT"
+            echo "Motorola $SERIAL is not attached; physical-device acceptance remains outstanding."
+            exit 0
+          fi
+          echo "attached=true" >> "$GITHUB_OUTPUT"
+          bash ui-shell/tools/build_host.sh --verify-device "$SERIAL"
+          grep -q '^DEVICE_INSTALL=PASS' build/reports/tsunami/ui-shell/host/build.txt
+          grep -q '^DEVICE_VERIFY=PASS' build/reports/tsunami/ui-shell/host/build.txt
+          grep -q '^VISUAL_CAPTURE=PASS states=36' build/reports/tsunami/ui-shell/host/build.txt
+          grep -q '^VISUAL_SANITY=PASS' build/reports/tsunami/ui-shell/host/build.txt
+          grep -q '^CRASH_SCAN=PASS' build/reports/tsunami/ui-shell/host/build.txt
+          grep -q 'OK (' build/reports/tsunami/ui-shell/host/instrumentation.txt
+          test -s build/reports/tsunami/ui-shell/host/visual/contact-sheet.png
+
+      - name: Summarize executable acceptance boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ steps.motorola.outputs.attached }}" == "true" ]]; then
+            echo "UI_GENESIS_SELFHOSTED=PASS build=PASS motorola=PASS instrumentation=PASS visual_matrix=36"
+          else
+            echo "UI_GENESIS_SELFHOSTED=PARTIAL build=PASS motorola=NOT_ATTACHED"
+          fi
+
+      - name: Upload shell APK and verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TSUNAMI-UI-Genesis-selfhosted
+          path: |
+            dist/TSUNAMI-UI-Genesis-debug.apk
+            dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
+            dist/TSUNAMI-Sans-v4.7/
+            build/reports/tsunami/ui-shell/host/
+            ui-shell/tools/proofs/
+          if-no-files-found: warn
