@@ -3,9 +3,11 @@ package com.tsunami.shell.screens
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -19,7 +21,7 @@ import com.tsunami.shell.theme.*
 @Composable fun SettingsOverlay(state:ShellState,onClose:()->Unit){
     val p=LocalTsunamiPalette.current
     val page=state.settingsExpanded ?: "root"
-    val goBack={ if(page=="root") onClose() else state.settingsExpanded="root" }
+    val goBack={ val parent=settingsParentPage(page);if(parent==null)onClose() else state.settingsExpanded=parent }
     Box(Modifier.fillMaxSize().background(p.ground)){
         Column(Modifier.fillMaxSize().statusBarsPadding().padding(horizontal=20.dp)){
             Row(Modifier.fillMaxWidth().height(58.dp),verticalAlignment=Alignment.CenterVertically){
@@ -30,12 +32,15 @@ import com.tsunami.shell.theme.*
             Rule()
             when(page){
                 "audio" -> AudioSettings(state)
+                "equalizer" -> EqualizerSettings(state)
+                "lyric-sources" -> LyricSourcesSettings(state)
                 "visualizer" -> VisualizerSettings(state)
                 "shuffle" -> ShuffleSettings(state)
                 "library-roots" -> LibraryRootsSettings(state)
                 "library-sections" -> LibrarySectionsSettings(state)
                 "library-profiles" -> LibraryProfilesSettings(state)
                 "metadata" -> MetadataSettings(state)
+                "services" -> ServicesSettings(state)
                 "scrobbling" -> ScrobblingSettings(state)
                 "backup" -> BackupSettings(state)
                 "controls" -> ControlSettings(state)
@@ -51,14 +56,24 @@ import com.tsunami.shell.theme.*
     }
 }
 
+fun settingsParentPage(page:String):String?=when(page){
+    "root"->null
+    "equalizer"->"audio"
+    "lyric-sources"->"lyrics"
+    else->"root"
+}
+
 private fun settingsTitle(page:String)=when(page){
     "audio"->"Audio processing"
+    "equalizer"->"10-band equalizer"
+    "lyric-sources"->"Lyric source priority"
     "visualizer"->"Visualizer"
     "shuffle"->"Shuffle behavior"
     "library-roots"->"Library roots"
     "library-sections"->"Library sections"
     "library-profiles"->"Library profiles"
     "metadata"->"Metadata presentation"
+    "services"->"Connected services"
     "scrobbling"->"Listening services"
     "backup"->"Backup & portability"
     "controls"->"Controls & gestures"
@@ -115,17 +130,15 @@ private fun settingsTitle(page:String)=when(page){
         }
         item{
             IntentSection("Services")
-            state.services.forEachIndexed{i,s->
-                val progress=state.importProgress[s.name]
-                ActionRow(s.name,if(s.connected)"CONNECTED · ${s.detail}" else "DISCONNECTED"){state.toggleService(i)}
-                if(s.connected) ActionRow("Import ${s.name}",when(progress){null->"READY";100->"COMPLETE";else->"${progress}% · tap to continue"}){state.advanceImport(i)}
-            }
+            val connected=state.services.count{it.connected}
+            val audited=state.importAudits.size
+            ActionRow("Connected services","${connected} connected · ${audited} import audit${if(audited==1)"" else "s"}"){state.settingsExpanded="services"}
         }
         item{
             IntentSection("Privacy")
             ToggleRow("Listening history",if(state.historyEnabled)"ON" else "OFF"){state.historyEnabled=!state.historyEnabled}
             ActionRow("Listening services","${if(state.listenBrainzEnabled)"ListenBrainz " else ""}${if(state.lastFmEnabled)"Last.fm" else if(!state.listenBrainzEnabled)"OFF" else ""}"){state.settingsExpanded="scrobbling"}
-            ActionRow("Clear history","Local mock state only"){state.banner="Listening history cleared in prototype"}
+            ActionRow("Clear history","LOCAL PREVIEW DATA"){state.requestClearHistory()}
         }
         item{
             IntentSection("Advanced")
@@ -133,8 +146,33 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Quick actions & sessions",state.activeSession?.let{"SESSION · $it"}?:"No active session"){state.settingsExpanded="quick-actions"}
             ActionRow("Backup & portability",if(state.autoBackupEnabled)"AUTO · every ${state.backupIntervalHours}h" else "MANUAL"){state.settingsExpanded="backup"}
             ActionRow("Diagnostics",if(state.diagnosticsFault)"ATTENTION" else "HEALTHY"){state.primary=PrimarySpace.SIGNAL;onClose()}
-            ActionRow("About","UI Genesis · isolated shell"){state.banner="TSUNAMI UI Genesis · backend-free experiential prototype"}
-            ActionRow("Prototype status","No production data access"){state.banner="Shell is backend-free"}
+            ActionRow("About","UI Genesis · isolated preview"){state.banner="TSUNAMI UI Genesis · sample state only"}
+            ActionRow("Data boundary","Sample state only"){state.banner="No production data access"}
+        }
+    }
+}
+
+@Composable private fun ColumnScope.ServicesSettings(state:ShellState){
+    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+        item{
+            IntentSection("Connections")
+            state.services.forEachIndexed{i,s->
+                val progress=state.importProgress[s.name]
+                val audit=state.importAudits[s.name]
+                ActionRow(s.name,if(s.connected)"CONNECTED · ${s.detail}" else s.detail.uppercase()){state.toggleService(i)}
+                if(s.connected){
+                    ActionRow("Import ${s.name}",when(progress){null->"READY";100->"COMPLETE · tap to re-audit";else->"${progress}% · tap to continue"}){state.advanceImport(i)}
+                }
+                if(audit!=null){
+                    ActionRow("Import audit · ${s.name}",state.describeImportAudit(s.name)){state.announceImportAudit(s.name)}
+                }
+            }
+        }
+        item{
+            IntentSection("Import semantics")
+            Text("Imported library entries remain visible when a provider disconnects. Excluded Shorts, video-only items, samples and unmatched items are recorded in the audit rather than silently disappearing.",style=Type.body.copy(color=LocalTsunamiPalette.current.ink2),modifier=Modifier.padding(vertical=14.dp))
+            Rule()
+            Text("No account credential, network request, provider database or production import engine is used in this preview.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -148,12 +186,13 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Global delay","${state.lyricsGlobalDelayMs} ms"){state.cycleLyricsDelay()}
             ToggleRow("Missing-lyrics fallback",if(state.missingLyricsFallback)"ON" else "OFF"){state.missingLyricsFallback=!state.missingLyricsFallback}
             ToggleRow("Auto-fetch exact matches",if(state.lyricsAutoFetch)"ON" else "OFF"){state.lyricsAutoFetch=!state.lyricsAutoFetch}
+            ActionRow("Source priority",state.lyricSourceOrder.joinToString(" → ")){state.settingsExpanded="lyric-sources"}
         }
         item{
             IntentSection("Environment")
             ToggleRow("Artwork backdrop",if(state.lyricsArtworkBackdrop)"ON" else "OFF"){state.lyricsArtworkBackdrop=!state.lyricsArtworkBackdrop}
             ToggleRow("Visualizer behind lyrics",if(state.visualizerBehindLyrics)"ON" else "OFF"){state.visualizerBehindLyrics=!state.visualizerBehindLyrics}
-            Text("Timing controls are prototype state only. No transcription, network lookup, microphone capture, or production lyric store is accessed.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("SIMULATED STATE · no transcription, network lookup, microphone capture or production lyric store.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -201,6 +240,7 @@ private fun settingsTitle(page:String)=when(page){
             ToggleRow("DSP",if(state.dspEnabled)"ON" else "BYPASS"){state.dspEnabled=!state.dspEnabled}
             ActionRow("Bass","${signedDb(state.bassDb)} dB"){state.cycleBass()}
             ActionRow("Treble","${signedDb(state.trebleDb)} dB"){state.cycleTreble()}
+            ActionRow("10-band equalizer",if(state.eqBandsDb.any{it!=0f})"CUSTOM" else "FLAT"){state.settingsExpanded="equalizer"}
             ToggleRow("Mono downmix",if(state.monoDownmix)"ON" else "OFF"){state.monoDownmix=!state.monoDownmix}
             ActionRow("Stereo width","${state.stereoWidth}×"){state.cycleStereoWidth()}
             ToggleRow("Compressor",if(state.compressorEnabled)"ON" else "OFF"){state.compressorEnabled=!state.compressorEnabled}
@@ -210,7 +250,39 @@ private fun settingsTitle(page:String)=when(page){
             ToggleRow("Reverse stereo",if(state.reverseStereo)"ON" else "OFF"){state.reverseStereo=!state.reverseStereo}
             ActionRow("Crossfeed","${(state.crossfeed*100).toInt()}%"){state.crossfeed=when(state.crossfeed){0f->.25f;.25f->.5f;else->0f}}
             ActionRow("Reverb","${(state.reverb*100).toInt()}%"){state.reverb=when(state.reverb){0f->.15f;.15f->.3f;else->0f}}
-            Text("Processing remains explicitly opt-in; the prototype never claims signal changes are occurring.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("SIMULATED PROCESSING · no live audio samples are altered.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+        }
+    }
+}
+
+
+@Composable private fun ColumnScope.EqualizerSettings(state:ShellState){
+    val labels=listOf("31 Hz","62 Hz","125 Hz","250 Hz","500 Hz","1 kHz","2 kHz","4 kHz","8 kHz","16 kHz")
+    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+        item{
+            IntentSection("Graphic equalizer","Reset"){state.resetEq()}
+            labels.forEachIndexed{index,label->
+                ActionRow(label,"${signedDb(state.eqBandsDb[index])} dB"){state.cycleEqBand(index)}
+            }
+            Text("SIMULATED PROCESSING · EQ values are not applied to live audio.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+        }
+    }
+}
+
+@Composable private fun ColumnScope.LyricSourcesSettings(state:ShellState){
+    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+        item{
+            IntentSection("Resolution order")
+            state.lyricSourceOrder.forEachIndexed{index,name->
+                Row(Modifier.fillMaxWidth().heightIn(min=64.dp),verticalAlignment=Alignment.CenterVertically){
+                    Text((index+1).toString().padStart(2,'0'),style=Type.numeric.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.width(34.dp))
+                    Text(name,style=Type.row.copy(color=LocalTsunamiPalette.current.ink),modifier=Modifier.weight(1f))
+                    if(index>0)HitIcon(Glyph.UP,"Move $name up",{state.moveLyricSource(index,-1)})
+                    if(index<state.lyricSourceOrder.lastIndex)HitIcon(Glyph.DOWN,"Move $name down",{state.moveLyricSource(index,1)})
+                }
+                Rule()
+            }
+            Text("This preview represents source precedence only. It performs no lyric lookup, transcription, authentication, or network request.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -231,7 +303,7 @@ private fun settingsTitle(page:String)=when(page){
             ToggleRow("Beat backlight",if(state.visualizerBeatBacklight)"ON" else "OFF"){state.visualizerBeatBacklight=!state.visualizerBeatBacklight}
             ToggleRow("Behind lyrics",if(state.visualizerBehindLyrics)"ON" else "OFF"){state.visualizerBehindLyrics=!state.visualizerBehindLyrics}
             ToggleRow("Reduced motion",if(state.reducedMotion)"ON" else "OFF"){state.reducedMotion=!state.reducedMotion}
-            Text("Visualizer state is deterministic mock state. No microphone, audio-session capture, or production telemetry is accessed.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("SIMULATED VISUAL · no microphone, audio-session capture or live telemetry.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -267,7 +339,7 @@ private fun settingsTitle(page:String)=when(page){
         item{
             IntentSection("Presets","Save"){state.saveShufflePreset()}
             state.shufflePresets.forEach{preset->ActionRow(preset,if(preset.contains(state.shuffleMode,true))"CURRENT-LIKE" else "SAVED"){state.banner="Applied shuffle preset · $preset"}}
-            Text("All shuffle policies affect deterministic prototype queue choices only; they do not import production queue code.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("SIMULATED QUEUE · shuffle policies affect this preview queue only.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -279,7 +351,7 @@ private fun settingsTitle(page:String)=when(page){
             state.libraryRoots.forEach{root->
                 ActionRow(root,if(root.contains("Audiobooks",true))"LONGFORM ROOT" else "MUSIC ROOT"){state.removeLibraryRoot(root)}
             }
-            Text("Tap a listed root to remove it. At least one root is always retained in mock state.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Tap a listed root to remove it. At least one root is retained in this preview.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
             IntentSection("Exclusions")
             ActionRow("Excluded folders","${state.excludedFolderCount} paths"){state.cycleExcludedFolders()}
             ActionRow("Excluded extensions",state.excludedExtensions){state.cycleExcludedExtensions()}
@@ -290,15 +362,21 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.LibrarySectionsSettings(state:ShellState){
-    val sections=listOf("Tracks","Albums","Artists","Playlists","Folders","Longform","Radio")
     LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
         item{
-            IntentSection("Visible lenses")
-            sections.forEach{section->
-                if(section=="Tracks") ToggleRow(section,"ANCHOR"){state.banner="Tracks remains the stable library anchor"}
-                else ToggleRow(section,if(section in state.hiddenLibrarySections)"HIDDEN" else "VISIBLE"){state.toggleLibrarySection(section)}
+            IntentSection("Library lens order")
+            state.librarySectionOrder.forEachIndexed{index,section->
+                Row(Modifier.fillMaxWidth().heightIn(min=64.dp),verticalAlignment=Alignment.CenterVertically){
+                    Text((index+1).toString().padStart(2,'0'),style=Type.numeric.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.width(34.dp))
+                    Text(section,style=Type.row.copy(color=LocalTsunamiPalette.current.ink),modifier=Modifier.weight(1f))
+                    if(section=="Tracks") Text("ANCHOR",style=Type.micro.copy(color=LocalTsunamiPalette.current.ink3))
+                    else TextCommand(if(section in state.hiddenLibrarySections)"Show $section" else "Hide $section",{state.toggleLibrarySection(section)},section !in state.hiddenLibrarySections)
+                    if(index>0)HitIcon(Glyph.UP,"Move $section up",{state.moveLibrarySection(index,-1)})
+                    if(index<state.librarySectionOrder.lastIndex)HitIcon(Glyph.DOWN,"Move $section down",{state.moveLibrarySection(index,1)})
+                }
+                Rule()
             }
-            Text("The shell keeps the navigation model stable while allowing the library index to be pruned to the listener's actual object classes.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Order is user-controlled, but Tracks remains a guaranteed visible fallback so the Library never loses its stable anchor.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -309,7 +387,7 @@ private fun settingsTitle(page:String)=when(page){
             IntentSection("Active profile")
             ActionRow("Main library",if(state.activeLibraryProfile=="Main library")"ACTIVE · 2 roots" else "2 roots"){state.activeLibraryProfile="Main library";state.banner="Library profile · Main library"}
             ActionRow("Travel library",if(state.activeLibraryProfile=="Travel library")"ACTIVE · offline-first" else "offline-first"){state.activeLibraryProfile="Travel library";state.banner="Library profile · Travel library"}
-            ActionRow("Create profile","Mock profile creation"){state.cycleLibraryProfile()}
+            ActionRow("Create profile","Create from current roots"){state.cycleLibraryProfile()}
         }
     }
 }
@@ -322,7 +400,7 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Now playing",state.metadataTemplate){state.cycleMetadataTemplate()}
             ActionRow("Album artist",state.albumArtistMode){state.cycleAlbumArtistMode()}
             ActionRow("Car display","Title · Artist"){state.banner="Car-display template · Title · Artist"}
-            Text("Metadata templates are presentation rules only; they do not rewrite source tags in this backend-free shell.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Display only · source tags are never rewritten.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -337,8 +415,8 @@ private fun settingsTitle(page:String)=when(page){
             ToggleRow("Love / hate sync",if(state.loveHateSync)"ON" else "OFF"){state.loveHateSync=!state.loveHateSync}
             ActionRow("Scrobble threshold","${state.scrobbleThreshold}%"){state.cycleScrobbleThreshold()}
             ActionRow("Threshold cap","${state.scrobbleThresholdCapSeconds}s"){state.cycleScrobbleCap()}
-            ActionRow("Import listening history","CSV / JSON mock"){state.banner="History import preview · 128 matched · 7 unmatched"}
-            Text("No credential, OAuth, scrobble, or network operation occurs. The prototype represents only the user-facing control model.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            ActionRow("Import listening history","CSV / JSON preview"){state.banner="History import preview · 128 matched · 7 unmatched"}
+            Text("SIMULATED STATE · no credentials, OAuth, scrobble or network operation.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -351,6 +429,30 @@ private fun settingsTitle(page:String)=when(page){
             listOf("Player","Lyrics","Visualizer","Library","Search","Signal","Settings").forEach{view->
                 ActionRow("$view orientation",state.orientationLocks[view]?:"Auto"){state.cycleOrientation(view)}
             }
+        }
+        item{
+            IntentSection("Player action surfaces")
+            Text("Mini player keeps previous / play-pause / next as stable transport; choose up to two contextual extras.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=8.dp))
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+                listOf("Favourite","Lyrics","Queue","Output","Sleep").forEach{action->
+                    TextCommand(action,{state.toggleMiniPlayerExtra(action)},action in state.miniPlayerExtras,modifier=Modifier.semantics{contentDescription="Mini player extra: $action"})
+                }
+            }
+            Rule()
+            Text("Full listening environment keeps transport and mode navigation stable; choose up to five object actions beneath the track metadata.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(top=12.dp,bottom=4.dp))
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+                listOf("Favourite","Offline","Share","Play next","Add to playlist").forEach{action->
+                    TextCommand(action,{state.toggleFullPlayerButton(action)},action in state.fullPlayerButtons,modifier=Modifier.semantics{contentDescription="Full player action: $action"})
+                }
+            }
+            Rule()
+            Text("Android notification · up to five supported actions",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(top=12.dp,bottom=4.dp))
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+                listOf("Previous","Play/Pause","Next","Favourite","Shuffle","Repeat").forEach{action->
+                    TextCommand(action,{state.toggleNotificationAction(action)},action in state.notificationActions,modifier=Modifier.semantics{contentDescription="Notification action: $action"})
+                }
+            }
+            Rule()
         }
         item{
             IntentSection("Track gestures")
@@ -366,7 +468,7 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Double",state.headsetDouble){state.headsetDouble=if(state.headsetDouble=="Next")"Seek +30s" else "Next"}
             ActionRow("Triple",state.headsetTriple){state.headsetTriple=if(state.headsetTriple=="Previous")"Seek −15s" else "Previous"}
             ActionRow("Long",state.headsetLong){state.headsetLong=if(state.headsetLong=="Actions")"Output" else "Actions"}
-            Text("Mappings are represented explicitly; the shell does not listen for hardware buttons.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Mappings are represented explicitly; this preview does not listen for hardware buttons.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -446,12 +548,12 @@ private fun settingsTitle(page:String)=when(page){
     LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Portability")
-            ActionRow("Export TSUNAMI backup","Settings · playlists · history · progress"){state.banner="Mock backup exported"}
-            ActionRow("Restore TSUNAMI backup","Preview before applying"){state.banner="Mock restore preview opened"}
+            ActionRow("Export TSUNAMI backup","Settings · playlists · history · progress"){state.banner="Backup export preview ready"}
+            ActionRow("Restore TSUNAMI backup","Preview before applying"){state.banner="Restore preview opened"}
             ActionRow("TSUNAMI device migration",state.deviceMigrationStatus){state.prepareDeviceMigration()}
-            ActionRow("Share TSUNAMI APK","Installed-shell handoff mock"){state.banner="TSUNAMI APK share sheet opened · mock"}
-            ActionRow("Export longform progress","JSON mock"){state.banner="Longform progress exported"}
-            ActionRow("Import longform progress","JSON mock"){state.banner="Longform progress import · 14 matched · 1 unmatched"}
+            ActionRow("Share TSUNAMI APK","Share handoff preview"){state.banner="TSUNAMI APK share handoff preview"}
+            ActionRow("Export longform progress","JSON preview"){state.banner="Longform progress exported"}
+            ActionRow("Import longform progress","JSON preview"){state.banner="Longform progress import · 14 matched · 1 unmatched"}
             ActionRow("Preview path remap","${state.remapOldPath} → ${state.remapNewPath}"){state.cycleRemapPath()}
         }
         item{
@@ -460,7 +562,7 @@ private fun settingsTitle(page:String)=when(page){
             if(state.autoBackupEnabled){
                 ActionRow("Keep","${state.backupKeep} backups"){state.cycleBackupKeep()}
                 ActionRow("Interval","${state.backupIntervalHours} hours"){state.cycleBackupInterval()}
-                ActionRow("Backup now","Mock destination selected"){state.banner="Rotating backup complete"}
+                ActionRow("Backup now","Preview destination selected"){state.banner="Rotating backup complete"}
             }
         }
         item{
@@ -490,23 +592,42 @@ private fun signedDb(v:Float)=when{
 
 @Composable private fun ActionRow(title:String,state:String,onClick:()->Unit){
     val p=LocalTsunamiPalette.current
+    var focused by remember(title){ mutableStateOf(false) }
     Row(
-        Modifier.fillMaxWidth().heightIn(min=66.dp).semantics{role=Role.Button}.clickable(onClick=onClick).padding(vertical=10.dp),
+        Modifier.fillMaxWidth().heightIn(min=66.dp)
+            .semantics(mergeDescendants=true){role=Role.Button}
+            .onFocusChanged{focused=it.isFocused}
+            .clickable(onClick=onClick)
+            .background(if(focused)p.groundAlt else androidx.compose.ui.graphics.Color.Transparent)
+            .padding(vertical=10.dp),
         verticalAlignment=Alignment.CenterVertically
     ){
+        Box(Modifier.width(if(focused)3.dp else 1.dp).height(30.dp).background(if(focused)p.selected else androidx.compose.ui.graphics.Color.Transparent))
+        Spacer(Modifier.width(if(focused)8.dp else 0.dp))
         Column(Modifier.weight(1f)){
             Text(title,style=Type.row.copy(color=p.ink))
             Spacer(Modifier.height(2.dp))
             Text(state,style=Type.meta.copy(color=p.ink3),maxLines=2)
         }
-        Box(Modifier.width(28.dp).height(1.dp).background(p.rule))
+        Box(Modifier.width(if(focused)34.dp else 28.dp).height(if(focused)2.dp else 1.dp).background(if(focused)p.selected else p.rule))
     }
     Rule()
 }
 
 @Composable private fun ToggleRow(title:String,state:String,onClick:()->Unit){
     val p=LocalTsunamiPalette.current
-    Row(Modifier.fillMaxWidth().heightIn(min=62.dp).semantics{role=Role.Switch;stateDescription=state}.clickable(onClick=onClick).padding(vertical=10.dp),verticalAlignment=Alignment.CenterVertically){
+    var focused by remember(title){ mutableStateOf(false) }
+    Row(
+        Modifier.fillMaxWidth().heightIn(min=62.dp)
+            .semantics(mergeDescendants=true){role=Role.Switch;stateDescription=state}
+            .onFocusChanged{focused=it.isFocused}
+            .clickable(onClick=onClick)
+            .background(if(focused)p.groundAlt else androidx.compose.ui.graphics.Color.Transparent)
+            .padding(vertical=10.dp),
+        verticalAlignment=Alignment.CenterVertically
+    ){
+        Box(Modifier.width(if(focused)3.dp else 1.dp).height(28.dp).background(if(focused)p.selected else androidx.compose.ui.graphics.Color.Transparent))
+        Spacer(Modifier.width(if(focused)8.dp else 0.dp))
         Text(title,style=Type.row.copy(color=p.ink),modifier=Modifier.weight(1f))
         Text(state,style=Type.micro.copy(color=p.selected,fontWeight=FontWeight.SemiBold))
     }
