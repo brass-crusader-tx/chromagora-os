@@ -61,6 +61,7 @@ fun main(){
  val bufferingState=ShellState(defaultFixture("buffering"));ok(bufferingState.buffering&&!bufferingState.playing,"buffering fixture");bufferingState.togglePlayback();ok(!bufferingState.buffering&&bufferingState.playing,"buffer resolution")
  val unavailableState=ShellState(defaultFixture("unavailable"));ok(unavailableState.currentTrack?.available==false&&!unavailableState.playing,"unavailable fixture");unavailableState.togglePlayback();ok(unavailableState.banner?.startsWith("Unavailable")==true,"unavailable guard");unavailableState.next();ok(unavailableState.currentTrack?.available==true,"unavailable skip")
  ok(defaultFixture("partial").partial,"partial fixture")
+ s.libraryViewMode="Index";ok(s.libraryViewMode=="Index","library index view");s.libraryViewMode="Ledger";ok(s.libraryViewMode=="Ledger","library ledger view")
  val emptyQueue=ShellState(defaultFixture("queue-empty"));ok(emptyQueue.queue.isEmpty()&&emptyQueue.currentTrack==null&&!emptyQueue.playing&&emptyQueue.positionMs==0L,"queue-empty fixture")
  val searchFailure=ShellState(defaultFixture("search-error"));ok(searchFailure.searchFault,"search-error fixture");searchFailure.retrySearch();ok(!searchFailure.searchFault,"search recovery")
  val providerConnecting=ShellState(defaultFixture("provider-connecting"));ok(providerConnecting.providerTransient=="connecting","provider connecting");providerConnecting.retryProvider();ok(providerConnecting.providerTransient.isEmpty(),"provider connecting recovery")
