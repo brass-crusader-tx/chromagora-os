@@ -2,12 +2,6 @@ name: TSUNAMI UI Genesis Builder
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - build/tsunami-ui-genesis-20260925
-    paths:
-      - "tsunami-builder/**"
-      - ".github/workflows/tsunami-ui-builder.yml"
 
 permissions:
   contents: read
