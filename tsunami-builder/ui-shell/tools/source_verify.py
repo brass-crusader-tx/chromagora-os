@@ -108,7 +108,7 @@ REQUIRED_ANCHORS = {
         "playNext(", "shuffleNext(", "moveQueue(", "toggleDownload(", "addToPlaylist(",
         "createEmptyPlaylist(", "cycleRepeat(", "cycleCrossfade(", "advanceImport(", "importAudits", "describeImportAudit(", "announceImportAudit(",
         "selectedTrackIds", "addSelectionToPlaylist(", "hiddenLibrarySections", "metadataTemplate", "if(!track.available && play)", "lyricsGlobalDelayMs", "showArtworkInPlayer", "buffering", "togglePlayback(",
-        "highContrast", "largeControls", "hapticStrength", "wifiOnlyDownloads", "lyricsAutoFetch", "resumePositions", "playedLongform", "seekRelative(", "togglePlayedLongform(", "listenLens",
+        "highContrast", "largeControls", "hapticStrength", "advancedExperience", "wifiOnlyDownloads", "lyricsAutoFetch", "resumePositions", "playedLongform", "seekRelative(", "togglePlayedLongform(", "listenLens",
         "signalSection", "runGaplessProbe(", "auditLyrics(", "scanDuplicateHashes(", "exportReplay(",
         "excludedGenres", "excludedPlaylistPaths", "swipeUp", "swipeDown", "albumArtistMode", "prepareDeviceMigration(",
         "miniPlayerExtras", "fullPlayerButtons", "notificationActions", "toggleNotificationAction(", "quickSettingsActions", "toggleQuickSettingsAction(", "widgetLayout", "cycleWidgetLayout(", "wearControlsEnabled", "wearSecondaryAction", "cycleWearSecondaryAction(", "runPlayerAction(",
@@ -397,7 +397,7 @@ def main() -> int:
         "settings_actions": 100,
         "settings_toggles": 45,
         "authored_actions": 280,
-        "instrumentation_tests": 30,
+        "instrumentation_tests": 31,
     }
     collapsed = {name: (counts[name], minimum) for name, minimum in floors.items() if counts[name] < minimum}
     if collapsed:
