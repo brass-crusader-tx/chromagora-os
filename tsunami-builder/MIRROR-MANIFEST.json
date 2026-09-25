@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "b7751c4241907abb3bef9b13e261cbad0d2a2ca1",
+  "source_head": "19ad901cedf93639a0cc5ac04c1ea4e88e7652fc",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 8,
-  "note": "Every listed blob is mirrored byte-identically from private Genesis source head b7751c4241907abb3bef9b13e261cbad0d2a2ca1. Mirror tree revalidated after Settings synchronization; build outputs are not claimed until Android assembly succeeds.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 19ad901cedf93639a0cc5ac04c1ea4e88e7652fc; documentation-only commits outside the mirror set do not alter the shell build graph. Build outputs are not claimed until Android assembly succeeds.",
   "files": [
     {
       "path": "ui-shell/README.md",
