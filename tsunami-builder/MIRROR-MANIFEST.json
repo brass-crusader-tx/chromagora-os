@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "27c63dbedd8914b03b3756c7de2a23a9f78e0753",
+  "source_head": "16d1778b6bd5d97b862f46b8e17f152f34e0eb43",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 8,
-  "note": "Every listed blob is mirrored byte-identically. Hosted workflow execution is manual while runner allocation is unavailable. Build outputs are not claimed until Android assembly succeeds.",
+  "note": "Every listed blob is mirrored byte-identically from the current private Genesis branch. Hosted workflow execution remains manual while runner allocation is unavailable. Build outputs are not claimed until Android assembly succeeds.",
   "files": [
     {
       "path": "ui-shell/app/build.gradle.kts",
