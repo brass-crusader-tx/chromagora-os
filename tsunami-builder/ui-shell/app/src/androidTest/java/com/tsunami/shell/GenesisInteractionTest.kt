@@ -288,6 +288,25 @@ class GenesisInteractionTest {
     }
 
 
+    @Test fun externalPlaybackSurfacesHaveExplicitMockContracts() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithText("Controls & gestures").performClick()
+
+        compose.onNodeWithContentDescription("Quick Settings action: Previous").performClick()
+        compose.onNodeWithText("Quick Settings exposes two transport actions").assertExists()
+        compose.onNodeWithContentDescription("Quick Settings action: Next").performClick()
+        compose.onNodeWithContentDescription("Quick Settings action: Previous").performClick()
+
+        compose.onNodeWithText("Home-screen widget").performClick()
+        compose.onNodeWithText("Listening").assertExists()
+
+        compose.onNodeWithText("Wear transport").performClick()
+        compose.onNodeWithText("Wear secondary action").assertDoesNotExist()
+        compose.onNodeWithText("Wear transport").performClick()
+        compose.onNodeWithText("Wear secondary action").performClick()
+        compose.onNodeWithText("Wear secondary action · Queue").assertExists()
+    }
+
     @Test fun providerImportAuditPreservesLibraryAcrossDisconnect() {
         compose.onNodeWithContentDescription("Settings").performClick()
         compose.onNodeWithText("Connected services").performClick()
