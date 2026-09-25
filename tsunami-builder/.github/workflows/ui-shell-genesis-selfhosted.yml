@@ -1,24 +1,6 @@
 name: TSUNAMI UI Genesis Self Hosted
 
 on:
-  push:
-    branches: [genesis/ui-shell-20260923]
-    paths:
-      - ".github/workflows/ui-shell-genesis-selfhosted.yml"
-      - "ui-shell/**"
-      - "brand/**"
-      - "docs/TSUNAMI-UI-GENESIS-*.md"
-      - "tools/ui_shell_gate.py"
-      - "tools/ui_shell_codespace_build.py"
-  pull_request:
-    branches: [main]
-    paths:
-      - ".github/workflows/ui-shell-genesis-selfhosted.yml"
-      - "ui-shell/**"
-      - "brand/**"
-      - "docs/TSUNAMI-UI-GENESIS-*.md"
-      - "tools/ui_shell_gate.py"
-      - "tools/ui_shell_codespace_build.py"
   workflow_dispatch:
 
 permissions:
