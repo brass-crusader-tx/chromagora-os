@@ -502,10 +502,20 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
         }
         pendingConfirmation=null
     }
-    fun resolveBuffering(){ buffering=false; playing=currentTrack?.available != false; banner=if(playing)"Playback ready" else "Current item unavailable" }
+    fun resolveBuffering(){
+        val track=currentTrack
+        buffering=false
+        playing=track?.available==true
+        banner=when{
+            track==null -> "Queue empty"
+            playing -> "Playback ready"
+            else -> "Current item unavailable"
+        }
+    }
     fun togglePlayback(){
         val track=currentTrack
-        if(track?.available==false){ playing=false; buffering=false; banner="Unavailable · ${track.title}"; return }
+        if(track==null){ playing=false; buffering=false; banner="Queue empty"; return }
+        if(!track.available){ playing=false; buffering=false; banner="Unavailable · ${track.title}"; return }
         if(buffering){ resolveBuffering(); return }
         playing=!playing
     }
