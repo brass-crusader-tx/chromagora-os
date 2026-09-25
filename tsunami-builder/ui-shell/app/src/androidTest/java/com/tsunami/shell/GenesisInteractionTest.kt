@@ -62,9 +62,14 @@ class GenesisInteractionTest {
         compose.onAllNodesWithContentDescription("Artwork for Afterglow at the Edge of the City").onFirst().assertExists()
         compose.onNodeWithText("Index").performClick()
         compose.onNodeWithText("Library view · Index").assertExists()
+        compose.onNodeWithText("Dense").assertDoesNotExist()
+        compose.onNodeWithText("Comfortable").assertDoesNotExist()
+        compose.onNodeWithText("Title A–Z").assertDoesNotExist()
         compose.onAllNodesWithContentDescription("Artwork for Afterglow at the Edge of the City").assertCountEquals(0)
         compose.onNodeWithText("Afterglow at the Edge of the City").assertExists()
         compose.onNodeWithText("Ledger").performClick()
+        compose.onNodeWithText("Title A–Z").assertExists()
+        compose.onNodeWithText("Dense").assertExists()
         compose.onAllNodesWithContentDescription("Artwork for Afterglow at the Edge of the City").onFirst().assertExists()
     }
 
@@ -484,6 +489,28 @@ class GenesisInteractionTest {
         state.runPlayerAction("Play/Pause")
         assertFalse(state.playing)
         assertTrue(state.currentTrack == null)
+    }
+
+    @Test fun libraryRootMutationPropagatesIntoFolderLens() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithText("Library roots").performClick()
+        compose.onNodeWithText("Add").performClick()
+        compose.onNodeWithText("/Music/Field Recordings").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Folders").performClick()
+        compose.onNodeWithText("/Music/Field Recordings").assertExists()
+    }
+
+    @Test fun albumObjectPlayUsesTrackFromThatAlbum() {
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Albums").performClick()
+        compose.onNodeWithText("Glass Meridian").performClick()
+        compose.onNodeWithText("Play").performClick()
+        compose.onNodeWithContentDescription("Open listening environment").performClick()
+        compose.onNodeWithText("Glass Meridian").assertExists()
+        compose.onNodeWithText("Ari Nox").assertExists()
     }
 
     @Test fun libraryAndSearchStateRespond() {

@@ -2,16 +2,16 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "68c3805cbb1a0ba7941907743118068307bae0ac",
+  "source_head": "b7751c4241907abb3bef9b13e261cbad0d2a2ca1",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 8,
-  "note": "Every listed blob is mirrored byte-identically from private Genesis source head 68c3805cbb1a0ba7941907743118068307bae0ac. Hosted workflow execution remains unavailable while Actions fails before step allocation. Build outputs are not claimed until Android assembly succeeds.",
+  "note": "Every listed blob is mirrored byte-identically from private Genesis source head b7751c4241907abb3bef9b13e261cbad0d2a2ca1. Build outputs are not claimed until Android assembly succeeds.",
   "files": [
     {
       "path": "ui-shell/README.md",
-      "git_blob_sha": "d2bbb3911962929751f4037ef008e06f272877fb",
+      "git_blob_sha": "c4687ab475079ee71ef93caf0a49c91ca4d83506",
       "bytes": 8130
     },
     {
@@ -21,8 +21,8 @@
     },
     {
       "path": "ui-shell/app/src/androidTest/java/com/tsunami/shell/GenesisInteractionTest.kt",
-      "git_blob_sha": "57c337888a0d9945a4c258a226f5c7cd68afb09c",
-      "bytes": 27286
+      "git_blob_sha": "eabaa5e206afb619099f3aacc8a87078d17e0669",
+      "bytes": 28803
     },
     {
       "path": "ui-shell/app/src/main/AndroidManifest.xml",
@@ -66,8 +66,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/LibraryScreen.kt",
-      "git_blob_sha": "5fb278aaa056a390b61809cf0bf36ece5582bc11",
-      "bytes": 18946
+      "git_blob_sha": "049c1414f555c801450280360b28fb75ee715534",
+      "bytes": 20114
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/ListenScreen.kt",
@@ -91,8 +91,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/state/ShellState.kt",
-      "git_blob_sha": "4a8713c5ad2d2a5f76f8f40010677d9e503f8179",
-      "bytes": 39677
+      "git_blob_sha": "4426f99e7a38d6cad859d952041fb2a1c3b83116",
+      "bytes": 39689
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/theme/TsunamiTheme.kt",
@@ -201,8 +201,8 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "a0f6c731b1e57d32cbd009dd4a64cd574f0e7b06",
-      "bytes": 29585
+      "git_blob_sha": "a19a9ef8581dff2aea649765064d18bfcf0c2755",
+      "bytes": 29726
     },
     {
       "path": "ui-shell/tools/visual_sanity_verify.py",
@@ -248,8 +248,8 @@
     },
     {
       "path": "tools/ui_shell_static_check.py",
-      "git_blob_sha": "c267275583c65978e62ed80d817c82d0cedc2998",
-      "bytes": 18404
+      "git_blob_sha": "bb21dfc664cbe1b7a92752d9efc8e98b46543ed1",
+      "bytes": 18508
     }
   ]
 }

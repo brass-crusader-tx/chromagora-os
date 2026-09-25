@@ -42,9 +42,9 @@ import com.tsunami.shell.theme.*
         if(!state.offlineOnly) state.fixture.tracks else state.fixture.tracks.filter{it.id in offlineIds}
     }
     val ordered=remember(filtered,state.sortLabel){ if(state.sortLabel=="Title A–Z") filtered.sortedBy{it.title.lowercase()} else filtered }
-    val folderRows=remember(ordered){
+    val folderRows=remember(ordered,state.libraryRoots.toList()){
         val groups=ordered.filter{it.provenance==Provenance.OWNED}.groupBy(::libraryFolderFor)
-        listOf("/Music/Library","/Music/Field Recordings","/Audiobooks").map{name->
+        state.libraryRoots.map{name->
             val items=groups[name].orEmpty()
             val noun=if(name=="/Audiobooks") if(items.size==1)"book" else "books" else if(items.size==1)"track" else "tracks"
             Triple(name,"Folder","${items.size} $noun")
@@ -63,11 +63,11 @@ import com.tsunami.shell.theme.*
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){lenses.forEach{(lens,label)->TextCommand(label,{if(state.libraryLens!=lens){state.clearSelection();state.libraryLens=lens}},state.libraryLens==lens)}}
         Rule()
         Row(Modifier.fillMaxWidth(),verticalAlignment=androidx.compose.ui.Alignment.CenterVertically){
-            TextCommand(state.sortLabel,{state.sortLabel=if(state.sortLabel=="Recently played")"Title A–Z" else "Recently played"},true)
+            if(state.libraryViewMode=="Ledger") TextCommand(state.sortLabel,{state.sortLabel=if(state.sortLabel=="Recently played")"Title A–Z" else "Recently played"},true)
             TextCommand("Offline",{state.offlineOnly=!state.offlineOnly},state.offlineOnly)
             TextCommand("Ledger",{state.libraryViewMode="Ledger";state.banner="Library view · Ledger"},state.libraryViewMode=="Ledger")
             TextCommand("Index",{state.libraryViewMode="Index";state.sortLabel="Title A–Z";state.banner="Library view · Index"},state.libraryViewMode=="Index")
-            TextCommand(if(state.denseLibrary)"Comfortable" else "Dense",{state.denseLibrary=!state.denseLibrary},state.denseLibrary)
+            if(state.libraryViewMode=="Ledger") TextCommand(if(state.denseLibrary)"Comfortable" else "Dense",{state.denseLibrary=!state.denseLibrary},state.denseLibrary)
             if(state.libraryLens==LibraryLens.TRACKS) TextCommand(if(state.selectionMode)"Selecting" else "Select",{
                 state.selectionMode=!state.selectionMode
                 if(!state.selectionMode) state.selectedTrackIds.clear()
@@ -92,8 +92,11 @@ import com.tsunami.shell.theme.*
                     val letters=remember(ordered){ ordered.mapNotNull{it.title.firstOrNull()?.uppercaseChar()}.distinct().filter{it.isLetter()}.take(26) }
                     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
                         letters.forEach{letter->TextCommand(letter.toString(),{
-                            val index=ordered.indexOfFirst{it.title.startsWith(letter,ignoreCase=true)}
-                            if(index>=0) scope.launch{listState.animateScrollToItem(if(state.libraryViewMode=="Index") index + letters.count{it < letter} else index)}
+                            val index=if(state.libraryViewMode=="Index"){
+                                val grouped=ordered.groupBy{it.title.firstOrNull()?.uppercaseChar()?.takeIf(Char::isLetter) ?: '#'}.toSortedMap()
+                                grouped.entries.takeWhile{it.key<letter}.sumOf{it.value.size+1}
+                            }else ordered.indexOfFirst{it.title.startsWith(letter,ignoreCase=true)}
+                            if(index>=0) scope.launch{listState.animateScrollToItem(index)}
                         })}
                     }
                     Rule()
@@ -200,6 +203,14 @@ import com.tsunami.shell.theme.*
     LazyColumn(Modifier.fillMaxWidth().weight(1f)){itemsIndexed(rows){index,(name,type,meta)->
         val representative=when(type){
             "Playlist","Smart list" -> state.playlistTracks[name]?.firstOrNull()?.let{id->state.fixture.tracks.firstOrNull{it.id==id}}
+            "Album" -> state.fixture.tracks.firstOrNull{it.album==name}
+            "Artist" -> state.fixture.tracks.firstOrNull{it.artist==name}
+            "Folder" -> state.fixture.tracks.firstOrNull{it.provenance==Provenance.OWNED && libraryFolderFor(it)==name}
+            "Radio" -> when(name){
+                "Recent favourites" -> state.fixture.tracks.firstOrNull{it.id in state.favourites}
+                "Night signal" -> state.fixture.tracks.firstOrNull{it.provenance!=Provenance.OWNED}
+                else -> state.fixture.tracks.firstOrNull{it.provenance==Provenance.OWNED}
+            }
             else -> state.fixture.tracks.getOrNull(index % state.fixture.tracks.size.coerceAtLeast(1))
         }
         var focused by remember(name,type){ mutableStateOf(false) }
@@ -235,10 +246,14 @@ import com.tsunami.shell.theme.*
         obj.kind=="Artist" -> filtered.filter{it.artist==obj.title}
         obj.kind=="Folder" -> filtered.filter{it.provenance==Provenance.OWNED && libraryFolderFor(it)==obj.title}
         obj.kind=="Playlist" || obj.kind=="Smart list" -> {
-            val ids=state.playlistTracks[obj.title].orEmpty().toSet()
-            filtered.filter{it.id in ids}
+            val byId=filtered.associateBy{it.id}
+            state.playlistTracks[obj.title].orEmpty().mapNotNull(byId::get)
         }
-        obj.kind=="Radio" -> filtered.take(8)
+        obj.kind=="Radio" -> when(obj.title){
+            "Recent favourites" -> filtered.filter{it.id in state.favourites}.take(8)
+            "Night signal" -> filtered.filter{it.provenance!=Provenance.OWNED}.take(8)
+            else -> filtered.filter{it.provenance==Provenance.OWNED}.take(8)
+        }
         else -> filtered.take(8)
     }
     Column(Modifier.fillMaxSize()){

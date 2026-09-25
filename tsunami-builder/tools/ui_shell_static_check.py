@@ -432,6 +432,8 @@ def main() -> int:
         "longformSeparatesAudiobooksAndPodcasts",
         "providerImportAuditPreservesLibraryAcrossDisconnect",
         "unavailableTrackCanOpenWithoutPretendingToPlay",
+        "libraryRootMutationPropagatesIntoFolderLens",
+        "albumObjectPlayUsesTrackFromThatAlbum",
     )
     for name in expected_test_contracts:
         if f"fun {name}(" not in tests:

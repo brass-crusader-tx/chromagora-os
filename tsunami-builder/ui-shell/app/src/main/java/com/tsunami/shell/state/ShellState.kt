@@ -415,7 +415,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     fun cycleBackupKeep(){ backupKeep=when(backupKeep){5->10;10->20;else->5} }
     fun cycleBackupInterval(){ backupIntervalHours=when(backupIntervalHours){24->72;72->168;else->24} }
     fun cycleLibraryProfile(){ activeLibraryProfile=if(activeLibraryProfile=="Main library")"Travel library" else "Main library"; banner="Library profile · $activeLibraryProfile" }
-    fun addMockLibraryRoot(){ val root=if("/Field Recordings" in libraryRoots)"/Imported Music" else "/Field Recordings"; if(root !in libraryRoots)libraryRoots.add(root); banner="Library root added · $root" }
+    fun addMockLibraryRoot(){ val root=if("/Music/Field Recordings" in libraryRoots)"/Music/Imported" else "/Music/Field Recordings"; if(root !in libraryRoots)libraryRoots.add(root); banner="Library root added · $root" }
     fun removeLibraryRoot(root:String){ if(libraryRoots.size<=1){banner="Keep at least one library root";return}; libraryRoots.remove(root); banner="Library root removed · $root" }
     fun toggleLibrarySection(section:String){
         if(section in hiddenLibrarySections) hiddenLibrarySections.remove(section)

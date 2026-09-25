@@ -132,7 +132,7 @@ REQUIRED_ANCHORS = {
     "screens/LibraryScreen.kt": [
         "LibraryLens.TRACKS", "LibraryLens.ALBUMS", "LibraryLens.ARTISTS",
         "LibraryLens.PLAYLISTS", "LibraryLens.FOLDERS", "LibraryLens.LONGFORM",
-        "LibraryLens.RADIO", "animateScrollToItem", "selectionMode", 'TextCommand("Ledger"', 'TextCommand("Index"', 'showArtwork=state.libraryViewMode=="Ledger"', "libraryViewMode", "showArtwork=false",
+        "LibraryLens.RADIO", "animateScrollToItem", "selectionMode", 'if(state.libraryViewMode=="Ledger") TextCommand(state.sortLabel', 'TextCommand("Ledger"', 'TextCommand("Index"', 'if(state.libraryViewMode=="Ledger") TextCommand(if(state.denseLibrary)', 'showArtwork=state.libraryViewMode=="Ledger"', "libraryViewMode", "showArtwork=false",
     ],
     "screens/SettingsScreen.kt": [
         '"audio"', '"visualizer"', '"shuffle"', '"library-roots"', '"library-sections"',
@@ -403,7 +403,7 @@ def main() -> int:
         "settings_actions": 100,
         "settings_toggles": 45,
         "authored_actions": 280,
-        "instrumentation_tests": 34,
+        "instrumentation_tests": 36,
     }
     collapsed = {name: (counts[name], minimum) for name, minimum in floors.items() if counts[name] < minimum}
     if collapsed:
