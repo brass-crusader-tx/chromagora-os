@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "71f49a21681bf357cd32afcc0a04545e245a332a",
+  "source_head": "78929c62997caad9bbdcbdc27c21c4b6da3e2619",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 8,
-  "note": "Every listed blob is mirrored byte-identically from private Genesis source head 71f49a21681bf357cd32afcc0a04545e245a332a. Hosted workflow execution remains unavailable while Actions fails before step allocation. Build outputs are not claimed until Android assembly succeeds.",
+  "note": "Every listed blob is mirrored byte-identically from private Genesis source head 78929c62997caad9bbdcbdc27c21c4b6da3e2619. Hosted workflow execution remains unavailable while Actions fails before step allocation. Build outputs are not claimed until Android assembly succeeds.",
   "files": [
     {
       "path": "ui-shell/app/build.gradle.kts",
@@ -41,8 +41,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/model/MockModels.kt",
-      "git_blob_sha": "9ffb528611f95b400ea1895de2b616a2b5331c27",
-      "bytes": 6622
+      "git_blob_sha": "3fbaf5d3e96a9a9bcb0bb345ee26bb74887eba4b",
+      "bytes": 6763
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/navigation/GenesisShell.kt",
