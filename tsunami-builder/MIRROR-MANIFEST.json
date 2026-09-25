@@ -2,16 +2,16 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "19ad901cedf93639a0cc5ac04c1ea4e88e7652fc",
+  "source_head": "7a8be40697d7350b97a8d304765b21a03d7ecc68",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 8,
-  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 19ad901cedf93639a0cc5ac04c1ea4e88e7652fc; documentation-only commits outside the mirror set do not alter the shell build graph. Build outputs are not claimed until Android assembly succeeds.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 7a8be40697d7350b97a8d304765b21a03d7ecc68. Documentation-only files outside the mirror set are intentionally excluded. Build/device PASS remains contingent on executable Android verification.",
   "files": [
     {
       "path": "ui-shell/README.md",
-      "git_blob_sha": "c4687ab475079ee71ef93caf0a49c91ca4d83506",
+      "git_blob_sha": "16c96b700b240c101d7601dfbd62832e6472447d",
       "bytes": 8130
     },
     {
@@ -21,8 +21,8 @@
     },
     {
       "path": "ui-shell/app/src/androidTest/java/com/tsunami/shell/GenesisInteractionTest.kt",
-      "git_blob_sha": "eabaa5e206afb619099f3aacc8a87078d17e0669",
-      "bytes": 28803
+      "git_blob_sha": "5d35f6eb3cb1d0d24c06317e90d05a114d0819a4",
+      "bytes": 29743
     },
     {
       "path": "ui-shell/app/src/main/AndroidManifest.xml",
@@ -201,8 +201,8 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "a19a9ef8581dff2aea649765064d18bfcf0c2755",
-      "bytes": 29726
+      "git_blob_sha": "b463b168f8fce8326df86a04e896399867f2cd7c",
+      "bytes": 29975
     },
     {
       "path": "ui-shell/tools/visual_sanity_verify.py",
@@ -248,8 +248,8 @@
     },
     {
       "path": "tools/ui_shell_static_check.py",
-      "git_blob_sha": "bb21dfc664cbe1b7a92752d9efc8e98b46543ed1",
-      "bytes": 18508
+      "git_blob_sha": "c9b01f23240018cc42cd99b148c7a2843a138787",
+      "bytes": 18566
     }
   ]
 }

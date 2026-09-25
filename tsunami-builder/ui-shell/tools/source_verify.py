@@ -367,10 +367,13 @@ def main() -> int:
     test_src=TEST.read_text(encoding="utf-8")
     if "externalPlaybackSurfacesHaveExplicitMockContracts" not in test_src:
         die("external playback surfaces lost their instrumentation contract")
+    if "progressiveSettingsRoutesRoundTripToStableRoot" not in test_src:
+        die("progressive settings routes lost their back-topology instrumentation contract")
     for name in ("adverseFixtureStatesRecoverWithoutDestroyingContext","emptyQueueFixtureCannotPretendToPlay","libraryIndexModeRemovesArtworkDependencyStructurally"):
         if name not in test_src:
             die(f"adverse-state instrumentation contract missing: {name}")
     print("EXTERNAL_PLAYBACK_SURFACES=PASS notification quick_settings widget wear")
+    print("PROGRESSIVE_SETTINGS_TOPOLOGY=PASS route_depth returns_to_stable_root")
     print("ADVERSE_STATE_CONTRACT=PASS search provider downloads queue")
 
     all_src = "\n".join(source_text.values())
@@ -403,7 +406,7 @@ def main() -> int:
         "settings_actions": 100,
         "settings_toggles": 45,
         "authored_actions": 280,
-        "instrumentation_tests": 36,
+        "instrumentation_tests": 37,
     }
     collapsed = {name: (counts[name], minimum) for name, minimum in floors.items() if counts[name] < minimum}
     if collapsed:

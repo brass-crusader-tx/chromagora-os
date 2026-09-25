@@ -331,6 +331,27 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Context rules").performScrollTo().assertExists()
     }
 
+
+    @Test fun progressiveSettingsRoutesRoundTripToStableRoot() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        val routes = listOf(
+            "Library profile" to "Library profiles",
+            "Custom sections" to "Custom library sections",
+            "Output profiles" to "Output profiles",
+            "Shuffle behavior" to "Shuffle behavior",
+            "Visualizer" to "Visualizer",
+            "Listening services" to "Listening services",
+            "Context rules" to "Context rules",
+            "Quick actions & sessions" to "Quick actions & sessions",
+        )
+        routes.forEach { (entry, title) ->
+            compose.onNodeWithText(entry).performScrollTo().performClick()
+            compose.onNodeWithText(title).assertExists()
+            compose.onNodeWithContentDescription("Back").performClick()
+            compose.onNodeWithText("Settings").assertExists()
+        }
+    }
+
     @Test fun providerImportAuditPreservesLibraryAcrossDisconnect() {
         compose.onNodeWithContentDescription("Settings").performClick()
         compose.onNodeWithText("Connected services").performClick()

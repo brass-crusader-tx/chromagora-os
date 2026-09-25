@@ -434,6 +434,7 @@ def main() -> int:
         "unavailableTrackCanOpenWithoutPretendingToPlay",
         "libraryRootMutationPropagatesIntoFolderLens",
         "albumObjectPlayUsesTrackFromThatAlbum",
+        "progressiveSettingsRoutesRoundTripToStableRoot",
     )
     for name in expected_test_contracts:
         if f"fun {name}(" not in tests:

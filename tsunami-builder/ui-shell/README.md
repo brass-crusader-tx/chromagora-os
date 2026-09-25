@@ -64,7 +64,7 @@ The shell intentionally remains backend-free. Queue, downloads, provider imports
 
 ## Current verification boundary
 
-Static source/state/type/brand verification is present in-repo, but final acceptance still requires an Android-capable host to assemble the current head, install `com.tsunami.shell`, run the 36 Compose instrumentation tests, execute the 45-state capture matrix, inspect logcat, and complete the human visual-review protocol. GitHub Actions for this repository are currently terminating at `startup_failure` before jobs are created, so a workflow startup failure is not treated as either build success or build failure.
+Static source/state/type/brand verification is present in-repo, but final acceptance still requires an Android-capable host to assemble the current head, install `com.tsunami.shell`, run the 37 Compose instrumentation tests, execute the 45-state capture matrix, inspect logcat, and complete the human visual-review protocol. GitHub Actions for this repository are currently terminating at `startup_failure` before jobs are created, so a workflow startup failure is not treated as either build success or build failure.
 
 
 ## Codespace fallback when GitHub-hosted Actions cannot start
