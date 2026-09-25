@@ -14,6 +14,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     var largeControls by mutableStateOf(false)
     var hapticStrength by mutableIntStateOf(1)
     var denseLibrary by mutableStateOf(false)
+    var advancedExperience by mutableStateOf(true)
     var listenLens by mutableStateOf("Deep cuts")
     var selectionMode by mutableStateOf(false)
     var currentIndex by mutableIntStateOf(0)
@@ -159,6 +160,9 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
         "15:08:33 · library index coherent"
     )
     var sourceError by mutableStateOf(fixture.error)
+    var searchFault by mutableStateOf(fixture.searchError)
+    var downloadsFault by mutableStateOf(fixture.downloadsError)
+    var providerTransient by mutableStateOf(when{fixture.providerConnecting->"connecting";fixture.providerError->"error";else->""})
     var loading by mutableStateOf(fixture.loading)
     var onboardingComplete by mutableStateOf(false)
     var banner by mutableStateOf<String?>(null)
@@ -166,8 +170,9 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     val selectedTrackIds = mutableStateListOf<String>()
     val downloads = mutableStateMapOf<String, DownloadState>().apply {
         fixture.tracks.take(4).forEach { put(it.id, DownloadState.DOWNLOADED) }
+        if(fixture.downloadsActive) fixture.tracks.firstOrNull{it.provenance!=Provenance.OWNED}?.let{put(it.id,DownloadState.DOWNLOADING)}
     }
-    val queue = mutableStateListOf<Track>().apply { addAll(fixture.tracks.take(8)) }
+    val queue = mutableStateListOf<Track>().apply { if(!fixture.queueEmpty) addAll(fixture.tracks.take(8)) }
     val bookmarks = mutableStateMapOf<String, Long>()
     val playedLongform = mutableStateListOf<String>()
     val resumePositions = mutableStateMapOf<String, Long>().apply {
@@ -329,6 +334,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
         clearSelection()
     }
     fun toggleDownload(id:String){
+        downloadsFault=false
         when(downloads[id] ?: DownloadState.REMOTE){
             DownloadState.REMOTE -> { downloads[id]=DownloadState.DOWNLOADING; banner="Download queued" }
             DownloadState.DOWNLOADING -> { downloads[id]=DownloadState.DOWNLOADED; banner="Available offline" }
@@ -550,7 +556,11 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
             buffering=false
         }
     }
+    fun retrySearch(){ searchFault=false; banner="Search source recovered" }
+    fun retryDownloads(){ downloadsFault=false; banner="Downloads recovered · queued work preserved" }
+    fun retryProvider(){ providerTransient=""; banner="Provider connection ready to retry" }
     fun toggleService(index:Int){
+        providerTransient=""
         val s=services[index]
         val connected=!s.connected
         val retained=importAudits[s.name]!=null
