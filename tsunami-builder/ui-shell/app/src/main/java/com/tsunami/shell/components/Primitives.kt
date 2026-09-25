@@ -87,9 +87,25 @@ enum class Glyph { PLAY, PAUSE, NEXT, PREVIOUS, STAR, DOWNLOAD, SEARCH, SETTINGS
 @Composable fun SectionHeader(label:String,action:String?=null,onAction:(()->Unit)?=null){
     val p=LocalTsunamiPalette.current
     val target=LocalControlTarget.current
+    var actionFocused by remember(label,action){ mutableStateOf(false) }
     Row(Modifier.fillMaxWidth().padding(top=18.dp,bottom=9.dp),verticalAlignment=Alignment.CenterVertically){
         Text(label,style=Type.meta.copy(color=p.ink2,fontWeight=FontWeight.SemiBold),modifier=Modifier.weight(1f))
-        if(action!=null&&onAction!=null) Text(action,style=Type.meta.copy(color=p.selected),modifier=Modifier.sizeIn(minHeight=target).semantics{role=Role.Button;contentDescription="$action $label"}.clickable(onClick=onAction).wrapContentHeight(Alignment.CenterVertically))
+        if(action!=null&&onAction!=null){
+            Column(
+                Modifier
+                    .sizeIn(minHeight=target)
+                    .semantics{role=Role.Button;contentDescription="$action $label"}
+                    .onFocusChanged{actionFocused=it.isFocused}
+                    .focusable()
+                    .clickable(onClick=onAction)
+                    .padding(horizontal=6.dp),
+                verticalArrangement=Arrangement.Center
+            ){
+                Text(action,style=Type.meta.copy(color=if(actionFocused)p.selected else p.ink2,fontWeight=if(actionFocused)FontWeight.SemiBold else FontWeight.Normal))
+                Spacer(Modifier.height(4.dp))
+                Box(Modifier.width(if(actionFocused)18.dp else 8.dp).height(if(actionFocused)2.dp else 1.dp).background(if(actionFocused)p.selected else Color.Transparent))
+            }
+        }
     }
     Rule()
 }
@@ -155,6 +171,8 @@ enum class Glyph { PLAY, PAUSE, NEXT, PREVIOUS, STAR, DOWNLOAD, SEARCH, SETTINGS
     val unavailable=!track.available
     val effectiveState=if(unavailable)"UNAVAILABLE · $stateLabel" else stateLabel
     var showActions by remember(track.id){mutableStateOf(false)}
+    var focused by remember(track.id){mutableStateOf(false)}
+    var downloadFocused by remember(track.id){mutableStateOf(false)}
     Column(
         Modifier.fillMaxWidth()
             .semantics{
@@ -162,12 +180,13 @@ enum class Glyph { PLAY, PAUSE, NEXT, PREVIOUS, STAR, DOWNLOAD, SEARCH, SETTINGS
                 contentDescription="${track.title}, ${track.artist}, ${track.album}. $effectiveState"
                 if(selected) stateDescription="Selected"
             }
+            .onFocusChanged{focused=it.isFocused}
             .combinedClickable(onClick=onOpen,onLongClick={if(!selectionMode)showActions=true})
-            .background(if(selected)p.groundAlt else Color.Transparent)
+            .background(if(selected||focused)p.groundAlt else Color.Transparent)
             .padding(vertical=if(compact)8.dp else 12.dp)
     ){
         Row(verticalAlignment=Alignment.CenterVertically){
-            Box(Modifier.width(3.dp).height(if(compact)24.dp else 32.dp).background(if(selected)p.selected else Color.Transparent))
+            Box(Modifier.width(if(selected||focused)3.dp else 1.dp).height(if(compact)24.dp else 32.dp).background(if(selected||focused)p.selected else Color.Transparent))
             Spacer(Modifier.width(if(selected)7.dp else 0.dp))
             Artwork(track,Modifier.size(if(compact)42.dp else 52.dp),forceMissing)
             Spacer(Modifier.width(12.dp))
@@ -194,23 +213,29 @@ enum class Glyph { PLAY, PAUSE, NEXT, PREVIOUS, STAR, DOWNLOAD, SEARCH, SETTINGS
             Row(Modifier.padding(start=64.dp),verticalAlignment=Alignment.CenterVertically){
                 Text(track.quality,style=Type.micro.copy(color=p.ink3)); Spacer(Modifier.weight(1f)); Text(effectiveState,style=Type.micro.copy(color=if(unavailable)p.danger else p.ink3)); Spacer(Modifier.width(8.dp))
                 Box(
-                    Modifier.sizeIn(minWidth=64.dp,minHeight=LocalControlTarget.current)
+                    Modifier
+                        .sizeIn(minWidth=64.dp,minHeight=LocalControlTarget.current)
                         .semantics{
                             role=Role.Button
                             contentDescription=when(downloadState){
                                 DownloadState.REMOTE->"Make ${track.title} available offline"
-                                DownloadState.DOWNLOADING->"Finish mock download for ${track.title}"
+                                DownloadState.DOWNLOADING->"Complete download for ${track.title}"
                                 DownloadState.DOWNLOADED->"Remove offline copy of ${track.title}"
                             }
+                            if(unavailable) disabled()
                         }
+                        .onFocusChanged{downloadFocused=it.isFocused}
+                        .focusable(!unavailable)
+                        .background(if(downloadFocused&&!unavailable)p.groundAlt else Color.Transparent)
                         .clickable(enabled=!unavailable,onClick=onDownload),
                     contentAlignment=Alignment.Center
                 ){
                     when(downloadState){
-                        DownloadState.REMOTE -> GlyphIcon(Glyph.DOWNLOAD,Modifier.size(17.dp),p.ink3)
-                        DownloadState.DOWNLOADING -> Text("DOWNLOADING",style=Type.micro.copy(color=p.selected))
-                        DownloadState.DOWNLOADED -> Text("LOCAL",style=Type.micro.copy(color=p.possession,fontWeight=FontWeight.SemiBold))
+                        DownloadState.REMOTE -> GlyphIcon(Glyph.DOWNLOAD,Modifier.size(17.dp),if(downloadFocused)p.selected else p.ink3)
+                        DownloadState.DOWNLOADING -> Text("DOWNLOADING",style=Type.micro.copy(color=p.selected,fontWeight=if(downloadFocused)FontWeight.SemiBold else FontWeight.Medium))
+                        DownloadState.DOWNLOADED -> Text("LOCAL",style=Type.micro.copy(color=if(downloadFocused)p.selected else p.possession,fontWeight=FontWeight.SemiBold))
                     }
+                    if(downloadFocused&&!unavailable) Box(Modifier.align(Alignment.BottomCenter).width(20.dp).height(2.dp).background(p.selected))
                 }
             }
         }
@@ -242,6 +267,7 @@ enum class Glyph { PLAY, PAUSE, NEXT, PREVIOUS, STAR, DOWNLOAD, SEARCH, SETTINGS
 @Composable fun TimeRuler(progress:Float,onSeek:(Float)->Unit,modifier:Modifier=Modifier,enabled:Boolean=true){
     val p=LocalTsunamiPalette.current
     val target=LocalControlTarget.current
+    var focused by remember { mutableStateOf(false) }
     val gestures=if(enabled) Modifier
         .pointerInput(Unit){ detectTapGestures{ o->onSeek((o.x/size.width).coerceIn(0f,1f)) } }
         .pointerInput(Unit){ detectDragGestures(
@@ -249,15 +275,17 @@ enum class Glyph { PLAY, PAUSE, NEXT, PREVIOUS, STAR, DOWNLOAD, SEARCH, SETTINGS
             onDrag={ change,_->onSeek((change.position.x/size.width).coerceIn(0f,1f));change.consume() }
         ) } else Modifier
     Canvas(modifier.height(target).fillMaxWidth()
+        .onFocusChanged{focused=it.isFocused}
+        .focusable(enabled)
         .semantics{
             progressBarRangeInfo=ProgressBarRangeInfo(progress,0f..1f)
             if(enabled) setProgress { target -> onSeek(target.coerceIn(0f,1f)); true } else disabled()
         }
         .then(gestures)){
         val y=size.height*.5f
-        drawLine(p.rule,Offset(0f,y),Offset(size.width,y),2.dp.toPx())
-        drawLine(if(enabled)p.ink else p.ink3,Offset(0f,y),Offset(size.width*progress.coerceIn(0f,1f),y),3.dp.toPx())
+        drawLine(if(focused)p.selected else p.rule,Offset(0f,y),Offset(size.width,y),(if(focused)3.dp else 2.dp).toPx())
+        drawLine(if(enabled)p.ink else p.ink3,Offset(0f,y),Offset(size.width*progress.coerceIn(0f,1f),y),(if(focused)4.dp else 3.dp).toPx())
         val px=size.width*progress.coerceIn(0f,1f)
-        drawLine(if(enabled)p.selected else p.ink3,Offset(px,y-10.dp.toPx()),Offset(px,y+10.dp.toPx()),2.dp.toPx())
+        drawLine(if(enabled)p.selected else p.ink3,Offset(px,y-(if(focused)14.dp else 10.dp).toPx()),Offset(px,y+(if(focused)14.dp else 10.dp).toPx()),(if(focused)3.dp else 2.dp).toPx())
     }
 }
