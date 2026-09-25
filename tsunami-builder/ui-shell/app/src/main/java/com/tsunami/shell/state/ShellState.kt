@@ -36,6 +36,8 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     var searchIntent by mutableStateOf<SearchIntent?>(null)
     var settingsExpanded by mutableStateOf<String?>(null)
     var historyEnabled by mutableStateOf(true)
+    var historyCleared by mutableStateOf(false)
+    var pendingConfirmation by mutableStateOf<ConfirmationKind?>(null)
     var offlineMode by mutableStateOf(false)
     var wifiOnlyDownloads by mutableStateOf(true)
     var showOnlineOnMobileData by mutableStateOf(false)
@@ -50,6 +52,8 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     var dspPreampDb by mutableFloatStateOf(0f)
     var bassDb by mutableFloatStateOf(0f)
     var trebleDb by mutableFloatStateOf(0f)
+    val eqBandsDb = mutableStateListOf(0f,0f,0f,0f,0f,0f,0f,0f,0f,0f)
+    val lyricSourceOrder = mutableStateListOf("Embedded","LRC sidecar","LRCLIB","Whisper alignment")
     var monoDownmix by mutableStateOf(false)
     var stereoWidth by mutableFloatStateOf(1f)
     var visualizerMode by mutableStateOf("Spectrum")
@@ -165,20 +169,26 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     }
     val queue = mutableStateListOf<Track>().apply { addAll(fixture.tracks.take(8)) }
     val bookmarks = mutableStateMapOf<String, Long>()
+    val playedLongform = mutableStateListOf<String>()
     val resumePositions = mutableStateMapOf<String, Long>().apply {
         fixture.tracks.filter{it.longform}.forEach{ put(it.id,it.durationMs/3) }
     }
     val services = mutableStateListOf<ServiceConnection>().apply { addAll(fixture.services) }
     val importProgress = mutableStateMapOf<String, Int>()
+    val importAudits = mutableStateMapOf<String, ProviderImportAuditMock>()
     val playlistTracks = mutableStateMapOf<String, List<String>>().apply {
         put("Late driving", fixture.tracks.filterNot{it.longform}.take(4).map{it.id})
         put("Reference masters", fixture.tracks.filter{it.quality.contains("FLAC")}.take(6).map{it.id})
         put("Unfinished albums", fixture.tracks.filter{it.longform}.map{it.id})
     }
     val libraryRoots = mutableStateListOf("/Music/Library", "/Audiobooks")
+    val librarySectionOrder = mutableStateListOf("Tracks","Albums","Artists","Playlists","Folders","Longform","Radio")
     val hiddenLibrarySections = mutableStateListOf<String>()
     val orientationLocks = mutableStateMapOf<String,String>()
-    val quickActions = mutableStateListOf("Favourite","Lyrics")
+    val quickActions = mutableStateListOf("Sleep timer")
+    val miniPlayerExtras = mutableStateListOf("Favourite","Lyrics")
+    val fullPlayerButtons = mutableStateListOf("Favourite","Offline","Share")
+    val notificationActions = mutableStateListOf("Previous","Play/Pause","Next","Favourite")
     var activeSession by mutableStateOf<String?>(null)
     val contextRules = mutableStateListOf(
         ContextRuleMock("Morning focus",true,"06:00–10:00","Music"),
@@ -193,7 +203,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
         AudioProfileMock("Living room","Cast speaker","Bass +3 dB"),
     )
 
-    val currentTrack: Track? get() = queue.getOrNull(currentIndex.coerceIn(0,(queue.size-1).coerceAtLeast(0))) ?: fixture.tracks.firstOrNull()
+    val currentTrack: Track? get() = queue.getOrNull(currentIndex.coerceIn(0,(queue.size-1).coerceAtLeast(0)))
 
     private fun storeCurrentLongformPosition(){
         currentTrack?.takeIf{it.longform}?.let{resumePositions[it.id]=positionMs.coerceIn(0L,it.durationMs)}
@@ -201,13 +211,14 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     private fun restorePosition(track:Track)=if(track.longform) resumePositions[track.id]?.coerceIn(0L,track.durationMs) ?: track.durationMs/3 else 0L
 
     fun selectTrack(track: Track, play: Boolean = true) {
-        if(!track.available){ banner="Unavailable · ${track.title}"; return }
+        if(!track.available && play){ banner="Unavailable · ${track.title}"; return }
         storeCurrentLongformPosition()
         val idx=queue.indexOfFirst { it.id==track.id }
         if(idx>=0) currentIndex=idx else { queue.add(0,track); currentIndex=0 }
         positionMs=restorePosition(track)
-        playing=play
+        playing=play && track.available
         buffering=false
+        if(!track.available) banner="Unavailable · ${track.title}"
     }
     fun next() {
         if(queue.isEmpty()) return
@@ -322,6 +333,21 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     }
     fun cycleRepeat(){ repeat=when(repeat){RepeatMode.OFF->RepeatMode.ALL;RepeatMode.ALL->RepeatMode.ONE;RepeatMode.ONE->RepeatMode.OFF} }
     fun cycleSleep(){ sleepMinutes=when(sleepMinutes){0->15;15->30;30->60;else->0} }
+    fun runPlayerAction(action:String){
+        when(action){
+            "Previous" -> previous()
+            "Play/Pause" -> togglePlayback()
+            "Next" -> next()
+            "Shuffle" -> shuffle=!shuffle
+            "Repeat" -> cycleRepeat()
+            "Favourite" -> currentTrack?.let{toggleFavourite(it.id)}
+            "Queue" -> { playerMode=PlayerMode.QUEUE; expandedPlayer=true }
+            "Lyrics" -> { playerMode=PlayerMode.LYRICS; expandedPlayer=true }
+            "Output" -> { playerMode=PlayerMode.OUTPUT; expandedPlayer=true }
+            "Sleep" -> cycleSleep()
+            else -> banner="$action ready"
+        }
+    }
     fun cycleCrossfade(){ crossfadeSeconds=when(crossfadeSeconds){0->3;3->6;6->12;else->0}; banner=if(crossfadeSeconds==0)"Crossfade off" else "Crossfade ${crossfadeSeconds}s" }
     fun cycleHapticStrength(){ hapticStrength=when(hapticStrength){0->1;1->2;else->0}; banner="Haptic intensity · ${when(hapticStrength){0->"Off";1->"Standard";else->"Strong"}}" }
     fun cycleAudioPreference(){ audioPreference=when(audioPreference){"Source"->"Lossless";"Lossless"->"Data saver";else->"Source"}; banner="Audio preference · $audioPreference" }
@@ -330,6 +356,14 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     fun cycleDspPreamp(){ dspPreampDb=when(dspPreampDb){0f->3f;3f->-3f;else->0f} }
     fun cycleBass(){ bassDb=when(bassDb){0f->3f;3f->6f;6f->-3f;else->0f} }
     fun cycleTreble(){ trebleDb=when(trebleDb){0f->3f;3f->6f;6f->-3f;else->0f} }
+    fun cycleEqBand(index:Int){ if(index !in eqBandsDb.indices)return;eqBandsDb[index]=when(eqBandsDb[index]){0f->3f;3f->6f;6f->-3f;else->0f} }
+    fun resetEq(){ for(i in eqBandsDb.indices)eqBandsDb[i]=0f;banner="Equalizer reset · flat" }
+    fun moveLyricSource(index:Int,delta:Int){
+        if(index !in lyricSourceOrder.indices)return
+        val target=(index+delta).coerceIn(0,lyricSourceOrder.lastIndex)
+        if(target==index)return
+        val item=lyricSourceOrder.removeAt(index);lyricSourceOrder.add(target,item);banner="Lyrics priority updated"
+    }
     fun cycleStereoWidth(){ stereoWidth=when(stereoWidth){1f->1.25f;1.25f->1.5f;else->1f} }
     fun cycleVisualizerMode(){ visualizerMode=when(visualizerMode){"Spectrum"->"Line";"Line"->"Field";else->"Spectrum"} }
     fun cycleVisualizerSensitivity(){ visualizerSensitivity=when(visualizerSensitivity){1f->1.5f;1.5f->2f;else->1f} }
@@ -382,6 +416,13 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
             if(activeName==section) libraryLens=LibraryLens.TRACKS
         }
     }
+    fun moveLibrarySection(index:Int,delta:Int){
+        if(index !in librarySectionOrder.indices)return
+        val target=(index+delta).coerceIn(0,librarySectionOrder.lastIndex)
+        if(target==index)return
+        val section=librarySectionOrder.removeAt(index);librarySectionOrder.add(target,section)
+        banner="Library order updated · $section"
+    }
     fun cycleMetadataTemplate(){ metadataTemplate=when(metadataTemplate){"Title · Artist · Album"->"Title · Album · Year";"Title · Album · Year"->"Title · Format · Source";else->"Title · Artist · Album"} }
     fun cycleAlbumArtistMode(){ albumArtistMode=when(albumArtistMode){"Prefer album artist"->"Track artist only";"Track artist only"->"Album artist first";else->"Prefer album artist"};banner="Album artist · $albumArtistMode" }
     fun runGaplessProbe(){ gaplessProbeResult=if(gaplessProbeResult=="PASS")"Not run" else "PASS"; diagnosticLog.add("15:09:02 · gapless probe · $gaplessProbeResult"); banner="Gapless probe · $gaplessProbeResult" }
@@ -394,7 +435,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     fun analyzeLibrary(){ analysisStatus="Analysed ${fixture.libraryCount} indexed items";banner="Library analysis complete" }
     fun cycleReplayPeriod(){ replayPeriod=when(replayPeriod){"Week"->"Month";"Month"->"Year";"Year"->"All";else->"Week"} }
     fun exportReplay(kind:String){ replayExportCount++;banner="TSUNAMI Replay · $kind export ready" }
-    fun exportDiagnostics(){ banner="Diagnostics bundle ready · mock"; diagnosticLog.add("15:09:30 · diagnostics bundle exported") }
+    fun exportDiagnostics(){ banner="Diagnostics bundle preview ready"; diagnosticLog.add("15:09:30 · diagnostics bundle exported") }
     fun prepareDeviceMigration(){ deviceMigrationStatus=if(deviceMigrationStatus=="Ready to send")"Not prepared" else "Ready to send"; banner=if(deviceMigrationStatus=="Ready to send")"TSUNAMI migration package ready" else "Migration package cleared" }
     fun clearDiagnosticLog(){ diagnosticLog.clear();banner="Diagnostic log cleared" }
     fun cycleOrientation(view:String){ val next=when(orientationLocks[view] ?: "Auto"){"Auto"->"Portrait";"Portrait"->"Landscape";else->"Auto"}; if(next=="Auto")orientationLocks.remove(view) else orientationLocks[view]=next }
@@ -402,8 +443,23 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     fun cycleSwipeRight(){ swipeRight=when(swipeRight){"Next"->"Lyrics";"Lyrics"->"Favourite";else->"Next"} }
     fun cycleSwipeUp(){ swipeUp=when(swipeUp){"Queue"->"Lyrics";"Lyrics"->"Expand player";else->"Queue"} }
     fun cycleSwipeDown(){ swipeDown=when(swipeDown){"Collapse player"->"Queue";"Queue"->"Dismiss overlay";else->"Collapse player"} }
+    fun toggleMiniPlayerExtra(action:String){
+        if(action in miniPlayerExtras) miniPlayerExtras.remove(action)
+        else if(miniPlayerExtras.size<2) miniPlayerExtras.add(action)
+        else banner="Mini player allows two extra actions"
+    }
+    fun toggleFullPlayerButton(action:String){
+        if(action in fullPlayerButtons) fullPlayerButtons.remove(action)
+        else if(fullPlayerButtons.size<5) fullPlayerButtons.add(action)
+        else banner="Full player allows five contextual actions"
+    }
+    fun toggleNotificationAction(action:String){
+        if(action in notificationActions) notificationActions.remove(action)
+        else if(notificationActions.size<5) notificationActions.add(action)
+        else banner="Notification allows five actions"
+    }
     fun cycleLongPress(){ longPressAction=when(longPressAction){"Actions"->"Favourite";"Favourite"->"Queue next";else->"Actions"} }
-    fun addQuickAction(){ val candidates=listOf("Output","Sleep timer","Bookmark","Shuffle","Lyrics"); val next=candidates.firstOrNull{it !in quickActions}; if(next!=null){quickActions.add(next);banner="Quick action added · $next"}else banner="All mock quick actions already added" }
+    fun addQuickAction(){ val candidates=listOf("Sleep timer","Bookmark","Play next","Add to playlist","Shuffle next"); val next=candidates.firstOrNull{it !in quickActions}; if(next!=null){quickActions.add(next);banner="Quick action added · $next"}else banner="All available quick actions already added" }
     fun removeQuickAction(label:String){quickActions.remove(label);banner="Quick action removed · $label"}
     fun toggleSession(){ activeSession=if(activeSession==null)"Focus" else null; banner=activeSession?.let{"Session started · $it"}?:"Session ended" }
     fun toggleContextRule(index:Int){ val r=contextRules[index];contextRules[index]=r.copy(enabled=!r.enabled) }
@@ -414,6 +470,15 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     fun addAudioProfile(){ val n=audioProfiles.size+1;audioProfiles.add(AudioProfileMock("Profile $n",output,if(dspEnabled)"DSP active" else "DSP bypass"));banner="Audio profile saved" }
     fun removeAudioProfile(index:Int){ if(index in audioProfiles.indices){val name=audioProfiles[index].name;audioProfiles.removeAt(index);banner="Audio profile removed · $name"} }
     fun shareTimestamp(){ banner="Timestamp ready · ${formatTime(positionMs)}" }
+    fun requestClearHistory(){ pendingConfirmation=ConfirmationKind.CLEAR_HISTORY }
+    fun dismissConfirmation(){ pendingConfirmation=null }
+    fun confirmPending(){
+        when(pendingConfirmation){
+            ConfirmationKind.CLEAR_HISTORY -> { historyCleared=true; banner="Listening history cleared" }
+            null -> Unit
+        }
+        pendingConfirmation=null
+    }
     fun resolveBuffering(){ buffering=false; playing=currentTrack?.available != false; banner=if(playing)"Playback ready" else "Current item unavailable" }
     fun togglePlayback(){
         val track=currentTrack
@@ -425,15 +490,81 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
         positionMs=(it.durationMs*f.coerceIn(0f,1f)).toLong()
         if(it.longform) resumePositions[it.id]=positionMs
     } }
+    fun seekRelative(deltaMs:Long){
+        val track=currentTrack ?: return
+        positionMs=(positionMs+deltaMs).coerceIn(0L,track.durationMs)
+        if(track.longform) resumePositions[track.id]=positionMs
+        banner=if(deltaMs<0)"Back ${(-deltaMs/1000)} seconds" else "Forward ${deltaMs/1000} seconds"
+    }
+    fun togglePlayedLongform(track:Track?=currentTrack){
+        val item=track ?: return
+        if(!item.longform) return
+        if(item.id in playedLongform){
+            playedLongform.remove(item.id)
+            banner="Marked unplayed · ${item.title}"
+        }else{
+            playedLongform.add(item.id)
+            resumePositions[item.id]=item.durationMs
+            if(item.id==currentTrack?.id) positionMs=item.durationMs
+            banner="Marked played · ${item.title}"
+        }
+    }
     fun moveQueue(from:Int,to:Int){ if(from !in queue.indices || to !in queue.indices)return; val currentId=currentTrack?.id; val t=queue.removeAt(from); queue.add(to,t); currentIndex=queue.indexOfFirst{it.id==currentId}.takeIf{it>=0}?:0 }
-    fun removeFromQueue(index:Int){ if(index !in queue.indices)return; val current=currentTrack?.id; queue.removeAt(index); currentIndex=queue.indexOfFirst{it.id==current}.takeIf{it>=0}?:0 }
-    fun toggleService(index:Int){ val s=services[index]; services[index]=s.copy(connected=!s.connected,detail=if(s.connected)"Not connected" else "Connected · mock library ready"); if(s.connected) importProgress.remove(s.name); banner=if(s.connected)"Disconnected ${s.name}" else "Connected ${s.name}" }
+    fun removeFromQueue(index:Int){
+        if(index !in queue.indices)return
+        val currentId=currentTrack?.id
+        val removingCurrent=queue[index].id==currentId
+        queue.removeAt(index)
+        if(queue.isEmpty()){
+            currentIndex=0
+            positionMs=0L
+            playing=false
+            buffering=false
+            banner="Queue empty"
+            return
+        }
+        currentIndex=if(removingCurrent){
+            index.coerceAtMost(queue.lastIndex)
+        }else{
+            queue.indexOfFirst{it.id==currentId}.takeIf{it>=0} ?: currentIndex.coerceIn(0,queue.lastIndex)
+        }
+        if(removingCurrent){
+            positionMs=currentTrack?.let(::restorePosition) ?: 0L
+            buffering=false
+        }
+    }
+    fun toggleService(index:Int){
+        val s=services[index]
+        val connected=!s.connected
+        val retained=importAudits[s.name]!=null
+        services[index]=s.copy(
+            connected=connected,
+            detail=if(connected)"Connected · preview library ready" else if(retained)"Disconnected · imported library kept" else "Not connected"
+        )
+        banner=if(connected)"Connected ${s.name}" else if(retained)"Disconnected ${s.name} · imported library kept" else "Disconnected ${s.name}"
+    }
     fun advanceImport(index:Int){
         val s=services[index]
         if(!s.connected){ banner="Connect ${s.name} first"; return }
         val next=((importProgress[s.name] ?: 0)+25).coerceAtMost(100)
         importProgress[s.name]=next
-        banner=if(next==100)"${s.name} import complete" else "${s.name} import ${next}%"
+        if(next==100){
+            val audit=when(s.name){
+                "YouTube Music"->ProviderImportAuditMock(1842,38,19,7,4)
+                "Spotify"->ProviderImportAuditMock(612,0,0,0,11)
+                else->ProviderImportAuditMock(428,0,0,3,6)
+            }
+            importAudits[s.name]=audit
+            banner="${s.name} import complete · ${audit.imported} imported"
+        }else banner="${s.name} import ${next}%"
+    }
+    fun describeImportAudit(name:String):String{
+        val audit=importAudits[name] ?: return "No completed import"
+        return "${audit.imported} imported · ${audit.excludedTotal} excluded"
+    }
+    fun announceImportAudit(name:String){
+        val audit=importAudits[name] ?: run{banner="No completed import for $name";return}
+        banner="${name}: ${audit.imported} imported · Shorts ${audit.shortsExcluded} · video-only ${audit.videoOnlyExcluded} · samples ${audit.samplesExcluded} · unmatched ${audit.unmatched}"
     }
 }
 
