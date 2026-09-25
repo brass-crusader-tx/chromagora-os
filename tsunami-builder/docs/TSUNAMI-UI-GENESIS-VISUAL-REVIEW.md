@@ -4,7 +4,7 @@ This is the mandatory human review pass for the generated verification matrix. T
 
 ## Review set
 
-The canonical capture matrix contains 44 base screenshots plus monochrome and blurred “squint”
+The canonical capture matrix contains 45 base screenshots plus monochrome and blurred “squint”
 derivatives. Review the contact sheet first, then the full-resolution images.
 
 ### Product topology
@@ -20,10 +20,14 @@ derivatives. Review the contact sheet first, then the full-resolution images.
 - `31-settings-controls` and `37-settings-external-controls`: in-app gesture/headset customization and off-app notification/Quick Settings/widget/Wear contracts remain distinct progressive settings depths rather than a single overloaded control dashboard.
 - `30-settings-audio`, `31-settings-controls`, `32-settings-backup`, `35-settings-services`: progressive settings retain
   the same typographic/rule grammar instead of falling back to stock settings rows.
+- `38-find-empty` and `39-find-error`: search remains intelligible when the result model is exhausted or a source fails.
+- `40-player-queue-empty`: the listening environment does not counterfeit playable state after queue exhaustion.
+- `41-settings-provider-connecting` and `42-settings-provider-error`: provider lifecycle states remain recoverable without leaking implementation detail.
+- `43-settings-downloads-active` and `44-settings-downloads-error`: active and failed download management remain legible as task state rather than generic progress decoration.
 
 ### Required adversarial tests
 
-**Remove the artwork:** inspect `02-library-no-artwork`, `33-listen-no-artwork` and `34-player-no-artwork`. Content slots must be deliberately neutral across browsing and active listening; the screen should still be recognizably TSUNAMI from type, rules, spacing, index behavior and state geometry. The image gate also compares the blurred `01↔33` and `09↔34` pairs, rejecting either an unchanged scenario or an excessive whole-screen structural divergence.
+**Artwork-free Index:** inspect `45-library-index` against `15-library-40`. The Index composition deliberately removes cover slots rather than substituting placeholders; title, metadata, alphabetical landmarks, rules and selection geometry must still read as a complete TSUNAMI library.\n\n**Remove the artwork:** inspect `02-library-no-artwork`, `33-listen-no-artwork` and `34-player-no-artwork`. Content slots must be deliberately neutral across browsing and active listening; the screen should still be recognizably TSUNAMI from type, rules, spacing, index behavior and state geometry. The image gate also compares the blurred `01↔33` and `09↔34` pairs, rejecting either an unchanged scenario or an excessive whole-screen structural divergence.
 
 **Remove the color:** inspect every `*-mono.png` derivative, especially LISTEN, LIBRARY, FIND,
 Expanded Listening and Settings. Selection/hierarchy must remain readable by weight, rules, position
