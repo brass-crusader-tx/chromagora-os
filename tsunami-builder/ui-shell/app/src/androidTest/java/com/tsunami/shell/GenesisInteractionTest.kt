@@ -307,6 +307,14 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Wear secondary action · Queue").assertExists()
     }
 
+    @Test fun experienceLevelControlsAdvancedDisclosure() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithText("Experience level").performScrollTo().performClick()
+        compose.onNodeWithText("Context rules").assertDoesNotExist()
+        compose.onNodeWithText("Experience level").performClick()
+        compose.onNodeWithText("Context rules").performScrollTo().assertExists()
+    }
+
     @Test fun providerImportAuditPreservesLibraryAcrossDisconnect() {
         compose.onNodeWithContentDescription("Settings").performClick()
         compose.onNodeWithText("Connected services").performClick()
