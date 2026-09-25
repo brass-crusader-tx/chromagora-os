@@ -453,6 +453,18 @@ private fun settingsTitle(page:String)=when(page){
                 }
             }
             Rule()
+            Text("Quick Settings · two glanceable transport actions",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(top=12.dp,bottom=4.dp))
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+                listOf("Play/Pause","Next","Previous","Favourite").forEach{action->
+                    TextCommand(action,{state.toggleQuickSettingsAction(action)},action in state.quickSettingsActions,modifier=Modifier.semantics{contentDescription="Quick Settings action: $action"})
+                }
+            }
+            Rule()
+            ActionRow("Home-screen widget",state.widgetLayout){state.cycleWidgetLayout()}
+            ToggleRow("Wear transport",if(state.wearControlsEnabled)"ON" else "OFF"){state.wearControlsEnabled=!state.wearControlsEnabled}
+            if(state.wearControlsEnabled) ActionRow("Wear secondary action",state.wearSecondaryAction){state.cycleWearSecondaryAction()}
+            Text("These surfaces mirror the user-facing control contract only; this shell does not register a tile, widget, notification service, or Wear data layer.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Rule()
         }
         item{
             IntentSection("Track gestures")
