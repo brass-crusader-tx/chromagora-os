@@ -189,6 +189,10 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     val miniPlayerExtras = mutableStateListOf("Favourite","Lyrics")
     val fullPlayerButtons = mutableStateListOf("Favourite","Offline","Share")
     val notificationActions = mutableStateListOf("Previous","Play/Pause","Next","Favourite")
+    val quickSettingsActions = mutableStateListOf("Play/Pause","Next")
+    var widgetLayout by mutableStateOf("Transport")
+    var wearControlsEnabled by mutableStateOf(true)
+    var wearSecondaryAction by mutableStateOf("Favourite")
     var activeSession by mutableStateOf<String?>(null)
     val contextRules = mutableStateListOf(
         ContextRuleMock("Morning focus",true,"06:00–10:00","Music"),
@@ -457,6 +461,19 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
         if(action in notificationActions) notificationActions.remove(action)
         else if(notificationActions.size<5) notificationActions.add(action)
         else banner="Notification allows five actions"
+    }
+    fun toggleQuickSettingsAction(action:String){
+        if(action in quickSettingsActions) quickSettingsActions.remove(action)
+        else if(quickSettingsActions.size<2) quickSettingsActions.add(action)
+        else banner="Quick Settings exposes two transport actions"
+    }
+    fun cycleWidgetLayout(){
+        widgetLayout=when(widgetLayout){"Transport"->"Listening";"Listening"->"Compact";else->"Transport"}
+        banner="Widget layout · $widgetLayout"
+    }
+    fun cycleWearSecondaryAction(){
+        wearSecondaryAction=when(wearSecondaryAction){"Favourite"->"Queue";"Queue"->"Output";else->"Favourite"}
+        banner="Wear secondary action · $wearSecondaryAction"
     }
     fun cycleLongPress(){ longPressAction=when(longPressAction){"Actions"->"Favourite";"Favourite"->"Queue next";else->"Actions"} }
     fun addQuickAction(){ val candidates=listOf("Sleep timer","Bookmark","Play next","Add to playlist","Shuffle next"); val next=candidates.firstOrNull{it !in quickActions}; if(next!=null){quickActions.add(next);banner="Quick action added · $next"}else banner="All available quick actions already added" }
