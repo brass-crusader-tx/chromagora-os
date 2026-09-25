@@ -69,7 +69,7 @@ jobs:
           bash ui-shell/tools/build_host.sh --verify-device "$SERIAL"
           grep -q '^DEVICE_INSTALL=PASS' build/reports/tsunami/ui-shell/host/build.txt
           grep -q '^DEVICE_VERIFY=PASS' build/reports/tsunami/ui-shell/host/build.txt
-          grep -q '^VISUAL_CAPTURE=PASS states=44' build/reports/tsunami/ui-shell/host/build.txt
+          grep -q '^VISUAL_CAPTURE=PASS states=45' build/reports/tsunami/ui-shell/host/build.txt
           grep -q '^VISUAL_SANITY=PASS' build/reports/tsunami/ui-shell/host/build.txt
           grep -q '^CRASH_SCAN=PASS' build/reports/tsunami/ui-shell/host/build.txt
           grep -q 'OK (' build/reports/tsunami/ui-shell/host/instrumentation.txt
@@ -80,7 +80,7 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "${{ steps.motorola.outputs.attached }}" == "true" ]]; then
-            echo "UI_GENESIS_SELFHOSTED=PASS build=PASS motorola=PASS instrumentation=PASS visual_matrix=44"
+            echo "UI_GENESIS_SELFHOSTED=PASS build=PASS motorola=PASS instrumentation=PASS visual_matrix=45"
           else
             echo "UI_GENESIS_SELFHOSTED=PARTIAL build=PASS motorola=NOT_ATTACHED"
           fi
