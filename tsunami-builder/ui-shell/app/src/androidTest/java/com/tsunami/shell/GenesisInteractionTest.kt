@@ -57,6 +57,17 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Your listening line").assertExists()
     }
 
+    @Test fun libraryIndexModeRemovesArtworkDependencyStructurally() {
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onAllNodesWithContentDescription("Artwork for Afterglow at the Edge of the City").onFirst().assertExists()
+        compose.onNodeWithText("Index").performClick()
+        compose.onNodeWithText("Library view · Index").assertExists()
+        compose.onAllNodesWithContentDescription("Artwork for Afterglow at the Edge of the City").assertCountEquals(0)
+        compose.onNodeWithText("Afterglow at the Edge of the City").assertExists()
+        compose.onNodeWithText("Ledger").performClick()
+        compose.onAllNodesWithContentDescription("Artwork for Afterglow at the Edge of the City").onFirst().assertExists()
+    }
+
     @Test fun libraryMultiSelectMutatesMockState() {
         compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
         compose.onNodeWithText("Select").performClick()
