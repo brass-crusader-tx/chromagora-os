@@ -1,0 +1,257 @@
+package com.tsunami.shell
+
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
+@RunWith(AndroidJUnit4::class)
+class GenesisInteractionTest {
+    @get:Rule val compose = createAndroidComposeRule<MainActivity>()
+
+    @Test fun primaryIndexChangesWorkspaceAndBackPreservesPlaybackContext() {
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("owned + indexed").assertExists()
+        compose.onNodeWithText("Find", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Track, album, artist, folder…").assertExists()
+        compose.onNodeWithText("Signal", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Playback truth").assertExists()
+        compose.onNodeWithText("Listen", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Your listening line").assertExists()
+    }
+
+    @Test fun transportAndExpandedListeningAreInteractive() {
+        compose.onAllNodesWithContentDescription("Track actions").onFirst().performClick()
+        compose.onNodeWithText("Play next").performClick()
+        compose.onNodeWithText("Already playing · Afterglow at the Edge of the City").assertExists()
+        compose.onNodeWithContentDescription("Pause").performClick()
+        compose.onNodeWithContentDescription("Play").assertExists()
+        compose.onNodeWithContentDescription("Open listening environment").performClick()
+        compose.onNodeWithText("NOW PLAYING").assertExists()
+        compose.onNodeWithText("Share 1:34").performClick()
+        compose.onNodeWithText("Timestamp ready · 1:34").assertExists()
+        compose.onAllNodesWithText("Lyrics").onFirst().performClick()
+        compose.onNodeWithText("Streetlights fold into the rain").assertExists()
+        compose.onAllNodesWithText("Output").onFirst().performClick()
+        compose.onNodeWithText("Sony WH-1000X").performClick()
+        compose.onNodeWithText("Output: Sony WH-1000X").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithText("Your listening line").assertExists()
+    }
+
+    @Test fun libraryMultiSelectMutatesMockState() {
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Select").performClick()
+        compose.onNodeWithText("Passage / Northbound").performClick()
+        compose.onNodeWithText("1 selected").assertExists()
+        compose.onAllNodesWithText("Offline").onLast().performClick()
+        compose.onNodeWithText("1 available offline").assertExists()
+        compose.onNodeWithText("Select").assertExists()
+    }
+
+    @Test fun libraryObjectsHaveReversibleDepth() {
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Albums").performClick()
+        compose.onNodeWithText("Refractions").performClick()
+        compose.onNodeWithText("ALBUM").assertExists()
+        compose.onNodeWithContentDescription("Back to library").performClick()
+        compose.onNodeWithText("owned + indexed").assertExists()
+    }
+
+    @Test fun searchIntentWorksBeforeTyping() {
+        compose.onNodeWithText("Find", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Find downloaded music").performClick()
+        compose.onNodeWithText("Downloaded").assertExists()
+        compose.onNodeWithText("4 results").assertExists()
+        compose.onNodeWithText("Afterglow at the Edge of the City").assertExists()
+    }
+
+
+    @Test fun searchToleratesOneEditOrAdjacentTransposition() {
+        compose.onNodeWithText("Find", useUnmergedTree = true).performClick()
+        compose.onNodeWithContentDescription("Search music").performTextInput("Mria")
+        compose.onNodeWithText("Afterglow at the Edge of the City").assertExists()
+    }
+
+    @Test fun searchObjectDepthReturnsToResults() {
+        compose.onNodeWithText("Find", useUnmergedTree = true).performClick()
+        compose.onNodeWithContentDescription("Search music").performTextInput("Refractions")
+        compose.onNodeWithText("Albums").performClick()
+        compose.onNodeWithText("Afterglow at the Edge of the City").performClick()
+        compose.onNodeWithText("FIND / ALBUM").assertExists()
+        compose.onNodeWithContentDescription("Back to search results").performClick()
+        compose.onNodeWithText("1 results").assertExists()
+    }
+
+
+
+    @Test fun listenLensesStayLibraryCentricAndInteractive() {
+        compose.onNodeWithText("Deep cuts").assertExists()
+        compose.onNodeWithText("Rediscover").performClick()
+        compose.onAllNodesWithText("REDISCOVER", substring = true).onFirst().assertExists()
+        compose.onNodeWithText("Unfinished").performClick()
+        compose.onNodeWithText("The Cartographer's Sleep").assertExists()
+    }
+
+    @Test fun folderSearchNavigatesARealObject() {
+        compose.onNodeWithText("Find", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Folders").performClick()
+        compose.onNodeWithText("/Music/Library").assertExists()
+        compose.onNodeWithText("/Music/Library").performClick()
+        compose.onNodeWithText("FIND / FOLDER").assertExists()
+        compose.onNodeWithContentDescription("Back to search results").performClick()
+        compose.onNodeWithText("Folders").assertExists()
+    }
+
+    @Test fun signalDepthIsInteractiveAndTruthful() {
+        compose.onNodeWithText("Signal", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Audio").performClick()
+        compose.onNodeWithText("Audio path").assertExists()
+        compose.onNodeWithText("Test next transition").performClick()
+        compose.onNodeWithText("PASS").assertExists()
+        // SIGNAL's section command and the persistent primary Index both say “Library”.
+        // Select the section command rendered inside the workspace, not the persistent destination.
+        compose.onAllNodesWithText("Library").onFirst().performClick()
+        compose.onNodeWithText("Library integrity").assertExists()
+        compose.onNodeWithText("Audit library").performClick()
+        compose.onNodeWithText("Audit complete").assertExists()
+        compose.onNodeWithText("Scan hashes").performClick()
+        compose.onNodeWithText("2").assertExists()
+        compose.onNodeWithText("History").performClick()
+        compose.onNodeWithText("TSUNAMI Replay").assertExists()
+        compose.onNodeWithText("CSV").performClick()
+        compose.onNodeWithText("TSUNAMI Replay · CSV export ready").assertExists()
+        compose.onNodeWithText("Logs").performClick()
+        compose.onNodeWithText("Export bundle").performClick()
+        compose.onNodeWithText("Diagnostics bundle ready · mock").assertExists()
+    }
+
+    @Test fun settingsPlaybackStateResponds() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithText("Settings").assertExists()
+        compose.onNodeWithText("Gapless").performClick()
+        compose.onNodeWithText("Crossfade").performClick()
+        compose.onNodeWithText("3s").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithText("Your listening line").assertExists()
+    }
+
+
+
+    @Test fun playlistInsertionIsVisibleInLibraryObject() {
+        compose.onNodeWithText("Find", useUnmergedTree = true).performClick()
+        compose.onNodeWithContentDescription("Search music").performTextInput("Serein")
+        compose.onNodeWithContentDescription("Track actions").performClick()
+        compose.onNodeWithText("Add to playlist").performClick()
+        compose.onNodeWithText("Added to Late driving · Serein").assertExists()
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Playlists").performClick()
+        compose.onNodeWithText("5 tracks · local mock").assertExists()
+        compose.onNodeWithText("Late driving").performClick()
+        compose.onNodeWithText("Serein").assertExists()
+    }
+
+    @Test fun advancedSettingsUseProgressiveDisclosure() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithText("Audio processing").performClick()
+        compose.onNodeWithText("ReplayGain").assertExists()
+        compose.onNodeWithText("Track").performClick()
+        compose.onNodeWithText("Album").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithText("Settings").assertExists()
+        compose.onNodeWithText("Audio processing").assertExists()
+    }
+
+    @Test fun lyricsTimingAndPresentationSettingsAreStateful() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithText("Lyrics & timing").performClick()
+        compose.onNodeWithText("Global delay").performClick()
+        compose.onNodeWithText("250 ms").assertExists()
+        compose.onNodeWithText("Word timing").performClick()
+        compose.onNodeWithText("LINE").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithText("Presentation").performClick()
+        compose.onNodeWithText("Artwork").performClick()
+        compose.onNodeWithText("HIDDEN").assertExists()
+        compose.onNodeWithText("Metadata density").performClick()
+        compose.onNodeWithText("COMPACT").assertExists()
+    }
+
+    @Test fun libraryExclusionsHaveAnIntentionalSettingsHome() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithText("Library roots").performClick()
+        compose.onNodeWithText("Excluded folders").performClick()
+        compose.onNodeWithText("1 paths").assertExists()
+        compose.onNodeWithText("Excluded extensions").performClick()
+        compose.onNodeWithText("part, temp, opus.preview").assertExists()
+    }
+    @Test fun librarySectionVisibilityAndMetadataTemplateAffectLibrary() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithText("Library sections").performClick()
+        compose.onNodeWithText("Albums").performClick()
+        compose.onNodeWithText("HIDDEN").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithText("Metadata template").performClick()
+        compose.onNodeWithText("Track rows").performClick()
+        compose.onNodeWithText("Title · Album · Year").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Albums").assertDoesNotExist()
+        compose.onNodeWithText("Refractions · 2026").assertExists()
+    }
+
+
+
+    @Test fun migratedProductionCapabilitiesHaveIntentionalHomes() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithText("Library roots").performClick()
+        compose.onNodeWithText("Excluded genres").performClick()
+        compose.onNodeWithText("Audiobook, Spoken").assertExists()
+        compose.onNodeWithText("Excluded playlist paths").performClick()
+        compose.onNodeWithText("/Imported/Temporary").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+
+        compose.onNodeWithText("Metadata template").performClick()
+        compose.onNodeWithText("Album artist").performClick()
+        compose.onNodeWithText("Track artist only").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+
+        compose.onNodeWithText("Controls & gestures").performClick()
+        compose.onNodeWithText("Swipe up").performClick()
+        compose.onNodeWithText("Lyrics").assertExists()
+        compose.onNodeWithText("Swipe down").performClick()
+        compose.onNodeWithText("Queue").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+
+        compose.onNodeWithText("Backup & portability").performClick()
+        compose.onNodeWithText("TSUNAMI device migration").performClick()
+        compose.onNodeWithText("Ready to send").assertExists()
+        compose.onNodeWithText("Share TSUNAMI APK").performClick()
+        compose.onNodeWithText("TSUNAMI APK share sheet opened · mock").assertExists()
+    }
+
+    @Test fun longformSeparatesAudiobooksAndPodcasts() {
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Longform").performClick()
+        compose.onNodeWithText("Audiobooks").performClick()
+        compose.onNodeWithText("The Cartographer's Sleep").assertExists()
+        compose.onNodeWithText("Designing for Interruption").assertDoesNotExist()
+        compose.onNodeWithText("Podcasts").performClick()
+        compose.onNodeWithText("Designing for Interruption").assertExists()
+        compose.onNodeWithText("The Cartographer's Sleep").assertDoesNotExist()
+    }
+
+    @Test fun libraryAndSearchStateRespond() {
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Offline").performClick()
+        compose.onNodeWithText("Dense").performClick()
+        compose.onNodeWithText("Find", useUnmergedTree = true).performClick()
+        compose.onNodeWithContentDescription("Search music").performTextInput("Mira")
+        compose.onNodeWithText("Afterglow at the Edge of the City").assertExists()
+        compose.onNodeWithText("Owned only").performClick()
+        compose.onNodeWithText("Afterglow at the Edge of the City").assertExists()
+    }
+}
