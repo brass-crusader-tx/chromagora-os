@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tsunami.shell.components.*
@@ -70,13 +72,23 @@ import com.tsunami.shell.theme.*
                 Triple(SearchIntent.ARTISTS,"Jump to an artist","library index")
             ).forEach{(intent,label,detail)->
                 val enabled=!(state.offlineMode && intent==SearchIntent.CATALOGUE)
+                var focused by remember(intent){ mutableStateOf(false) }
                 Column(
                     Modifier.fillMaxWidth().heightIn(min=62.dp)
+                        .semantics{role=Role.Button;contentDescription="$label. ${if(enabled)detail else "Unavailable while offline"}";if(!enabled)disabled()}
+                        .onFocusChanged{focused=it.isFocused}
                         .clickable(enabled=enabled){state.chooseSearchIntent(intent)}
+                        .background(if(focused&&enabled)p.groundAlt else androidx.compose.ui.graphics.Color.Transparent)
                         .padding(vertical=10.dp)
                 ){
-                    Text(label,style=Type.row.copy(color=if(enabled)p.ink else p.ink3.copy(alpha=.56f)))
-                    Text(if(enabled)detail else "unavailable while offline",style=Type.meta.copy(color=p.ink3))
+                    Row(verticalAlignment=androidx.compose.ui.Alignment.CenterVertically){
+                        Box(Modifier.width(if(focused&&enabled)3.dp else 1.dp).height(28.dp).background(if(focused&&enabled)p.selected else androidx.compose.ui.graphics.Color.Transparent))
+                        Spacer(Modifier.width(if(focused&&enabled)8.dp else 0.dp))
+                        Column{
+                            Text(label,style=Type.row.copy(color=if(enabled)p.ink else p.ink3.copy(alpha=.56f),fontWeight=if(focused&&enabled)FontWeight.SemiBold else FontWeight.Normal))
+                            Text(if(enabled)detail else "unavailable while offline",style=Type.meta.copy(color=p.ink3))
+                        }
+                    }
                 }
                 Rule()
             }
