@@ -46,7 +46,7 @@ object Type {
     val title=TextStyle(fontFamily=TsunamiFont,fontWeight=FontWeight.SemiBold,fontSize=22.sp,lineHeight=27.sp)
     val row=TextStyle(fontFamily=TsunamiFont,fontWeight=FontWeight.Medium,fontSize=16.sp,lineHeight=20.sp)
     val body=TextStyle(fontFamily=TsunamiFont,fontWeight=FontWeight.Normal,fontSize=15.sp,lineHeight=21.sp)
-    val meta=TextStyle(fontFamily=TsunamiFont,fontWeight=FontWeight.Normal,fontSize=12.sp,lineHeight=16.sp)
+    val meta=TextStyle(fontFamily=TsunamiFont,fontWeight=FontWeight.Medium,fontSize=12.sp,lineHeight=16.sp)
     val micro=TextStyle(fontFamily=TsunamiFont,fontWeight=FontWeight.Medium,fontSize=11.sp,lineHeight=14.sp,letterSpacing=.1.sp)
     val numeric=TextStyle(fontFamily=TsunamiFont,fontWeight=FontWeight.Medium,fontSize=13.sp,lineHeight=16.sp)
 }
