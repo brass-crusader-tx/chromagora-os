@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "e1228007363a62252e64596df7436c781b8ebcd8",
+  "source_head": "9506911a48ce8907c393538e4a8ea1489d7e6fd2",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 8,
-  "note": "Every listed build-critical blob is byte-identical to private Genesis source head e1228007363a62252e64596df7436c781b8ebcd8. Documentation-only files outside the mirror set are intentionally excluded. Build/device PASS remains contingent on executable Android verification.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 9506911a48ce8907c393538e4a8ea1489d7e6fd2. Documentation-only files outside the mirror set are intentionally excluded. Build/device PASS remains contingent on executable Android verification.",
   "files": [
     {
       "path": "ui-shell/README.md",
@@ -81,8 +81,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/SettingsScreen.kt",
-      "git_blob_sha": "c50fc64f06228cb8c0d21ebae7970a94ad1c4918",
-      "bytes": 45907
+      "git_blob_sha": "27363d85fcf5984b28a0cad30e2af24086acd8d4",
+      "bytes": 45931
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/SignalScreen.kt",
@@ -255,6 +255,6 @@
   "self_hosted_probe": {
     "requested_at": "2026-09-25T19:30:00Z",
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "e1228007363a62252e64596df7436c781b8ebcd8"
+    "source_head": "9506911a48ce8907c393538e4a8ea1489d7e6fd2"
   }
 }
