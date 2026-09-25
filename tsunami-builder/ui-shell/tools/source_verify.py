@@ -108,7 +108,7 @@ REQUIRED_ANCHORS = {
     "state/ShellState.kt": [
         "playNext(", "shuffleNext(", "moveQueue(", "toggleDownload(", "addToPlaylist(",
         "createEmptyPlaylist(", "cycleRepeat(", "cycleCrossfade(", "advanceImport(", "importAudits", "describeImportAudit(", "announceImportAudit(",
-        "selectedTrackIds", "addSelectionToPlaylist(", "hiddenLibrarySections", "metadataTemplate", "if(!track.available && play)", "lyricsGlobalDelayMs", "showArtworkInPlayer", "buffering", "togglePlayback(",
+        "selectedTrackIds", "addSelectionToPlaylist(", "hiddenLibrarySections", "metadataTemplate", "libraryViewMode", "if(!track.available && play)", "lyricsGlobalDelayMs", "showArtworkInPlayer", "buffering", "togglePlayback(",
         "highContrast", "largeControls", "hapticStrength", "advancedExperience", "wifiOnlyDownloads", "lyricsAutoFetch", "resumePositions", "playedLongform", "seekRelative(", "togglePlayedLongform(", "listenLens",
         "signalSection", "runGaplessProbe(", "auditLyrics(", "scanDuplicateHashes(", "exportReplay(",
         "searchFault", "downloadsFault", "providerTransient", "retrySearch(", "retryDownloads(", "retryProvider(",
@@ -132,7 +132,7 @@ REQUIRED_ANCHORS = {
     "screens/LibraryScreen.kt": [
         "LibraryLens.TRACKS", "LibraryLens.ALBUMS", "LibraryLens.ARTISTS",
         "LibraryLens.PLAYLISTS", "LibraryLens.FOLDERS", "LibraryLens.LONGFORM",
-        "LibraryLens.RADIO", "animateScrollToItem", "selectionMode",
+        "LibraryLens.RADIO", "animateScrollToItem", "selectionMode", 'TextCommand("Ledger"', 'TextCommand("Index"', 'showArtwork=state.libraryViewMode=="Ledger"', "libraryViewMode", "showArtwork=false",
     ],
     "screens/SettingsScreen.kt": [
         '"audio"', '"visualizer"', '"shuffle"', '"library-roots"', '"library-sections"',
@@ -367,7 +367,7 @@ def main() -> int:
     test_src=TEST.read_text(encoding="utf-8")
     if "externalPlaybackSurfacesHaveExplicitMockContracts" not in test_src:
         die("external playback surfaces lost their instrumentation contract")
-    for name in ("adverseFixtureStatesRecoverWithoutDestroyingContext","emptyQueueFixtureCannotPretendToPlay"):
+    for name in ("adverseFixtureStatesRecoverWithoutDestroyingContext","emptyQueueFixtureCannotPretendToPlay","libraryIndexModeRemovesArtworkDependencyStructurally"):
         if name not in test_src:
             die(f"adverse-state instrumentation contract missing: {name}")
     print("EXTERNAL_PLAYBACK_SURFACES=PASS notification quick_settings widget wear")
@@ -403,7 +403,7 @@ def main() -> int:
         "settings_actions": 100,
         "settings_toggles": 45,
         "authored_actions": 280,
-        "instrumentation_tests": 33,
+        "instrumentation_tests": 34,
     }
     collapsed = {name: (counts[name], minimum) for name, minimum in floors.items() if counts[name] < minimum}
     if collapsed:
@@ -462,7 +462,7 @@ def main() -> int:
         'test_apk_hash_match',
         'remote_source_verify',
         'remote_accessibility_verify',
-        'if len(base_captures) != 44:',
+        'if len(base_captures) != 45:',
         '--untracked-files=all',
     ):
         if anchor not in codespace_build:
@@ -481,7 +481,7 @@ def main() -> int:
     if not expected_match:
         die("visual sanity EXPECTED state set could not be parsed")
     expected_names=set(re.findall(r'"([0-9][0-9]-[^"]+)"',expected_match.group("body")))
-    if len(capture_names)!=44 or len(set(capture_names))!=44 or len(expected_names)!=44:
+    if len(capture_names)!=45 or len(set(capture_names))!=45 or len(expected_names)!=45:
         die(f"visual matrix cardinality drift capture={len(capture_names)} unique={len(set(capture_names))} expected={len(expected_names)}")
     if set(capture_names)!=expected_names:
         die(
@@ -489,7 +489,26 @@ def main() -> int:
             f"capture_only={sorted(set(capture_names)-expected_names)} "
             f"verifier_only={sorted(expected_names-set(capture_names))}"
         )
-    print("VISUAL_MATRIX_PARITY=PASS states=44 names=exact")
+    required_adversarial={
+        "27-listen-buffering","28-library-unavailable","29-find-partial",
+        "38-find-empty","39-find-error","40-player-queue-empty",
+        "41-settings-provider-connecting","42-settings-provider-error",
+        "43-settings-downloads-active","44-settings-downloads-error","45-library-index",
+    }
+    missing_adversarial=sorted(required_adversarial-expected_names)
+    if missing_adversarial:
+        die(f"adversarial visual acceptance states missing: {missing_adversarial}")
+    for literal in (
+        '("03-find-light","29-find-partial","38-find-empty","39-find-error")',
+        '("09-player-dark-queue","40-player-queue-empty")',
+        '("41-settings-provider-connecting","42-settings-provider-error","35-settings-services")',
+        '("07-settings-dark","43-settings-downloads-active","44-settings-downloads-error")',
+        '("15-library-40","45-library-index")',
+    ):
+        if literal not in visual_sanity:
+            die(f"visual sanity critical-group coverage missing: {literal}")
+    print("VISUAL_MATRIX_PARITY=PASS states=45 names=exact")
+    print("ADVERSARIAL_VISUAL_CONTRACT=PASS search queue provider downloads library-index")
     for anchor in (
         "ARTWORK_IDENTITY_PAIRS",
         "squint_range < 24",
@@ -504,7 +523,7 @@ def main() -> int:
     for anchor in (
         'bash ui-shell/tools/build_host.sh',
         'bash ui-shell/tools/build_host.sh --verify-device "$SERIAL"',
-        'VISUAL_CAPTURE=PASS states=44',
+        'VISUAL_CAPTURE=PASS states=45',
         'VISUAL_SANITY=PASS',
         'CRASH_SCAN=PASS',
         'instrumentation.txt',
@@ -525,7 +544,7 @@ def main() -> int:
     print("BUILD_STACK_CONTRACT=PASS compileSdk=36 targetSdk=36 compose=1.11.4 agp=9.2.1 builtInKotlin=2.2.10 gradle=9.4.1")
     print("PORTAL_PUBLISH_CONTRACT=PASS host_then_codespace hash_bound atomic_manifested")
     print("VISUAL_IDENTITY_GATE_CONTRACT=PASS monochrome squint hierarchy artwork-removal")
-    print("SELFHOSTED_DEVICE_GATE_CONTRACT=PASS build instrumentation visual44 crash_scan")
+    print("SELFHOSTED_DEVICE_GATE_CONTRACT=PASS build instrumentation visual45 crash_scan")
     print("INTERACTION_COUNTS=" + ",".join(f"{k}:{v}" for k,v in counts.items()))
     return 0
 
