@@ -4,7 +4,7 @@ This is the mandatory human review pass for the generated verification matrix. T
 
 ## Review set
 
-The canonical capture matrix contains 37 base screenshots plus monochrome and blurred “squint”
+The canonical capture matrix contains 44 base screenshots plus monochrome and blurred “squint”
 derivatives. Review the contact sheet first, then the full-resolution images.
 
 ### Product topology
@@ -49,8 +49,7 @@ label/state and location without consulting the research rationale.
   spacing failures.
 - Inspect `06-player-longform` and the long-title fixture for wrapping, chapter hierarchy, timestamps
   and resume context.
-- Inspect disabled/unavailable and fault states: `04-signal-error`, `27-listen-buffering`,
-  `28-library-unavailable`, `29-find-partial`.
+- Inspect disabled/unavailable and adverse states: `04-signal-error`, `27-listen-buffering`, `28-library-unavailable`, `29-find-partial`, `38-find-empty`, `39-find-error`, `40-player-queue-empty`, `41-settings-provider-connecting`, `42-settings-provider-error`, `43-settings-downloads-active`, and `44-settings-downloads-error`. Each recovery path must remain legible without displacing the stable navigation/transport grammar.
 
 ### De-tackification rejection criteria
 
@@ -75,7 +74,7 @@ For the final device pass, record each of the following as PASS or REVISE in the
 10. non-streaming-clone architecture;
 11. light/dark structural equivalence;
 12. large-font survival;
-13. missing-art/empty/loading/error/unavailable/partial-source states;
+13. missing-art/empty/loading/error/unavailable/partial-source plus empty-search, failed-search, empty-queue, provider-transition, provider-failure, active-download and failed-download states;
 14. 40 / 4,008 / 40,008 library behavior;
 15. settings-depth coherence, including provider connections/import audit outside the root settings surface.
 
