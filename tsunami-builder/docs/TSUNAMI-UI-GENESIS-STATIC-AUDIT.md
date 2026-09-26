@@ -200,3 +200,25 @@ A separate current-head lexical/cross-reference scan covered all **15** Kotlin s
 The self-hosted lane was then tested as an explicit escape hatch for the hosted Actions problem. A temporary branch-push trigger was applied at commit `bb055d4416e76e7dff05aa31bd6ce877e134e306`. GitHub immediately produced the same pre-job synthetic failure—push run **36182967561** and pull-request run **36182971506**, both `BuildFailed / startup_failure`, with no job allocation. Because this establishes that the dispatcher failure occurs before either hosted or self-hosted workflow steps can execute, the self-hosted workflow was returned to explicit `workflow_dispatch` at `78face894834e20ea19b29dfc0ea9ff2df2b3bcd`.
 
 This evidence strengthens the source-contract boundary and isolates the current infrastructure blocker, but it still does **not** substitute for current-head Gradle compilation, APK/device installation, instrumentation, Android TSUNAMI Sans raster review, the exact 45-state capture matrix, crash scan, or human visual acceptance.
+
+
+## Current v5.1 source-contract refresh — 2026-09-26 17:xx EDT
+
+The historical audit blocks above record the project's progression; this section is the current reconciliation. A fresh authenticated source read was executed against executable head **`1fe4d52eaf9deee0b334e10caf6670442da41bc2`** before the documentation-only reconciliation commits that follow it.
+
+Results:
+
+- Kotlin source/test files scanned: **15**;
+- delimiter / lexical structural problems: **0**;
+- `ShellState` UI/test references unresolved against current state members: **0**;
+- Compose `@Test` methods: **38**;
+- shell manifest permissions: **0**;
+- generic-Material / anti-tackiness source anchors checked: **0 hits**;
+- production runtime/build paths changed versus `main`: **0**;
+- TSUNAMI Sans generator blob: **`43ae1290ae3063a717cddb0272080dc0c27d3b7f`**;
+- canonical v5.1 manifest generator blob: **identical**;
+- font generator identifies **Version 5.100**, v5.1 proof labels, deterministic timestamps and the operational non-breaking hyphen used in shell copy.
+
+The current acceptance scripts require exactly **38** instrumentation tests and **45** base visual captures. The visual contract spans compact/landscape/medium/expanded layouts, 40 / 4,008 / 40,008 library sizes, 150% / 200% font scale, no-artwork states, audiobook/podcast semantics, queue/lyrics/output/visual modes, disconnected/transient provider states, failed/active downloads, empty/failed search, queue exhaustion, buffering/unavailable/partial states, and the artwork-free Library Index.
+
+These checks establish source coherence only. They deliberately do **not** certify Android compilation, APK installability, device rendering, TSUNAMI Sans Android raster quality, the human de-tackification review, or crash-free execution.
