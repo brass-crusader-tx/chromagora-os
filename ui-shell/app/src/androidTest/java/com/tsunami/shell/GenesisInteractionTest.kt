@@ -15,6 +15,15 @@ import org.junit.runner.RunWith
 class GenesisInteractionTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
 
+    private fun openSetting(label: String) {
+        compose.onNodeWithTag("settings-root-list").performScrollToNode(hasText(label))
+        compose.onNodeWithText(label).assertHasClickAction().performClick()
+    }
+
+    private fun scrollListTo(tag: String, label: String) {
+        compose.onNodeWithTag(tag).performScrollToNode(hasText(label))
+    }
+
     @Test fun rotationPreservesLibraryAndListeningContext() {
         compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
         compose.onNodeWithText("owned + indexed").assertExists()
@@ -38,6 +47,15 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Your listening line").assertExists()
     }
 
+    @Test fun listenTemporalLedgerTracksCurrentObjectWithoutArtworkDependency() {
+        compose.onNodeWithText("CURRENT THREAD").assertExists()
+        compose.onNodeWithText("LIBRARY LENS").assertExists()
+        compose.onNodeWithTag("listen-current-afterglow").assertExists()
+        compose.onAllNodesWithContentDescription("Artwork for Afterglow at the Edge of the City").assertCountEquals(0)
+        compose.onAllNodesWithContentDescription("Play Passage / Northbound").onFirst().performClick()
+        compose.onNodeWithTag("listen-current-passage").assertExists()
+    }
+
     @Test fun transportAndExpandedListeningAreInteractive() {
         compose.onAllNodesWithContentDescription("Track actions").onFirst().performClick()
         compose.onNodeWithText("Play next").performClick()
@@ -55,6 +73,22 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Output: Sony WH-1000X").assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
         compose.onNodeWithText("Your listening line").assertExists()
+    }
+
+    @Test fun libraryIndexModeRemovesArtworkDependencyStructurally() {
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onAllNodesWithContentDescription("Artwork for Afterglow at the Edge of the City").onFirst().assertExists()
+        compose.onNodeWithText("Index").performClick()
+        compose.onNodeWithText("Library view · Index").assertExists()
+        compose.onNodeWithText("Dense").assertDoesNotExist()
+        compose.onNodeWithText("Comfortable").assertDoesNotExist()
+        compose.onNodeWithText("Title A–Z").assertDoesNotExist()
+        compose.onAllNodesWithContentDescription("Artwork for Afterglow at the Edge of the City").assertCountEquals(0)
+        compose.onAllNodesWithText("Afterglow at the Edge of the City").onFirst().assertExists()
+        compose.onNodeWithText("Ledger").performClick()
+        compose.onNodeWithText("Title A–Z").assertExists()
+        compose.onNodeWithText("Dense").assertExists()
+        compose.onAllNodesWithContentDescription("Artwork for Afterglow at the Edge of the City").onFirst().assertExists()
     }
 
     @Test fun libraryMultiSelectMutatesMockState() {
@@ -93,21 +127,21 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Find downloaded music").performClick()
         compose.onNodeWithText("Downloaded").assertExists()
         compose.onNodeWithText("4 results").assertExists()
-        compose.onNodeWithText("Afterglow at the Edge of the City").assertExists()
+        compose.onAllNodesWithText("Afterglow at the Edge of the City").onFirst().assertExists()
     }
 
 
     @Test fun searchToleratesOneEditOrAdjacentTransposition() {
         compose.onNodeWithText("Find", useUnmergedTree = true).performClick()
         compose.onNodeWithContentDescription("Search music").performTextInput("Mria")
-        compose.onNodeWithText("Afterglow at the Edge of the City").assertExists()
+        compose.onAllNodesWithText("Afterglow at the Edge of the City").onFirst().assertExists()
     }
 
     @Test fun searchObjectDepthReturnsToResults() {
         compose.onNodeWithText("Find", useUnmergedTree = true).performClick()
         compose.onNodeWithContentDescription("Search music").performTextInput("Refractions")
         compose.onNodeWithText("Albums").performClick()
-        compose.onNodeWithText("Afterglow at the Edge of the City").performClick()
+        compose.onAllNodesWithText("Afterglow at the Edge of the City").onFirst().performClick()
         compose.onNodeWithText("FIND / ALBUM").assertExists()
         compose.onNodeWithContentDescription("Back to search results").performClick()
         compose.onNodeWithText("1 results").assertExists()
@@ -116,18 +150,22 @@ class GenesisInteractionTest {
 
 
     @Test fun listenLensesStayLibraryCentricAndInteractive() {
+        scrollListTo("listen-list", "Deep cuts")
         compose.onNodeWithText("Deep cuts").assertExists()
         compose.onNodeWithText("Rediscover").performClick()
-        compose.onAllNodesWithText("REDISCOVER", substring = true).onFirst().assertExists()
+        compose.onNodeWithTag("listen-list").performScrollToNode(hasContentDescription("REDISCOVER", substring = true))
+        compose.onAllNodes(hasContentDescription("REDISCOVER", substring = true) and hasClickAction()).onFirst().assertExists()
+        compose.onNodeWithTag("listen-list").performScrollToNode(hasText("Unfinished"))
         compose.onNodeWithText("Unfinished").performClick()
+        compose.onNodeWithTag("listen-list").performScrollToNode(hasText("The Cartographer's Sleep"))
         compose.onNodeWithText("The Cartographer's Sleep").assertExists()
     }
 
     @Test fun folderSearchNavigatesARealObject() {
         compose.onNodeWithText("Find", useUnmergedTree = true).performClick()
         compose.onNodeWithText("Folders").performClick()
-        compose.onNodeWithText("/Music/Library").assertExists()
-        compose.onNodeWithText("/Music/Library").performClick()
+        compose.onNodeWithTag("find-results-list").performScrollToNode(hasContentDescription("/Music/Library", substring = true))
+        compose.onNode(hasContentDescription("/Music/Library", substring = true) and hasClickAction()).performClick()
         compose.onNodeWithText("FIND / FOLDER").assertExists()
         compose.onNodeWithContentDescription("Back to search results").performClick()
         compose.onNodeWithText("Folders").assertExists()
@@ -137,16 +175,20 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Signal", useUnmergedTree = true).performClick()
         compose.onNodeWithText("Audio").performClick()
         compose.onNodeWithText("Audio path").assertExists()
-        compose.onNodeWithText("Test next transition").performClick()
-        compose.onNodeWithText("PASS").assertExists()
+        scrollListTo("signal-audio-list", "Test next transition")
+        compose.onNodeWithText("Test next transition").assertHasClickAction().performClick()
+        scrollListTo("signal-audio-list", "Retest transition")
+        compose.onNodeWithText("Retest transition").assertExists()
         // SIGNAL's section command and the persistent primary Index both say “Library”.
         // Select the section command rendered inside the workspace, not the persistent destination.
         compose.onAllNodesWithText("Library").onFirst().performClick()
         compose.onNodeWithText("Library integrity").assertExists()
+        scrollListTo("signal-library-list", "Audit library")
         compose.onNodeWithText("Audit library").performClick()
-        compose.onNodeWithText("Audit complete").assertExists()
+        compose.onNodeWithText("Lyrics audit · 1 missing").assertExists()
+        scrollListTo("signal-library-list", "Scan hashes")
         compose.onNodeWithText("Scan hashes").performClick()
-        compose.onNodeWithText("2").assertExists()
+        compose.onNodeWithText("SHA-256 duplicate scan · 2 groups").assertExists()
         compose.onNodeWithText("History").performClick()
         compose.onNodeWithText("TSUNAMI Replay").assertExists()
         compose.onNodeWithText("CSV").performClick()
@@ -159,6 +201,7 @@ class GenesisInteractionTest {
     @Test fun settingsPlaybackStateResponds() {
         compose.onNodeWithContentDescription("Settings").performClick()
         compose.onNodeWithText("Settings").assertExists()
+        scrollListTo("settings-root-list", "Gapless")
         compose.onNodeWithText("Gapless").assertHasClickAction().performClick()
         compose.onNodeWithText("Crossfade").assertHasClickAction().performClick()
         compose.onNodeWithText("3s").assertExists()
@@ -172,22 +215,23 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Find", useUnmergedTree = true).performClick()
         compose.onNodeWithContentDescription("Search music").performTextInput("Serein")
         compose.onNodeWithContentDescription("Track actions").performClick()
-        compose.onNodeWithText("Add to playlist").performClick()
-        compose.onNodeWithText("Added to Late driving · Serein").assertExists()
-        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("track-action-row-serein", useUnmergedTree = true).performScrollToNode(hasText("Add to playlist"))
+        compose.onNodeWithText("Add to playlist").assertIsDisplayed().performClick()
+        compose.onAllNodesWithText("Library", useUnmergedTree = true).onLast().performClick()
         compose.onNodeWithText("Playlists").performClick()
         compose.onNodeWithText("5 tracks · local playlist").assertExists()
         compose.onNodeWithText("Late driving").performClick()
+        scrollListTo("library-object-contents-list", "Serein")
         compose.onNodeWithText("Serein").assertExists()
     }
 
     @Test fun consequentialHistoryClearRequiresConfirmation() {
         compose.onNodeWithContentDescription("Settings").performClick()
-        compose.onNodeWithText("Clear history").performClick()
+        openSetting("Clear history")
         compose.onNodeWithText("Clear listening history?").assertExists()
         compose.onNodeWithText("Cancel").performClick()
         compose.onNodeWithText("Clear listening history?").assertDoesNotExist()
-        compose.onNodeWithText("Clear history").performClick()
+        openSetting("Clear history")
         compose.onNodeWithText("Clear").performClick()
         compose.onNodeWithText("Listening history cleared").assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
@@ -198,10 +242,11 @@ class GenesisInteractionTest {
 
     @Test fun advancedSettingsUseProgressiveDisclosure() {
         compose.onNodeWithContentDescription("Settings").performClick()
-        compose.onNodeWithText("Audio processing").performClick()
+        openSetting("Audio processing")
         compose.onNodeWithText("ReplayGain").assertExists()
         compose.onNodeWithText("Track").performClick()
         compose.onNodeWithText("Album").assertExists()
+        scrollListTo("settings-page-list", "10-band equalizer")
         compose.onNodeWithText("10-band equalizer").performClick()
         compose.onNodeWithText("31 Hz").performClick()
         compose.onNodeWithText("+3 dB").assertExists()
@@ -213,7 +258,7 @@ class GenesisInteractionTest {
 
     @Test fun lyricsTimingAndPresentationSettingsAreStateful() {
         compose.onNodeWithContentDescription("Settings").performClick()
-        compose.onNodeWithText("Lyrics & timing").performClick()
+        openSetting("Lyrics & timing")
         compose.onNodeWithText("Global delay").performClick()
         compose.onNodeWithText("250 ms").assertExists()
         compose.onNodeWithText("Word timing").performClick()
@@ -224,7 +269,7 @@ class GenesisInteractionTest {
         compose.onNodeWithContentDescription("Back").performClick()
         compose.onNodeWithText("Lyrics & timing").assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
-        compose.onNodeWithText("Presentation").performClick()
+        openSetting("Presentation")
         compose.onNodeWithText("Artwork").performClick()
         compose.onNodeWithText("HIDDEN").assertExists()
         compose.onNodeWithText("Metadata density").performClick()
@@ -233,7 +278,7 @@ class GenesisInteractionTest {
 
     @Test fun libraryExclusionsHaveAnIntentionalSettingsHome() {
         compose.onNodeWithContentDescription("Settings").performClick()
-        compose.onNodeWithText("Library roots").performClick()
+        openSetting("Library roots")
         compose.onNodeWithText("Excluded folders").performClick()
         compose.onNodeWithText("1 paths").assertExists()
         compose.onNodeWithText("Excluded extensions").performClick()
@@ -241,15 +286,15 @@ class GenesisInteractionTest {
     }
     @Test fun librarySectionVisibilityAndMetadataTemplateAffectLibrary() {
         compose.onNodeWithContentDescription("Settings").performClick()
-        compose.onNodeWithText("Library sections").performClick()
+        openSetting("Sections")
         compose.onNodeWithContentDescription("Move Albums up").performClick()
         compose.onNodeWithText("Library order updated · Albums").assertExists()
         compose.onNodeWithText("Hide Albums").performClick()
         compose.onNodeWithText("Show Albums").assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
-        compose.onNodeWithText("Metadata template").performClick()
+        openSetting("Metadata template")
         compose.onNodeWithText("Track rows").performClick()
-        compose.onNodeWithText("Title · Album · Year").assertExists()
+        compose.onAllNodesWithText("Title · Album · Year").onFirst().assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
         compose.onNodeWithContentDescription("Back").performClick()
         compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
@@ -261,26 +306,28 @@ class GenesisInteractionTest {
 
     @Test fun migratedProductionCapabilitiesHaveIntentionalHomes() {
         compose.onNodeWithContentDescription("Settings").performClick()
-        compose.onNodeWithText("Library roots").performClick()
+        openSetting("Library roots")
         compose.onNodeWithText("Excluded genres").performClick()
         compose.onNodeWithText("Audiobook, Spoken").assertExists()
         compose.onNodeWithText("Excluded playlist paths").performClick()
         compose.onNodeWithText("/Imported/Temporary").assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
 
-        compose.onNodeWithText("Metadata template").performClick()
+        openSetting("Metadata template")
         compose.onNodeWithText("Album artist").performClick()
         compose.onNodeWithText("Track artist only").assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
 
-        compose.onNodeWithText("Controls & gestures").performClick()
+        openSetting("Controls & gestures")
+        scrollListTo("settings-page-list", "Swipe up")
         compose.onNodeWithText("Swipe up").performClick()
-        compose.onNodeWithText("Lyrics").assertExists()
+        compose.onNode(hasText("Swipe up") and hasText("Lyrics")).assertExists()
+        scrollListTo("settings-page-list", "Swipe down")
         compose.onNodeWithText("Swipe down").performClick()
-        compose.onNodeWithText("Queue").assertExists()
+        compose.onNode(hasText("Swipe down") and hasText("Queue")).assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
 
-        compose.onNodeWithText("Backup & portability").performClick()
+        openSetting("Backup & portability")
         compose.onNodeWithText("TSUNAMI device migration").performClick()
         compose.onNodeWithText("Ready to send").assertExists()
         compose.onNodeWithText("Share TSUNAMI APK").performClick()
@@ -290,7 +337,7 @@ class GenesisInteractionTest {
 
     @Test fun externalPlaybackSurfacesHaveExplicitMockContracts() {
         compose.onNodeWithContentDescription("Settings").performClick()
-        compose.onNodeWithText("External playback surfaces").performClick()
+        openSetting("External playback surfaces")
 
         compose.onNodeWithContentDescription("Quick Settings action: Previous").performClick()
         compose.onNodeWithText("Quick Settings exposes two transport actions").assertExists()
@@ -307,9 +354,46 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Wear secondary action · Queue").assertExists()
     }
 
+    @Test fun experienceLevelControlsAdvancedDisclosure() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        scrollListTo("settings-root-list", "Experience level")
+        compose.onNodeWithText("Experience level").performClick()
+        compose.onNodeWithText("Context rules").assertDoesNotExist()
+        compose.onNodeWithText("Experience level").performClick()
+        scrollListTo("settings-root-list", "Context rules")
+        compose.onNodeWithText("Context rules").assertExists()
+    }
+
+
+    @Test fun progressiveSettingsRoutesRoundTripToStableRoot() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        val routes = listOf(
+            "Library profile" to "Library profiles",
+            "Custom sections" to "Custom library sections",
+            "Output profiles" to "Output profiles",
+            "Shuffle behavior" to "Shuffle behavior",
+            "Visualizer" to "Visualizer",
+            "Listening services" to "Listening services",
+            "Context rules" to "Context rules",
+            "Quick actions & sessions" to "Quick actions & sessions",
+        )
+        routes.forEach { (entry, title) ->
+            scrollListTo("settings-root-list", entry)
+            compose.onNodeWithText(entry).performClick()
+            compose.onNodeWithText(title).assertExists()
+            compose.onNodeWithContentDescription("Back").performClick()
+            compose.onNodeWithText("Settings").assertExists()
+        }
+    }
+
     @Test fun providerImportAuditPreservesLibraryAcrossDisconnect() {
         compose.onNodeWithContentDescription("Settings").performClick()
-        compose.onNodeWithText("Connected services").performClick()
+        openSetting("Connected services")
+        compose.onNodeWithText("YouTube Music").assertExists()
+        compose.onNodeWithText("Apple Music").assertExists()
+        compose.onNodeWithText("Amazon Music").assertExists()
+        compose.onNodeWithText("Spotify").assertExists()
+        compose.onNodeWithText("TIDAL").assertExists()
         compose.onNodeWithText("Import YouTube Music").performScrollTo().performClick()
         compose.onNodeWithText("Import YouTube Music").performClick()
         compose.onNodeWithText("Import YouTube Music").performClick()
@@ -320,6 +404,17 @@ class GenesisInteractionTest {
         compose.onNodeWithText("YouTube Music").performClick()
         compose.onNodeWithText("DISCONNECTED · IMPORTED LIBRARY KEPT").assertExists()
         compose.onNodeWithText("Import audit · YouTube Music").assertExists()
+    }
+
+    @Test fun nonYouTubeProviderUsesSameImportLifecycle() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        openSetting("Connected services")
+        compose.onNodeWithText("Apple Music").performScrollTo().performClick()
+        repeat(4) {
+            compose.onNodeWithText("Import Apple Music").performScrollTo().performClick()
+        }
+        compose.onNodeWithText("Apple Music import complete · 428 imported").assertExists()
+        compose.onNodeWithText("Import audit · Apple Music").assertExists()
     }
 
     @Test fun longformSeparatesAudiobooksAndPodcasts() {
@@ -338,6 +433,9 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Back 30 seconds").assertExists()
         compose.onNodeWithText("Mark played").performClick()
         compose.onNodeWithText("Marked played · Designing for Interruption").assertExists()
+        compose.onNodeWithText("Played").performClick()
+        compose.onNodeWithText("Marked unplayed · Designing for Interruption").assertExists()
+        compose.onNodeWithText("0:00").assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
 
         compose.onNodeWithText("Audiobooks").performClick()
@@ -352,12 +450,17 @@ class GenesisInteractionTest {
 
     @Test fun fullPlayerObjectActionsDriveListeningCore() {
         compose.onNodeWithContentDescription("Settings").performClick()
-        compose.onNodeWithText("Controls & gestures").performClick()
-        compose.onNodeWithContentDescription("Full player action: Share").performClick()
-        compose.onNodeWithContentDescription("Full player action: Add to playlist").performClick()
+        openSetting("Controls & gestures")
+        compose.onNodeWithTag("settings-page-list").performScrollToIndex(1)
+        compose.onNodeWithText("Share").assertIsDisplayed().assertIsSelected().performClick()
+        compose.onNodeWithText("Share").assertIsNotSelected()
+        compose.onNodeWithTag("full-player-action-row").performScrollToNode(hasText("Add to playlist"))
+        compose.onNodeWithText("Add to playlist").assertIsDisplayed().assertIsNotSelected().performClick()
+        compose.onNodeWithText("Add to playlist").assertIsSelected()
         compose.onNodeWithContentDescription("Back").performClick()
         compose.onNodeWithContentDescription("Back").performClick()
         compose.onNodeWithContentDescription("Open listening environment").performClick()
+        compose.onNodeWithTag("expanded-listening-scroll").performScrollToNode(hasText("Add to playlist"))
         compose.onNodeWithText("Add to playlist").assertExists()
         compose.onNodeWithText("Share 1:34").assertDoesNotExist()
         compose.onNodeWithText("Add to playlist").performClick()
@@ -367,7 +470,7 @@ class GenesisInteractionTest {
     @Test fun miniPlayerActionCustomizationChangesPersistentSpine() {
         compose.onNodeWithContentDescription("Previous").assertExists()
         compose.onNodeWithContentDescription("Settings").performClick()
-        compose.onNodeWithText("Controls & gestures").performClick()
+        openSetting("Controls & gestures")
         compose.onNodeWithContentDescription("Mini player extra: Favourite").performClick()
         compose.onNodeWithContentDescription("Mini player extra: Queue").performClick()
         compose.onNodeWithContentDescription("Back").performClick()
@@ -375,7 +478,7 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Queue").assertExists()
         compose.onNodeWithText("Lyrics").assertExists()
         compose.onNodeWithText("Queue").performClick()
-        compose.onNodeWithText("QUEUE").assertExists()
+        compose.onNodeWithContentDescription("Queue item 1: Afterglow at the Edge of the City, Mira Sol").assertExists()
     }
 
     @Test fun unavailableTrackCanOpenWithoutPretendingToPlay() {
@@ -411,14 +514,77 @@ class GenesisInteractionTest {
         assertTrue(state.banner == "Queue empty")
     }
 
+
+    @Test fun adverseFixtureStatesRecoverWithoutDestroyingContext() {
+        val search = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("search-error"))
+        assertTrue(search.searchFault)
+        search.searchQuery = "Refractions"
+        search.retrySearch()
+        assertFalse(search.searchFault)
+        assertTrue(search.searchQuery == "Refractions")
+
+        val connecting = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("provider-connecting"))
+        assertTrue(connecting.providerTransient == "connecting")
+        connecting.retryProvider()
+        assertTrue(connecting.providerTransient.isEmpty())
+
+        val providerError = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("provider-error"))
+        assertTrue(providerError.providerTransient == "error")
+        providerError.retryProvider()
+        assertTrue(providerError.providerTransient.isEmpty())
+
+        val downloads = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("downloads-error"))
+        assertTrue(downloads.downloadsFault)
+        downloads.retryDownloads()
+        assertFalse(downloads.downloadsFault)
+
+        val active = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("downloads-active"))
+        assertTrue(active.downloads.values.any { it == com.tsunami.shell.model.DownloadState.DOWNLOADING })
+    }
+
+    @Test fun emptyQueueFixtureCannotPretendToPlay() {
+        val state = com.tsunami.shell.state.ShellState(com.tsunami.shell.model.defaultFixture("queue-empty"))
+        assertTrue(state.queue.isEmpty())
+        assertTrue(state.currentTrack == null)
+        assertFalse(state.playing)
+        assertFalse(state.buffering)
+        assertTrue(state.positionMs == 0L)
+        state.runPlayerAction("Play/Pause")
+        assertFalse(state.playing)
+        assertTrue(state.currentTrack == null)
+    }
+
+    @Test fun libraryRootMutationPropagatesIntoFolderLens() {
+        compose.onNodeWithContentDescription("Settings").performClick()
+        openSetting("Library roots")
+        compose.onNodeWithText("Add").performClick()
+        compose.onNodeWithText("/Music/Field Recordings").assertExists()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Folders").performClick()
+        compose.onNodeWithText("/Music/Field Recordings").assertExists()
+    }
+
+    @Test fun albumObjectPlayUsesTrackFromThatAlbum() {
+        compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Albums").performClick()
+        scrollListTo("library-object-list", "Glass Meridian")
+        compose.onNodeWithText("Glass Meridian").performClick()
+        compose.onNodeWithText("Play").performClick()
+        compose.onNodeWithContentDescription("Open listening environment").performClick()
+        compose.onAllNodesWithText("Glass Meridian").onFirst().assertExists()
+        compose.onAllNodesWithText("Ari Nox").onFirst().assertExists()
+    }
+
     @Test fun libraryAndSearchStateRespond() {
         compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
         compose.onNodeWithText("Offline").performClick()
         compose.onNodeWithText("Dense").performClick()
         compose.onNodeWithText("Find", useUnmergedTree = true).performClick()
         compose.onNodeWithContentDescription("Search music").performTextInput("Mira")
-        compose.onNodeWithText("Afterglow at the Edge of the City").assertExists()
+        compose.onAllNodesWithText("Afterglow at the Edge of the City").onFirst().assertExists()
         compose.onNodeWithText("Owned only").performClick()
-        compose.onNodeWithText("Afterglow at the Edge of the City").assertExists()
+        compose.onAllNodesWithText("Afterglow at the Edge of the City").onFirst().assertExists()
     }
 }
