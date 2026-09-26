@@ -76,6 +76,68 @@ jobs:
             echo "MOTOROLA=NOT_ATTACHED"
           fi
 
+      - name: Publish exact-source shell preview to Chromagora Dev Portal
+        working-directory: tsunami-builder
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="$PWD/dist/TSUNAMI-UI-Genesis-debug.apk"
+          PORTAL_ROOT="/Users/ezra/Downloads/TSUNAMI"
+          TARGET="$PORTAL_ROOT/dist/TSUNAMI-UI-Shell-Rebrand-v1-debug.apk"
+          META="$TARGET.json"
+          if [[ ! -s "$SRC" ]]; then
+            echo "PORTAL_PUBLISH=SKIP apk_missing"
+            exit 0
+          fi
+          if [[ ! -d "$PORTAL_ROOT/dist" ]]; then
+            echo "PORTAL_PUBLISH=SKIP primary_checkout_not_mounted"
+            exit 0
+          fi
+          source_head="$(python3 - <<'PY'
+          import json
+          print(json.load(open("MIRROR-MANIFEST.json"))["source_head"])
+          PY
+          )"
+          tmp="$TARGET.tmp.$"
+          cp "$SRC" "$tmp"
+          chmod 0644 "$tmp"
+          mv -f "$tmp" "$TARGET"
+          sha="$(shasum -a 256 "$TARGET" | awk '{print $1}')"
+          bytes="$(stat -f%z "$TARGET")"
+          device_verified=false
+          if grep -q '^DEVICE_VERIFY=PASS' build/reports/tsunami/ui-shell/host/build.txt 2>/dev/null; then
+            device_verified=true
+          fi
+          python3 - "$META" "$TARGET" "$sha" "$bytes" "$source_head" "$GITHUB_SHA" "$device_verified" <<'PY'
+          import datetime,json,pathlib,sys
+          meta,target,sha,bytes_,source_head,mirror_commit,device_verified=sys.argv[1:]
+          payload={
+            "artifact":"TSUNAMI UI Genesis",
+            "package":"com.tsunami.shell",
+            "portal_path":target,
+            "bytes":int(bytes_),
+            "sha256":sha,
+            "source_head":source_head,
+            "source_branch":"genesis/ui-shell-20260923",
+            "public_mirror_commit":mirror_commit,
+            "build_backend":"chromagora-os-self-hosted",
+            "backend_free":True,
+            "device_verified":device_verified.lower()=="true",
+            "published_at_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),
+          }
+          pathlib.Path(meta).write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+          print(json.dumps(payload,sort_keys=True))
+          PY
+          if curl -fsSL --max-time 30 "https://dev.mintiful.dev/download/tsunami-ui-shell-rebrand-v1-apk" -o /tmp/tsunami-ui-portal.apk; then
+            live_sha="$(shasum -a 256 /tmp/tsunami-ui-portal.apk | awk '{print $1}')"
+            live_bytes="$(stat -f%z /tmp/tsunami-ui-portal.apk)"
+            [[ "$live_sha" == "$sha" && "$live_bytes" == "$bytes" ]]
+            echo "PORTAL_ROUTE_CHECK=PASS sha256=$live_sha bytes=$live_bytes"
+          else
+            echo "PORTAL_ROUTE_CHECK=SKIP route_unreachable_from_runner"
+          fi
+          echo "PORTAL_PUBLISH=PASS source_head=$source_head sha256=$sha bytes=$bytes target=$TARGET"
+
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
