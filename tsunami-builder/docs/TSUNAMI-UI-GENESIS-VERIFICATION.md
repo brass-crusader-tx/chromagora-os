@@ -1,6 +1,6 @@
 # TSUNAMI UI Genesis — verification ledger
 
-Current verification date: 2026-09-25
+Current verification date: 2026-09-26
 
 This ledger records concrete checks against the isolated `ui-shell` branch. It deliberately distinguishes evidence that has actually run from checks that still require an Android build environment.
 
@@ -602,3 +602,16 @@ Both runs were again registered as workflow id `340225603`, empty workflow name,
 
 This closes a further infrastructure question: the failure occurs before GitHub evaluates or allocates the requested runner class, so merely targeting the Mac self-hosted runner cannot currently bypass the dispatcher fault. It remains infrastructure evidence only; it does not count as Android build or device acceptance.
 
+
+
+## Current manifest-bound type gate and refreshed public mirror — 2026-09-26
+
+A fresh type/evidence audit found that the v4.8 generator and proof manifest had advanced beyond two duplicated hash tables retained in `tools/ui_shell_gate.py` and `ui-shell/tools/build_host.sh`. Those tables would have rejected the current proofed masters before Android compilation even though the generator itself was healthy. The duplication has been removed: both executable build paths now load `docs/TSUNAMI-SANS-v4.8-MANIFEST.json`, verify family/version identity, all five master SHA-256 values and byte sizes, and verify the proof-image hashes/byte sizes. `source_verify.py` additionally rejects any future build path that ceases to bind to the canonical manifest.
+
+The current v4.8 manifest is bound to generator blob `1759a3ee680ef51d914d507d3ee2e93ec371f82f`. The 2026-09-26 Mac acceptance pass discovered that the previously recorded manifest bytes did **not** reproduce from that current source. The manifest was therefore reconciled to freshly generated outputs from the pinned FontTools 4.63.0 / Shapely 2.1.2 / Pillow 12.3.0 toolchain on macOS 15.7.5 x86_64. Python 3.12.14, 3.13.12 and 3.14.7 independently emitted identical TTF and proof-image hashes. FontTools reopened all five outputs as **TSUNAMI Sans Version 4.800**, with weight classes 300/400/500/600/700, 176 glyphs per master, required UI/Western-European coverage and GPOS. Cross-platform byte identity is not claimed without executed Linux evidence; the authenticated Codespaces diagnostic was unavailable because the account had exhausted its Codespaces usage/budget. Android text rendering remains part of the exact-current-head device pass.
+
+The public build mirror on `brass-crusader-tx/chromagora-os:build/tsunami-ui-genesis-20260925` was then rebound byte-for-byte to private Genesis source head `11388f2ce43bb8c518a494e8044e5dba0f854e09`. Direct Git-tree comparison covered **56 build-critical blobs** (40 `ui-shell/` files + 16 support files) with **0 missing and 0 divergent blobs**; the public mirror manifest names that exact private head. This refresh also added the canonical v4.8 font manifest and root Android gate, both now required by the mirrored source verifier.
+
+Push commit `03d38e5a42587f9a2beb140aa132214954149d60` created fresh public builder run **36246923694**, job **108417723315**. GitHub allocated the job object but failed it before a step sequence or log blob materialized (`steps=null`; job-log fetch returned 404 BlobNotFound). The simultaneous public self-hosted run **36246923706** remains queued pending a matching runner. Therefore neither event is Android compilation evidence: checkout, source verification, font generation, Gradle, Kotlin/Compose compilation, APK assembly, instrumentation and device capture still have no executed job output.
+
+The current source-side audit also rechecked all 18 Kotlin/Kotlin-DSL files after the manifest changes: delimiter/string/comment balance and the high-risk Compose/import contracts returned **0 problems**. The shell manifest still declares no permissions, no production `com.tsunami.app.*` imports are present, and no direct network/MediaStore/ContentResolver client references were found. These checks strengthen the pre-build evidence but do not lower the executable acceptance boundary.
