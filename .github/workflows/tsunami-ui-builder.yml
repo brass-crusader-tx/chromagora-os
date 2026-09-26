@@ -77,3 +77,5 @@ jobs:
             tsunami-builder/ui-shell/tools/proofs/
             tsunami-builder/MIRROR-MANIFEST.json
           if-no-files-found: error
+
+# current-head retry 2026-09-26 source=f498e8a7990b7c4f266483cf259c384ace9709dc
