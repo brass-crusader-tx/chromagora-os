@@ -54,7 +54,7 @@ object Type {
 val LocalTsunamiPalette=staticCompositionLocalOf { LightPalette }
 val LocalControlTarget=staticCompositionLocalOf<Dp> { 48.dp }
 
-@Composable fun TsunamiTheme(mode:ThemeMode,highContrast:Boolean=false,largeControls:Boolean=false,content:@Composable()->Unit){
+@Composable fun TsunamiTheme(mode:ThemeMode,highContrast:Boolean=false,largeControls:Boolean=false,content: @Composable () -> Unit){
     val palette=when{
         mode==ThemeMode.DARK && highContrast -> DarkHighContrast
         mode==ThemeMode.DARK -> DarkPalette
