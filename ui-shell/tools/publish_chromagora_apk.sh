@@ -6,6 +6,7 @@ SHELL_ROOT="$ROOT/ui-shell"
 DIST="$ROOT/dist"
 BUILT="$DIST/TSUNAMI-UI-Genesis-debug.apk"
 CODESPACE_MANIFEST="$DIST/codespace-build.json"
+JITPACK_MANIFEST="$DIST/jitpack-build.json"
 # The live Chromagora gateway serves from the primary TSUNAMI worktree, not necessarily
 # from the current linked worktree. Resolve Git's common directory so Genesis worktrees
 # publish to the same stable portal path as the primary checkout.
@@ -26,7 +27,7 @@ START_HEAD="$(git -C "$ROOT" rev-parse HEAD)"
 python3 "$ROOT/tools/ui_shell_static_check.py"
 python3 "$SHELL_ROOT/tools/source_verify.py"
 python3 "$SHELL_ROOT/tools/accessibility_verify.py"
-if [[ -n "$(git -C "$ROOT" status --porcelain --untracked-files=all -- ui-shell brand docs/TSUNAMI-UI-GENESIS-RESEARCH.md docs/TSUNAMI-UI-GENESIS-COVERAGE.md tools/ui_shell_gate.py tools/ui_shell_static_check.py tools/ui_shell_codespace_build.py)" ]]; then
+if [[ -n "$(git -C "$ROOT" status --porcelain --untracked-files=all -- ui-shell brand docs/TSUNAMI-UI-GENESIS-RESEARCH.md docs/TSUNAMI-UI-GENESIS-COVERAGE.md tools/ui_shell_gate.py tools/ui_shell_static_check.py tools/ui_shell_codespace_build.py tools/ui_shell_jitpack_fetch.py)" ]]; then
   echo "ERROR: refusing portal publish from dirty UI Genesis source." >&2
   exit 2
 fi
@@ -39,7 +40,15 @@ codespace_build() {
   python3 "$ROOT/tools/ui_shell_codespace_build.py"
 }
 
-if [[ "${TSUNAMI_FORCE_CODESPACE_BUILD:-0}" == "1" ]]; then
+jitpack_build() {
+  python3 "$ROOT/tools/ui_shell_jitpack_fetch.py"
+}
+
+if [[ "${TSUNAMI_FORCE_JITPACK_BUILD:-0}" == "1" ]]; then
+  echo "Publishing through JitPack public mirror because TSUNAMI_FORCE_JITPACK_BUILD=1"
+  jitpack_build
+  BUILD_BACKEND="jitpack-public-mirror"
+elif [[ "${TSUNAMI_FORCE_CODESPACE_BUILD:-0}" == "1" ]]; then
   echo "Publishing through Codespaces because TSUNAMI_FORCE_CODESPACE_BUILD=1"
   codespace_build
   BUILD_BACKEND="github-codespaces"
@@ -48,10 +57,16 @@ else
   if host_build; then
     BUILD_BACKEND="host"
   else
-    echo "Host build unavailable; falling back to the repository Codespaces builder" >&2
+    echo "Host build unavailable; trying the repository Codespaces builder" >&2
     rm -f "$BUILT"
-    codespace_build
-    BUILD_BACKEND="github-codespaces"
+    if codespace_build; then
+      BUILD_BACKEND="github-codespaces"
+    else
+      echo "Codespaces build unavailable; falling back to the immutable public JitPack mirror" >&2
+      rm -f "$BUILT"
+      jitpack_build
+      BUILD_BACKEND="jitpack-public-mirror"
+    fi
   fi
 fi
 
@@ -65,7 +80,7 @@ if [[ "$SOURCE_HEAD" != "$START_HEAD" ]]; then
   echo "ERROR: Genesis HEAD changed during build ($START_HEAD -> $SOURCE_HEAD); refusing publication." >&2
   exit 3
 fi
-if [[ -n "$(git -C "$ROOT" status --porcelain --untracked-files=all -- ui-shell brand docs/TSUNAMI-UI-GENESIS-RESEARCH.md docs/TSUNAMI-UI-GENESIS-COVERAGE.md tools/ui_shell_gate.py tools/ui_shell_static_check.py tools/ui_shell_codespace_build.py)" ]]; then
+if [[ -n "$(git -C "$ROOT" status --porcelain --untracked-files=all -- ui-shell brand docs/TSUNAMI-UI-GENESIS-RESEARCH.md docs/TSUNAMI-UI-GENESIS-COVERAGE.md tools/ui_shell_gate.py tools/ui_shell_static_check.py tools/ui_shell_codespace_build.py tools/ui_shell_jitpack_fetch.py)" ]]; then
   echo "ERROR: UI Genesis source changed during build; refusing publication." >&2
   exit 3
 fi
@@ -87,6 +102,26 @@ assert payload.get("hash_match") is True, payload
 actual=hashlib.sha256(apk_path.read_bytes()).hexdigest()
 assert payload.get("sha256")==actual, (payload.get("sha256"), actual)
 print("CODESPACE_MANIFEST_BINDING=PASS")
+PY
+fi
+if [[ "$BUILD_BACKEND" == "jitpack-public-mirror" ]]; then
+  test -s "$JITPACK_MANIFEST" || {
+    echo "ERROR: JitPack build manifest missing: $JITPACK_MANIFEST" >&2
+    exit 3
+  }
+  python3 - "$JITPACK_MANIFEST" "$SOURCE_HEAD" "$BUILT" <<'PY'
+import hashlib, json, pathlib, sys
+manifest_path=pathlib.Path(sys.argv[1])
+expected_head=sys.argv[2]
+apk_path=pathlib.Path(sys.argv[3])
+payload=json.loads(manifest_path.read_text(encoding="utf-8"))
+assert payload.get("status")=="BUILT", payload
+assert payload.get("source_head")==expected_head, (payload.get("source_head"), expected_head)
+assert payload.get("source_contract_match") is True, payload
+actual=hashlib.sha256(apk_path.read_bytes()).hexdigest()
+assert payload.get("app_sha256")==actual, (payload.get("app_sha256"), actual)
+assert len(str(payload.get("mirror_commit","")))==40, payload
+print("JITPACK_MANIFEST_BINDING=PASS")
 PY
 fi
 
