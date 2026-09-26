@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "b45c93572c3eccf987af21629f712f42daeedbd1",
+  "source_head": "ab58326c5bcb944f8b238e736895d26e75da6cca",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 16,
-  "note": "Every listed build-critical blob is byte-identical to private Genesis source head b45c93572c3eccf987af21629f712f42daeedbd1. The mirror includes the canonical TSUNAMI Sans v4.8 manifest and root verification gates required by source_verify.py. Build/device PASS remains contingent on executable Android verification.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head ab58326c5bcb944f8b238e736895d26e75da6cca. The mirror includes the canonical TSUNAMI Sans v4.8 manifest and root verification gates required by source_verify.py. Build/device PASS remains contingent on executable Android verification.",
   "files": [
     {
       "path": "ui-shell/app/build.gradle.kts",
@@ -268,8 +268,8 @@
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VERIFICATION.md",
-      "git_blob_sha": "2641c38433361a430a639c9ce42dcc0a4302b48b",
-      "bytes": 59248
+      "git_blob_sha": "ac095245dd5698f3898a78c26476cea4b4660854",
+      "bytes": 60387
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md",
@@ -294,6 +294,6 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "b45c93572c3eccf987af21629f712f42daeedbd1"
+    "source_head": "ab58326c5bcb944f8b238e736895d26e75da6cca"
   }
 }
