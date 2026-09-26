@@ -220,14 +220,21 @@ def main()->int:
         "ui-shell","brand","docs/TSUNAMI-UI-GENESIS-RESEARCH.md",
         "docs/TSUNAMI-UI-GENESIS-COVERAGE.md","docs/TSUNAMI-SANS-v5.1-MANIFEST.json",
         "tools/ui_shell_gate.py","tools/ui_shell_static_check.py",
+        "tools/ui_shell_codespace_build.py","tools/ui_shell_jitpack_fetch.py",
     ],capture=True).stdout.strip()
     if dirty:
         raise BuildError("refusing JitPack artifact binding from dirty build-critical source")
 
     mirror_sha=resolve_mirror_head()
     manifest=manifest_for(mirror_sha)
+    manifest_source=str(manifest.get("source_head") or "")
+    if manifest_source != source_head:
+        raise BuildError(
+            "public mirror source_head is stale against current private Genesis head: "
+            f"{manifest_source or 'missing'} != {source_head}"
+        )
     contract=verify_source_contract(manifest)
-    print(f"MIRROR_CONTRACT=PASS entries={contract['entries']} mirror={mirror_sha}")
+    print(f"MIRROR_CONTRACT=PASS exact_head={source_head} entries={contract['entries']} mirror={mirror_sha}")
     jitpack_version=trigger_and_wait(mirror_sha,timeout_s)
     app,test=download_artifacts(jitpack_version)
     evidence={
@@ -236,6 +243,7 @@ def main()->int:
         "source_head":source_head,
         "mirror_manifest_source_head":manifest.get("source_head"),
         "source_contract_match":True,
+        "exact_source_head_match":True,
         "source_contract_entries":contract["entries"],
         "mirror_repository":"brass-crusader-tx/chromagora-os",
         "mirror_branch":PUBLIC_BRANCH,
