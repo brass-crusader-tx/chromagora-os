@@ -433,6 +433,7 @@ def main() -> int:
         "advancedSettingsUseProgressiveDisclosure",
         "playlistInsertionIsVisibleInLibraryObject",
         "longformSeparatesAudiobooksAndPodcasts",
+        "listenTemporalLedgerTracksCurrentObjectWithoutArtworkDependency",
         "providerImportAuditPreservesLibraryAcrossDisconnect",
         "unavailableTrackCanOpenWithoutPretendingToPlay",
         "libraryRootMutationPropagatesIntoFolderLens",
