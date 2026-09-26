@@ -24,10 +24,16 @@ if [[ -z "$JAVA_MAJOR" || "$JAVA_MAJOR" -lt 17 ]]; then
   exit 2
 fi
 if [[ -z "${ANDROID_SDK_ROOT:-}" ]]; then
-  if [[ -d "$HOME/Library/Android/sdk" ]]; then
+  if [[ -n "${ANDROID_HOME:-}" && -d "$ANDROID_HOME" ]]; then
+    export ANDROID_SDK_ROOT="$ANDROID_HOME"
+  elif [[ -d "$HOME/Library/Android/sdk" ]]; then
     export ANDROID_SDK_ROOT="$HOME/Library/Android/sdk"
   elif [[ -d "$HOME/Android/Sdk" ]]; then
     export ANDROID_SDK_ROOT="$HOME/Android/Sdk"
+  elif [[ -d "/opt/android-sdk-linux" ]]; then
+    export ANDROID_SDK_ROOT="/opt/android-sdk-linux"
+  elif [[ -d "/opt/android-sdk" ]]; then
+    export ANDROID_SDK_ROOT="/opt/android-sdk"
   fi
 fi
 export ANDROID_HOME="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
@@ -43,6 +49,10 @@ printf 'sdk.dir=%s\n' "$ANDROID_SDK_ROOT" > "$UI_ROOT/local.properties"
 SDKMANAGER=""
 if [[ -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]]; then
   SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+elif [[ -x "$ANDROID_SDK_ROOT/cmdline-tools/bin/sdkmanager" ]]; then
+  SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/bin/sdkmanager"
+elif [[ -x "$ANDROID_SDK_ROOT/tools/bin/sdkmanager" ]]; then
+  SDKMANAGER="$ANDROID_SDK_ROOT/tools/bin/sdkmanager"
 elif command -v sdkmanager >/dev/null 2>&1; then
   SDKMANAGER="$(command -v sdkmanager)"
 fi
