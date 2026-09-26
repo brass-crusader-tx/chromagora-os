@@ -1,0 +1,72 @@
+name: TSUNAMI RPC bridge
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+  id-token: write
+
+jobs:
+  dispatch:
+    if: startsWith(github.event.issue.title, '[TSUNAMI-RPC]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Parse request
+        id: parse
+        shell: bash
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os
+          body=os.environ.get('ISSUE_BODY') or ''
+          payload=json.loads(body)
+          if not isinstance(payload,dict): raise SystemExit('request body must be an object')
+          request_id=payload.get('request_id')
+          if not isinstance(request_id,str) or not request_id.strip(): raise SystemExit('request_id required')
+          json.dump(payload,open('request.json','w'),separators=(',',':'))
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f: f.write(f'request_id={request_id}\n')
+          PY
+
+      - name: Obtain GitHub OIDC token
+        id: oidc
+        shell: bash
+        run: |
+          set -euo pipefail
+          RESPONSE="$(curl -fsSL -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=tsunami-rpc")"
+          TOKEN="$(python3 -c 'import json,sys; print(json.load(sys.stdin)[\"value\"])' <<<"$RESPONSE")"
+          printf 'token=%s\n' "$TOKEN" >> "$GITHUB_OUTPUT"
+
+      - name: Forward to TSUNAMI RPC
+        id: rpc
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RPC_URL: https://dev.mintiful.dev/tsunami-rpc/execute
+        run: |
+          set -euo pipefail
+          HTTP_CODE="$(curl -sS -o response.json -w '%{http_code}' --connect-timeout 10 --max-time 45 -X POST "$RPC_URL" -H 'Content-Type: application/json' -H "Authorization: Bearer $OIDC_TOKEN" -H "X-TSUNAMI-Request-ID: ${{ steps.parse.outputs.request_id }}" --data-binary @request.json)"
+          printf 'http_code=%s\n' "$HTTP_CODE" >> "$GITHUB_OUTPUT"
+          cat response.json || true
+          [[ "$HTTP_CODE" -ge 200 && "$HTTP_CODE" -lt 300 ]]
+
+      - name: Post acknowledgement
+        if: always()
+        uses: actions/github-script@v8
+        env:
+          HTTP_CODE: ${{ steps.rpc.outputs.http_code }}
+          REQUEST_ID: ${{ steps.parse.outputs.request_id }}
+        with:
+          script: |
+            const ok = '${{ job.status }}' === 'success';
+            const code = process.env.HTTP_CODE || 'n/a';
+            const requestId = process.env.REQUEST_ID || 'unknown';
+            const body = ok
+              ? `TSUNAMI RPC accepted request \`${requestId}\` (HTTP ${code}).`
+              : `TSUNAMI RPC bridge failed for request \`${requestId}\` (HTTP ${code}).`;
+            await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body});
