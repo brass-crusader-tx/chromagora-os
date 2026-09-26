@@ -25,8 +25,8 @@ data class TsunamiPalette(
 )
 
 val LightPalette=TsunamiPalette(
-    ground=Color(0xFFF4F1EA), groundAlt=Color(0xFFEAE6DD), ink=Color(0xFF101114), ink2=Color(0xFF4B4D53), ink3=Color(0xFF6B6D73),
-    rule=Color(0xFFB9B5AC), selected=Color(0xFF3F56C5), possession=Color(0xFF946414), danger=Color(0xFFB3232E), inverse=Color.White)
+    ground=Color(0xFFF4F1EA), groundAlt=Color(0xFFEAE6DD), ink=Color(0xFF101114), ink2=Color(0xFF4B4D53), ink3=Color(0xFF62646A),
+    rule=Color(0xFFB9B5AC), selected=Color(0xFF3F56C5), possession=Color(0xFF835609), danger=Color(0xFFB3232E), inverse=Color.White)
 val DarkPalette=TsunamiPalette(
     ground=Color(0xFF111214), groundAlt=Color(0xFF1A1B1F), ink=Color(0xFFF4F1EA), ink2=Color(0xFFC5C1B8), ink3=Color(0xFF949189),
     rule=Color(0xFF3C3E44), selected=Color(0xFF9EAEFF), possession=Color(0xFFE3B45B), danger=Color(0xFFFF7D89), inverse=Color(0xFF101114))
