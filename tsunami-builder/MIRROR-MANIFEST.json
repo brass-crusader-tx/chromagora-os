@@ -2,7 +2,7 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "46fd4b61915936187521a3e0c5f542505b315c48",
+  "source_head": "3d1533e6c4f5dba70e9693dac89eba99fc635955",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
@@ -268,8 +268,8 @@
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VERIFICATION.md",
-      "git_blob_sha": "ac095245dd5698f3898a78c26476cea4b4660854",
-      "bytes": 60387
+      "git_blob_sha": "ab41eb788833b9a0a88c1290eb4f8ec45979df55",
+      "bytes": 63200
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md",
