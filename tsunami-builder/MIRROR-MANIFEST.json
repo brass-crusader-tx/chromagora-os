@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "b7411b44e4e073a12acf9323fdc164384a5ef179",
+  "source_head": "f83460d2c3541dfe219da2872bf51d93aee35755",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Every listed build-critical blob is byte-identical to private Genesis source head b7411b44e4e073a12acf9323fdc164384a5ef179. The public mirror additionally carries only build-transport adapters (JitPack/GitHub workflow files) outside the private source contract. Production runtime/root build files remain untouched.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head f83460d2c3541dfe219da2872bf51d93aee35755. The exact-source fallback now has three guarded build transports: host, authenticated Codespaces, and immutable public JitPack mirror. Production runtime/root build files remain untouched.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -293,8 +293,8 @@
     },
     {
       "path": "tools/ui_shell_static_check.py",
-      "git_blob_sha": "14e9e0aafb6ec69c269b205eb8a67f380a6c1687",
-      "bytes": 19169
+      "git_blob_sha": "ee172119e8498653360510ee2237bf178371e474",
+      "bytes": 20427
     },
     {
       "path": "tools/ui_shell_jitpack_fetch.py",
@@ -304,13 +304,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "b7411b44e4e073a12acf9323fdc164384a5ef179"
+    "source_head": "f83460d2c3541dfe219da2872bf51d93aee35755"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-26T22:58:00Z",
-    "private_head": "b7411b44e4e073a12acf9323fdc164384a5ef179",
-    "reason": "exact current-head mirror after JitPack fallback integration; require app + AndroidTest APK, binary manifest gate, 38 Compose tests, 45-state visual/device matrix, Android TSUNAMI Sans v5.1 raster review, crash scan, and Chromagora portal publication",
-    "sequence": 17
+    "requested_at_utc": "2026-09-26T22:59:00Z",
+    "private_head": "f83460d2c3541dfe219da2872bf51d93aee35755",
+    "reason": "exact current-head public-mirror retry after JitPack transport became a statically gated acceptance path; require app + AndroidTest APK, binary manifest gate, 38 Compose tests, 45-state visual/device matrix, Android TSUNAMI Sans v5.1 raster review, crash scan, and Chromagora portal publication",
+    "sequence": 18
   },
-  "generated_at_utc": "2026-09-26T22:58:00Z"
+  "generated_at_utc": "2026-09-26T22:59:00Z"
 }
