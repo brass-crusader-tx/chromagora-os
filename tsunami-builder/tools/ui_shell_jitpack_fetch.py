@@ -144,14 +144,44 @@ def api_status(version:str)->tuple[str|None,str|None]:
     return status,(commit if isinstance(commit,str) else None)
 
 
+def candidate_versions(mirror_sha:str)->tuple[str,str]:
+    if len(mirror_sha)!=40 or any(ch not in "0123456789abcdef" for ch in mirror_sha.lower()):
+        raise BuildError(f"invalid mirror commit SHA: {mirror_sha!r}")
+    return mirror_sha,mirror_sha[:10]
+
+
+def all_candidates_terminal(terminal_failures:dict[str,str], versions:tuple[str,...])->bool:
+    return bool(versions) and all(version in terminal_failures for version in versions)
+
+
+def resolver_self_test()->None:
+    sha="0123456789abcdef0123456789abcdef01234567"
+    versions=candidate_versions(sha)
+    assert versions==(sha,"0123456789")
+    assert not all_candidates_terminal({},versions)
+    assert not all_candidates_terminal({versions[0]:"full failed"},versions)
+    assert all_candidates_terminal({versions[0]:"full failed",versions[1]:"short failed"},versions)
+    try:
+        candidate_versions("not-a-sha")
+    except BuildError:
+        pass
+    else:
+        raise AssertionError("invalid SHA accepted")
+    print("JITPACK_RESOLVER_SELF_TEST=PASS")
+
+
 def trigger_and_wait(mirror_sha:str, timeout_s:int)->str:
-    # JitPack documents short commit hashes as canonical ad-hoc versions, but current
-    # deployments also accept full SHAs. Probe both while keeping the source contract
-    # bound to the full 40-character mirror commit.
-    versions=(mirror_sha,mirror_sha[:10])
+    # JitPack documents short commit hashes as canonical ad-hoc versions, while some
+    # deployments also accept full SHAs. A terminal error for one spelling must not
+    # suppress the other spelling: full-SHA resolution can fail while the canonical
+    # short commit succeeds. Keep the source contract bound to the full 40-char SHA,
+    # but only declare the transport failed once every candidate is terminal.
+    versions=candidate_versions(mirror_sha)
     deadline=time.monotonic()+timeout_s
     last={}
+    terminal_failures={}
     while time.monotonic()<deadline:
+        terminal_failures.clear()
         for version in versions:
             pom=f"{JITPACK}/{GROUP_PATH}/{version}/{PUBLIC_ARTIFACT}-{version}.pom"
             try:
@@ -181,7 +211,15 @@ def trigger_and_wait(mirror_sha:str, timeout_s:int)->str:
                     detail=http_bytes(log,timeout=30).decode("utf-8","replace")[-12000:]
                 except Exception:
                     detail="(build log unavailable)"
-                raise BuildError(f"JitPack build failed for {version} ({mirror_sha})\n{detail}")
+                terminal_failures[version]=detail
+
+        if all_candidates_terminal(terminal_failures,versions):
+            details="\n\n".join(
+                f"--- {version} ---\n{terminal_failures[version]}" for version in versions
+            )
+            raise BuildError(
+                f"JitPack failed for every accepted commit spelling of {mirror_sha}\n{details}"
+            )
         time.sleep(8)
     raise BuildError(f"JitPack did not produce build {mirror_sha} (full or short version) within {timeout_s}s")
 
@@ -263,6 +301,9 @@ def main()->int:
 
 if __name__=="__main__":
     try:
+        if "--self-test" in sys.argv:
+            resolver_self_test()
+            raise SystemExit(0)
         raise SystemExit(main())
     except Exception as exc:
         print(json.dumps({"status":"BLOCKED","backend":"jitpack-public-mirror","error":str(exc)}),file=sys.stderr)
