@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "2d2613efdf483475ea7ae01023562634ea005fc0",
+  "source_head": "b192d6b8c9dd0d20afcc0056857ad20a57b19a35",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 16,
-  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 2d2613efdf483475ea7ae01023562634ea005fc0. The mirror includes the canonical TSUNAMI Sans v5.1 manifest and root verification gates required by source_verify.py. The latest source delta removes designer-facing rationale/provenance jargon from product microcopy without changing runtime architecture. Production CI/root ignore policy remain byte-identical to main and are deliberately outside the Genesis payload. Build/device PASS remains contingent on executable Android verification.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head b192d6b8c9dd0d20afcc0056857ad20a57b19a35. The mirror includes the canonical TSUNAMI Sans v5.1 manifest and root verification gates required by source_verify.py. The current source also verifies WCAG text-role contrast on both primary and alternate surfaces; muted light-palette roles were corrected accordingly. Production CI/root ignore policy remain byte-identical to main and are deliberately outside the Genesis payload. Build/device PASS remains contingent on executable Android verification.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -96,7 +96,7 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/theme/TsunamiTheme.kt",
-      "git_blob_sha": "9bcb93e3766839d520316380b7cb197ee95111ea",
+      "git_blob_sha": "67e4c3cb3a2baabd9ba38a35ee36fbaedcd3c088",
       "bytes": 3531
     },
     {
@@ -161,8 +161,8 @@
     },
     {
       "path": "ui-shell/tools/accessibility_verify.py",
-      "git_blob_sha": "3db92e7cc16eff516c05ffe0e23adfea9a2cad5c",
-      "bytes": 8190
+      "git_blob_sha": "d513382ee2db5eddf4dd9cb790faae6199cc0f18",
+      "bytes": 8437
     },
     {
       "path": "ui-shell/tools/bootstrap_gradle.sh",
@@ -299,12 +299,12 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "2d2613efdf483475ea7ae01023562634ea005fc0"
+    "source_head": "b192d6b8c9dd0d20afcc0056857ad20a57b19a35"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-26T19:58:00Z",
-    "private_head": "2d2613efdf483475ea7ae01023562634ea005fc0",
-    "reason": "ACM exact-head executable retry after byte-for-byte mirror audit; request host APK + AndroidTest, Motorola 38-test instrumentation, 45-state device matrix, TSUNAMI Sans v5.1 Android review, and Chromagora portal publication",
-    "sequence": 2
+    "requested_at_utc": "2026-09-26T20:03:00Z",
+    "private_head": "b192d6b8c9dd0d20afcc0056857ad20a57b19a35",
+    "reason": "ACM exact-head rebind after alternate-surface contrast correction; request app + AndroidTest APK, 38 tests, 45 device states, Android TSUNAMI Sans v5.1 review, crash scan, and portal publication",
+    "sequence": 3
   }
 }
