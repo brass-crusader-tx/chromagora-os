@@ -2,7 +2,7 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "b109db25b716b7a6b503ee6f05b272e15a5b674d",
+  "source_head": "d4e13de8ee12ea893205b4df74a68c50a55c0e50",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
@@ -307,5 +307,5 @@
     "reason": "exact current-head retry; b109db is tree-identical to coherent 4d194f v5.1 source and must be the provenance bound into produced APK evidence",
     "sequence": 9
   },
-  "generated_at_utc": "2026-09-26T21:28:00Z"
+  "generated_at_utc": "2026-09-26T21:24:00Z"
 }
