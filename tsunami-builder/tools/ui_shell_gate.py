@@ -416,6 +416,10 @@ def verify_on_emulator(apk: Path) -> None:
         run([adb, "-s", serial, "shell", "settings", "put", "global", "window_animation_scale", "0"], check=False)
         run([adb, "-s", serial, "shell", "settings", "put", "global", "transition_animation_scale", "0"], check=False)
         run([adb, "-s", serial, "shell", "settings", "put", "global", "animator_duration_scale", "0"], check=False)
+        # Preserve ~411x914dp Pixel-6 geometry while cutting instrumentation raster load.
+        # capture_verify.sh sets each canonical visual state explicitly afterward.
+        run([adb, "-s", serial, "shell", "wm", "size", "720x1600"], check=False)
+        run([adb, "-s", serial, "shell", "wm", "density", "280"], check=False)
         test_apk = UI / "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
         if not test_apk.is_file() or test_apk.stat().st_size == 0:
             raise RuntimeError("UI Genesis AndroidTest APK missing after successful Gradle build")
