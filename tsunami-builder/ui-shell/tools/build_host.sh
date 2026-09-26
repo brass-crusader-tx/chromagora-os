@@ -72,6 +72,9 @@ if [[ -n "${GRADLE_BIN:-}" ]]; then
     echo "ERROR: GRADLE_BIN is not executable: $GRADLE_BIN" >&2
     exit 2
   fi
+elif command -v gradle >/dev/null 2>&1 && gradle --version 2>/dev/null | grep -q "Gradle $GRADLE_VERSION"; then
+  GRADLE_BIN="$(command -v gradle)"
+  echo "Using locally installed Gradle $GRADLE_VERSION: $GRADLE_BIN"
 else
   GRADLE_BIN="$(bash "$HERE/bootstrap_gradle.sh" --print-gradle)"
 fi
@@ -85,14 +88,27 @@ mkdir -p "$CACHE_ROOT"
 PYTHON_HOST="${PYTHON_BIN:-python3}"
 VENV="$CACHE_ROOT/venv"
 if [[ ! -x "$VENV/bin/python" ]]; then
-  "$PYTHON_HOST" -m venv "$VENV"
+  # Reuse exact host packages when available; this keeps a prepared Mac/Codespace
+  # build-capable even during transient package-index/DNS outages.
+  "$PYTHON_HOST" -m venv --system-site-packages "$VENV"
 fi
 PYTHON_BIN="$VENV/bin/python"
 export TSUNAMI_FONT_PYTHON="$PYTHON_BIN"
-"$PYTHON_BIN" -m pip install --disable-pip-version-check --quiet   "fonttools==4.63.0" "shapely==2.1.2" "pillow==12.3.0"
+if ! "$PYTHON_BIN" - <<'PY'
+import fontTools, shapely, PIL
+assert fontTools.__version__ == "4.63.0", fontTools.__version__
+assert shapely.__version__ == "2.1.2", shapely.__version__
+assert PIL.__version__ == "12.3.0", PIL.__version__
+PY
+then
+  "$PYTHON_BIN" -m pip install --disable-pip-version-check --quiet     "fonttools==4.63.0" "shapely==2.1.2" "pillow==12.3.0"
+fi
 
 "$PYTHON_BIN" - <<'PY'
 import fontTools, shapely, PIL
+assert fontTools.__version__ == "4.63.0"
+assert shapely.__version__ == "2.1.2"
+assert PIL.__version__ == "12.3.0"
 print("FONT_BUILD_DEPS=PASS")
 PY
 
