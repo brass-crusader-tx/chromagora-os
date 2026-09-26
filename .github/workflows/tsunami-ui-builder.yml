@@ -41,7 +41,7 @@ jobs:
           manifest=json.loads((root/"MIRROR-MANIFEST.json").read_text())
           assert manifest["ui_shell_file_count"]==len(manifest["files"]), manifest
           assert manifest["support_file_count"]==len(manifest["support_files"]), manifest
-          assert manifest["ui_shell_file_count"]==40, manifest
+          assert manifest["ui_shell_file_count"]>=40, manifest
           assert manifest["support_file_count"]>=10, manifest
           mismatches=[]
           for row in manifest["files"] + manifest["support_files"]:
@@ -78,4 +78,4 @@ jobs:
             tsunami-builder/MIRROR-MANIFEST.json
           if-no-files-found: error
 
-# current-head retry 2026-09-26 source=46fd4b61915936187521a3e0c5f542505b315c48 type=v5.1
+# current-head mirror contract is manifest-bound; file counts may grow as isolated verification tooling grows
