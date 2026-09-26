@@ -447,6 +447,8 @@ def main() -> int:
     for contract_name, contract_source in (("host build",host_build),("root gate",root_gate)):
         if "TSUNAMI-SANS-v4.8-MANIFEST.json" not in contract_source:
             die(f"{contract_name} must bind generated fonts to the canonical v4.8 manifest")
+    if "OK (38 tests)" not in host_build or "OK (38 tests)" not in root_gate:
+        die("Android acceptance paths must require the full 38-test instrumentation suite")
     for anchor in (
         'JDK 17 or newer',
         '/usr/libexec/java_home -v 17',
