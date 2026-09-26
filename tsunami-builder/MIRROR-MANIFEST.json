@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "f498e8a7990b7c4f266483cf259c384ace9709dc",
+  "source_head": "59df4c30c28da90bb2fce0975cb79756336f3f28",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 16,
-  "note": "Every listed build-critical blob is byte-identical to private Genesis source head f498e8a7990b7c4f266483cf259c384ace9709dc. The mirror includes the canonical TSUNAMI Sans v4.8 manifest and root verification gates required by source_verify.py. Build/device PASS remains contingent on executable Android verification.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 59df4c30c28da90bb2fce0975cb79756336f3f28. The mirror includes the canonical TSUNAMI Sans v4.8 manifest and root verification gates required by source_verify.py. Build/device PASS remains contingent on executable Android verification.",
   "files": [
     {
       "path": "ui-shell/app/build.gradle.kts",
@@ -16,8 +16,8 @@
     },
     {
       "path": "ui-shell/app/src/androidTest/java/com/tsunami/shell/GenesisInteractionTest.kt",
-      "git_blob_sha": "5a473bcb0533f0c431b48298ced5fdf48bdb2411",
-      "bytes": 31698
+      "git_blob_sha": "a71f28fe25dd4c9ebfb94c4d813d068e877f4c6b",
+      "bytes": 32484
     },
     {
       "path": "ui-shell/app/src/main/AndroidManifest.xml",
@@ -66,8 +66,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/ListenScreen.kt",
-      "git_blob_sha": "b9c213c1e2a714f53cd5d777806e5267904ea7a4",
-      "bytes": 5508
+      "git_blob_sha": "a894386d60beee3d5988a867c49ed493d18c8938",
+      "bytes": 8136
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/OnboardingScreen.kt",
@@ -86,8 +86,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/state/ShellState.kt",
-      "git_blob_sha": "bb172713875e7b3dd924e5425ad9ad9b0be4c8fb",
-      "bytes": 39644
+      "git_blob_sha": "914119a1835b59bc1bfc6c9416b5b66ca3efa0b3",
+      "bytes": 39799
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/theme/TsunamiTheme.kt",
@@ -201,8 +201,8 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "34e2ef96588278d85d4cbb393a54aeaf1007e5ce",
-      "bytes": 30919
+      "git_blob_sha": "ee156a2f8fb0807a07eb23ed5f49397fe3a2225c",
+      "bytes": 31031
     },
     {
       "path": "ui-shell/tools/visual_sanity_verify.py",
@@ -253,13 +253,13 @@
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-COVERAGE.md",
-      "git_blob_sha": "960c2cccf72f61d024ca0f764e7934b59c61f1ae",
-      "bytes": 16536
+      "git_blob_sha": "8c99d1a5a7971927326c79dac009133c4536a652",
+      "bytes": 16859
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-RESEARCH.md",
-      "git_blob_sha": "4682a1d293d8ba690079222b8765bc68d7dc2626",
-      "bytes": 25734
+      "git_blob_sha": "02bea1b8481a01184e150ceb10d7fdc55cc959a2",
+      "bytes": 26137
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-STATIC-AUDIT.md",
@@ -268,8 +268,8 @@
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VERIFICATION.md",
-      "git_blob_sha": "54693b5b5a07816a06aa6e673a73baddf8c77eaa",
-      "bytes": 56545
+      "git_blob_sha": "2641c38433361a430a639c9ce42dcc0a4302b48b",
+      "bytes": 59248
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md",
@@ -288,12 +288,12 @@
     },
     {
       "path": "tools/ui_shell_static_check.py",
-      "git_blob_sha": "7058cf0caa606dc6edc47d7a27b1fa85d3b90c26",
-      "bytes": 18828
+      "git_blob_sha": "12fdc112e87420e9d38e9740fe22ca83aa64cba0",
+      "bytes": 18903
     }
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "f498e8a7990b7c4f266483cf259c384ace9709dc"
+    "source_head": "59df4c30c28da90bb2fce0975cb79756336f3f28"
   }
 }
