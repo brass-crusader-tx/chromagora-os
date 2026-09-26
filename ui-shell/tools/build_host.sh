@@ -24,10 +24,16 @@ if [[ -z "$JAVA_MAJOR" || "$JAVA_MAJOR" -lt 17 ]]; then
   exit 2
 fi
 if [[ -z "${ANDROID_SDK_ROOT:-}" ]]; then
-  if [[ -d "$HOME/Library/Android/sdk" ]]; then
+  if [[ -n "${ANDROID_HOME:-}" && -d "$ANDROID_HOME" ]]; then
+    export ANDROID_SDK_ROOT="$ANDROID_HOME"
+  elif [[ -d "$HOME/Library/Android/sdk" ]]; then
     export ANDROID_SDK_ROOT="$HOME/Library/Android/sdk"
   elif [[ -d "$HOME/Android/Sdk" ]]; then
     export ANDROID_SDK_ROOT="$HOME/Android/Sdk"
+  elif [[ -d "/opt/android-sdk-linux" ]]; then
+    export ANDROID_SDK_ROOT="/opt/android-sdk-linux"
+  elif [[ -d "/opt/android-sdk" ]]; then
+    export ANDROID_SDK_ROOT="/opt/android-sdk"
   fi
 fi
 export ANDROID_HOME="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
@@ -43,6 +49,10 @@ printf 'sdk.dir=%s\n' "$ANDROID_SDK_ROOT" > "$UI_ROOT/local.properties"
 SDKMANAGER=""
 if [[ -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]]; then
   SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+elif [[ -x "$ANDROID_SDK_ROOT/cmdline-tools/bin/sdkmanager" ]]; then
+  SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/bin/sdkmanager"
+elif [[ -x "$ANDROID_SDK_ROOT/tools/bin/sdkmanager" ]]; then
+  SDKMANAGER="$ANDROID_SDK_ROOT/tools/bin/sdkmanager"
 elif command -v sdkmanager >/dev/null 2>&1; then
   SDKMANAGER="$(command -v sdkmanager)"
 fi
@@ -157,6 +167,32 @@ TEST_APK="$UI_ROOT/app/build/outputs/apk/androidTest/debug/app-debug-androidTest
 test -s "$APK"
 test -s "$TEST_APK"
 
+APK_ANALYZER="${APK_ANALYZER_BIN:-}"
+if [[ -z "$APK_ANALYZER" ]]; then
+  if command -v apkanalyzer >/dev/null 2>&1; then
+    APK_ANALYZER="$(command -v apkanalyzer)"
+  elif [[ -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/apkanalyzer" ]]; then
+    APK_ANALYZER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/apkanalyzer"
+  fi
+fi
+if [[ -z "$APK_ANALYZER" || ! -x "$APK_ANALYZER" ]]; then
+  echo "ERROR: apkanalyzer is required for binary manifest verification." >&2
+  exit 2
+fi
+APP_ID="$("$APK_ANALYZER" manifest application-id "$APK" | tr -d '\r')"
+[[ "$APP_ID" == "com.tsunami.shell" ]] || { echo "ERROR: unexpected APK application id: $APP_ID" >&2; exit 2; }
+PERMISSIONS="$("$APK_ANALYZER" manifest permissions "$APK" | sed '/^[[:space:]]*$/d')"
+if grep -q '^android\.permission\.' <<<"$PERMISSIONS"; then
+  echo "ERROR: backend-free shell APK unexpectedly declares Android permissions:" >&2
+  printf '%s\n' "$PERMISSIONS" >&2
+  exit 2
+fi
+{
+  echo "APPLICATION_ID=$APP_ID"
+  echo "DECLARED_ANDROID_PERMISSIONS=0"
+  echo "BINARY_MANIFEST_GATE=PASS"
+} | tee "$REPORT/binary-manifest.txt"
+
 OUT_APK="$DIST/TSUNAMI-UI-Genesis-debug.apk"
 OUT_TEST="$DIST/TSUNAMI-UI-Genesis-debug-androidTest.apk"
 cp "$APK" "$OUT_APK"
@@ -175,8 +211,31 @@ bytes_file() {
 
 APK_SHA="$(hash_file "$OUT_APK")"
 TEST_SHA="$(hash_file "$OUT_TEST")"
+
+# Bind build evidence to the canonical private Genesis source even when this script is
+# executed from the byte-identical public builder mirror. In the private repository
+# SOURCE_SHA and BUILD_REPO_SHA are identical. In the public mirror SOURCE_SHA comes
+# from MIRROR-MANIFEST.json while BUILD_REPO_SHA records the mirror commit that ran it.
+BUILD_REPO_SHA="$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || echo unknown)"
+SOURCE_SHA="$BUILD_REPO_SHA"
+MIRROR_MANIFEST="$REPO_ROOT/MIRROR-MANIFEST.json"
+if [[ -f "$MIRROR_MANIFEST" ]]; then
+  MIRROR_SOURCE_SHA="$("$PYTHON_BIN" - "$MIRROR_MANIFEST" <<'PY'
+import json, pathlib, sys
+data=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+print(data.get("source_head",""))
+PY
+)"
+  if [[ "$MIRROR_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+    SOURCE_SHA="$MIRROR_SOURCE_SHA"
+  else
+    echo "ERROR: public mirror manifest lacks a valid private source_head." >&2
+    exit 2
+  fi
+fi
 {
-  echo "SOURCE_SHA=$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || echo unknown)"
+  echo "SOURCE_SHA=$SOURCE_SHA"
+  echo "BUILD_REPO_SHA=$BUILD_REPO_SHA"
   echo "GRADLE=$("$GRADLE_BIN" --version | awk '/^Gradle /{print $2;exit}')"
   echo "JAVA=$(java -version 2>&1 | head -1)"
   echo "JAVA_HOME=${JAVA_HOME:-}"
