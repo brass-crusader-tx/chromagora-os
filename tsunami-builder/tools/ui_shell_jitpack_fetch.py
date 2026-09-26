@@ -159,8 +159,10 @@ def resolver_self_test()->None:
     versions=candidate_versions(sha)
     assert versions==(sha,"0123456789")
     assert not all_candidates_terminal({},versions)
-    assert not all_candidates_terminal({versions[0]:"full failed"},versions)
-    assert all_candidates_terminal({versions[0]:"full failed",versions[1]:"short failed"},versions)
+    partial={versions[0]:"full failed"}
+    assert not all_candidates_terminal(partial,versions)
+    partial[versions[1]]="short failed"
+    assert all_candidates_terminal(partial,versions)
     try:
         candidate_versions("not-a-sha")
     except BuildError:
@@ -181,7 +183,6 @@ def trigger_and_wait(mirror_sha:str, timeout_s:int)->str:
     last={}
     terminal_failures={}
     while time.monotonic()<deadline:
-        terminal_failures.clear()
         for version in versions:
             pom=f"{JITPACK}/{GROUP_PATH}/{version}/{PUBLIC_ARTIFACT}-{version}.pom"
             try:
@@ -205,7 +206,7 @@ def trigger_and_wait(mirror_sha:str, timeout_s:int)->str:
             if normalized in {"ok","success","successful","built"}:
                 print(f"JITPACK_VERSION={version}",flush=True)
                 return version
-            if normalized in {"error","failed","failure"}:
+            if normalized in {"error","failed","failure"} and version not in terminal_failures:
                 log=f"{JITPACK}/{GROUP_PATH}/{version}/build.log"
                 try:
                     detail=http_bytes(log,timeout=30).decode("utf-8","replace")[-12000:]
