@@ -39,7 +39,7 @@ import com.tsunami.shell.theme.*
             Spacer(Modifier.height(10.dp))
             Text("Your listening line",style=Type.display.copy(color=p.ink))
             Spacer(Modifier.height(10.dp))
-            Text("Playback context first; deliberate choice follows it.",style=Type.body.copy(color=p.ink2))
+            Text("Pick up where you left off, or choose from your library.",style=Type.body.copy(color=p.ink2))
             Spacer(Modifier.height(18.dp))
             Rule()
         }
@@ -62,7 +62,7 @@ import com.tsunami.shell.theme.*
         if(state.fixture.empty){
             item{
                 ListeningBandHeader("LIBRARY","EMPTY")
-                Text("No music is indexed yet.",style=Type.title.copy(color=p.ink),modifier=Modifier.padding(top=12.dp))
+                Text("Your library is empty.",style=Type.title.copy(color=p.ink),modifier=Modifier.padding(top=12.dp))
                 Spacer(Modifier.height(6.dp))
                 Text("Add a music folder or connect a service to begin.",style=Type.body.copy(color=p.ink2))
                 Spacer(Modifier.height(12.dp))
