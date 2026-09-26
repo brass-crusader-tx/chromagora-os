@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "9c25510a56c7ee88709ab837dbe7a241384cdfa2",
+  "source_head": "4d194f587e009eb7e1e19e3bcfbf6d4f36f025e6",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 16,
-  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 63d7b1f201b7873a65058150bde364375ab80bd8. The mirror includes the canonical TSUNAMI Sans v5.1 manifest and root verification gates required by source_verify.py. The current source verifies WCAG text-role contrast on both primary and alternate surfaces and binds host artifacts to the canonical private source SHA. Production CI/root ignore policy remain byte-identical to main and are deliberately outside the Genesis payload. Build/device PASS remains contingent on executable Android verification.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 4d194f587e009eb7e1e19e3bcfbf6d4f36f025e6. The mirror includes the manifest-coherent TSUNAMI Sans v5.1 aperture refinement, canonical v5.1 proof hashes, accessibility gates, host artifact source binding, and root verification gates. Production CI/root build policy remain byte-identical to main. Build/device PASS remains contingent on executable Android verification.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -186,7 +186,7 @@
     },
     {
       "path": "ui-shell/tools/generate_tsunami_sans.py",
-      "git_blob_sha": "40647ffaebca8de8e8b24baddd4346cfb79166e2",
+      "git_blob_sha": "43ae1290ae3063a717cddb0272080dc0c27d3b7f",
       "bytes": 24366
     },
     {
@@ -243,8 +243,8 @@
     },
     {
       "path": "docs/TSUNAMI-SANS-v5.1-MANIFEST.json",
-      "git_blob_sha": "347bed994c1d10c21028d0d89442f2691245f0ba",
-      "bytes": 1920
+      "git_blob_sha": "9f0bd41aeece78fb386e3e2788969e4ddd55cfd6",
+      "bytes": 2179
     },
     {
       "path": "docs/TSUNAMI-SANS-VISUAL-REVIEW.md",
@@ -299,13 +299,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "b192d6b8c9dd0d20afcc0056857ad20a57b19a35"
+    "source_head": "4d194f587e009eb7e1e19e3bcfbf6d4f36f025e6"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-26T20:57:00Z",
-    "private_head": "63d7b1f201b7873a65058150bde364375ab80bd8",
-    "reason": "exact-head retry after source-binding and contrast fixes; require app + AndroidTest APK, 38 Compose tests, 45-state device matrix, Android TSUNAMI Sans v5.1 review, crash scan, and Chromagora portal publication",
-    "sequence": 6
+    "requested_at_utc": "2026-09-26T21:14:00Z",
+    "private_head": "4d194f587e009eb7e1e19e3bcfbf6d4f36f025e6",
+    "reason": "exact-head retry after manifest-coherent TSUNAMI Sans v5.1 aperture refinement; require app + AndroidTest APK, 38 Compose tests, 45-state device matrix, Android font raster review, crash scan, and Chromagora portal publication",
+    "sequence": 7
   },
   "generated_at_utc": "2026-09-26T21:20:00Z"
 }
