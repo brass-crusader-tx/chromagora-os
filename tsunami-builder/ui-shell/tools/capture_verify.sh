@@ -22,17 +22,26 @@ adb shell rm -f "$REMOTE_APK" || true
 adb logcat -c || true
 capture() {
   local name="$1" screen="$2" scenario="$3" theme="$4" mode="${5:-}" page="${6:-}"
+  local launch focus
   adb shell am force-stop "$PKG"
   if [[ -n "$mode" && -n "$page" ]]; then
-    adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" --es mode "$mode" --es page "$page" >/dev/null
+    launch="$(adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" --es mode "$mode" --es page "$page")"
   elif [[ -n "$mode" ]]; then
-    adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" --es mode "$mode" >/dev/null
+    launch="$(adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" --es mode "$mode")"
   elif [[ -n "$page" ]]; then
-    adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" --es page "$page" >/dev/null
+    launch="$(adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" --es page "$page")"
   else
-    adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" >/dev/null
+    launch="$(adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme")"
   fi
+  printf '=== %s ===\n%s\n' "$name" "$launch" >> "$OUT/launch-status.txt"
+  grep -Fq 'Status: ok' <<<"$launch" || { echo "capture launch failed for $name" >&2; printf '%s\n' "$launch" >&2; exit 3; }
   sleep 1
+  focus="$(adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | head -1 || true)"
+  if [[ "$focus" != *"com.tsunami.shell"* || "$focus" != *"MainActivity"* ]]; then
+    echo "capture foreground mismatch for $name: $focus" >&2
+    exit 4
+  fi
+  printf 'FOCUS %s %s\n' "$name" "$focus" >> "$OUT/launch-status.txt"
   adb exec-out screencap -p > "$OUT/$name.png"
 }
 capture 01-listen-light listen default light
