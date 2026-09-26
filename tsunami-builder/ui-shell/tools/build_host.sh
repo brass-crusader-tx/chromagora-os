@@ -157,6 +157,32 @@ TEST_APK="$UI_ROOT/app/build/outputs/apk/androidTest/debug/app-debug-androidTest
 test -s "$APK"
 test -s "$TEST_APK"
 
+APK_ANALYZER="${APK_ANALYZER_BIN:-}"
+if [[ -z "$APK_ANALYZER" ]]; then
+  if command -v apkanalyzer >/dev/null 2>&1; then
+    APK_ANALYZER="$(command -v apkanalyzer)"
+  elif [[ -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/apkanalyzer" ]]; then
+    APK_ANALYZER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/apkanalyzer"
+  fi
+fi
+if [[ -z "$APK_ANALYZER" || ! -x "$APK_ANALYZER" ]]; then
+  echo "ERROR: apkanalyzer is required for binary manifest verification." >&2
+  exit 2
+fi
+APP_ID="$("$APK_ANALYZER" manifest application-id "$APK" | tr -d '\r')"
+[[ "$APP_ID" == "com.tsunami.shell" ]] || { echo "ERROR: unexpected APK application id: $APP_ID" >&2; exit 2; }
+PERMISSIONS="$("$APK_ANALYZER" manifest permissions "$APK" | sed '/^[[:space:]]*$/d')"
+if grep -q '^android\.permission\.' <<<"$PERMISSIONS"; then
+  echo "ERROR: backend-free shell APK unexpectedly declares Android permissions:" >&2
+  printf '%s\n' "$PERMISSIONS" >&2
+  exit 2
+fi
+{
+  echo "APPLICATION_ID=$APP_ID"
+  echo "DECLARED_ANDROID_PERMISSIONS=0"
+  echo "BINARY_MANIFEST_GATE=PASS"
+} | tee "$REPORT/binary-manifest.txt"
+
 OUT_APK="$DIST/TSUNAMI-UI-Genesis-debug.apk"
 OUT_TEST="$DIST/TSUNAMI-UI-Genesis-debug-androidTest.apk"
 cp "$APK" "$OUT_APK"
