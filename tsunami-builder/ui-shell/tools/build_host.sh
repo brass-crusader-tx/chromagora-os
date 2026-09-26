@@ -229,8 +229,8 @@ if [[ "$MODE" == "--install" || "$MODE" == "--verify-device" ]]; then
     "$ADB" -s "$SERIAL" logcat -c || true
     "$ADB" -s "$SERIAL" shell am instrument -w -e class com.tsunami.shell.GenesisInteractionTest \
       com.tsunami.shell.test/androidx.test.runner.AndroidJUnitRunner | tee "$REPORT/instrumentation.txt"
-    grep -q 'OK (' "$REPORT/instrumentation.txt" || {
-      echo "ERROR: instrumentation did not report success." >&2
+    grep -Fq 'OK (38 tests)' "$REPORT/instrumentation.txt" || {
+      echo "ERROR: instrumentation did not report OK (38 tests)." >&2
       exit 3
     }
 
