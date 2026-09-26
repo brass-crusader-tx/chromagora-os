@@ -175,8 +175,31 @@ bytes_file() {
 
 APK_SHA="$(hash_file "$OUT_APK")"
 TEST_SHA="$(hash_file "$OUT_TEST")"
+
+# Bind build evidence to the canonical private Genesis source even when this script is
+# executed from the byte-identical public builder mirror. In the private repository
+# SOURCE_SHA and BUILD_REPO_SHA are identical. In the public mirror SOURCE_SHA comes
+# from MIRROR-MANIFEST.json while BUILD_REPO_SHA records the mirror commit that ran it.
+BUILD_REPO_SHA="$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || echo unknown)"
+SOURCE_SHA="$BUILD_REPO_SHA"
+MIRROR_MANIFEST="$REPO_ROOT/MIRROR-MANIFEST.json"
+if [[ -f "$MIRROR_MANIFEST" ]]; then
+  MIRROR_SOURCE_SHA="$("$PYTHON_BIN" - "$MIRROR_MANIFEST" <<'PY'
+import json, pathlib, sys
+data=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+print(data.get("source_head",""))
+PY
+)"
+  if [[ "$MIRROR_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+    SOURCE_SHA="$MIRROR_SOURCE_SHA"
+  else
+    echo "ERROR: public mirror manifest lacks a valid private source_head." >&2
+    exit 2
+  fi
+fi
 {
-  echo "SOURCE_SHA=$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || echo unknown)"
+  echo "SOURCE_SHA=$SOURCE_SHA"
+  echo "BUILD_REPO_SHA=$BUILD_REPO_SHA"
   echo "GRADLE=$("$GRADLE_BIN" --version | awk '/^Gradle /{print $2;exit}')"
   echo "JAVA=$(java -version 2>&1 | head -1)"
   echo "JAVA_HOME=${JAVA_HOME:-}"
