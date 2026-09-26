@@ -87,7 +87,7 @@ def lower(ch,t):
     o=lambda: ring(w/2,h/2,w*.39,h/2+OV_X,tl)
     if ch=='a': return U(o(),R(w-m-tl,0,w-m,h)),w
     if ch=='b': return U(R(m,0,m+tl,ASC),translate(o(),xoff=18)),w
-    if ch=='c': return o().difference(R(w*.66,h*.16,w+80,h*.84)),w
+    if ch=='c': return o().difference(R(w*.64,h*.14,w+80,h*.86)),w
     if ch=='d': return U(R(w-m-tl,0,w-m,ASC),translate(o(),xoff=-18)),w
     if ch=='e':
         # Preserve almost the entire circular bowl and open only the middle-right aperture.
