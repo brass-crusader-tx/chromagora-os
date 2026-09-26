@@ -2,24 +2,66 @@
   "family": "TSUNAMI Sans",
   "version": "4.800",
   "generated_from": "ui-shell/tools/generate_tsunami_sans.py",
-  "proof_status": "Generated and visually inspected outside CI on 2026-09-26",
+  "proof_status": "Generated on the canonical Mac acceptance host and visually reviewable from the emitted proofs on 2026-09-26",
   "weights": {
-    "Light": {"bytes": 101272, "sha256": "05e01aed5f8ee3c7b72668b3d479020a39e5e4d9b7f066ef6c65b71b1510914c"},
-    "Regular": {"bytes": 103600, "sha256": "2b2c2fccdbd67a2bee45975b7347729cf943547b80c74f9788d5cd6fe30ec0aa"},
-    "Medium": {"bytes": 104420, "sha256": "aadd7d65383ace5eac8fe23f4e400ec34453bd9563c11e7138473c802071b615"},
-    "Semibold": {"bytes": 105528, "sha256": "afd3863d8240fa506f030d8423d5192822b313f502b0c206079a1f97a4d08e04"},
-    "Bold": {"bytes": 105376, "sha256": "3129cfd275727cf47f851b29c6b81bbe594e5603ca8e7d40efd17e66f080876f"}
+    "Light": {
+      "bytes": 102868,
+      "sha256": "845348eb5eed0a11551122e11f882c4f1c04b2f002c6651cb659f2e00dfc78e3"
+    },
+    "Regular": {
+      "bytes": 105204,
+      "sha256": "036bdedd69bc1565d140faec9cb17d3c27d55cef5e435c8d89068943953711a8"
+    },
+    "Medium": {
+      "bytes": 106020,
+      "sha256": "47b778217bc8f55f2777080454c3236571e16961caef708cbe967d98d322b3d7"
+    },
+    "Semibold": {
+      "bytes": 107108,
+      "sha256": "812a1cf08101cc1abd5f29c6094ab2f6117e93a3d3471c31da298eaa48175a5d"
+    },
+    "Bold": {
+      "bytes": 106912,
+      "sha256": "f7c0197e54b1c352469fac1e54baf9518453eab106ee09111d5ae183c4ae8013"
+    }
   },
   "proofs": {
-    "tsunami-sans-proof.png": {"bytes": 161831, "sha256": "4c2d63d660fa367d64a634a9cf8a3358cecba69cf75616fa7087414e07bcb9d2"},
-    "tsunami-sans-ui-proof.png": {"bytes": 72082, "sha256": "ac76fcb6b5712da1c80fdae244897694487a21af27e993ad09f406768e087bce"}
+    "tsunami-sans-proof.png": {
+      "bytes": 159128,
+      "sha256": "4b64248e1243a22997819d4e9a13671320ca55b51a46b2cd3b2d1c85b2212e88"
+    },
+    "tsunami-sans-ui-proof.png": {
+      "bytes": 70419,
+      "sha256": "14a9002e5021c48368c104680249bb0a7df8816e30fba4fec9af608cbd757986"
+    }
   },
   "validated": {
     "family_metadata": "TSUNAMI Sans",
-    "weight_classes": [300, 400, 500, 600, 700],
+    "weight_classes": [
+      300,
+      400,
+      500,
+      600,
+      700
+    ],
     "glyph_count_per_master": 176,
     "required_ui_glyph_coverage": true,
     "western_european_ui_coverage": true,
-    "control_pairs": ["I/l/1", "O/0", "rn/m", "c/e", "v/y"]
+    "control_pairs": [
+      "I/l/1",
+      "O/0",
+      "rn/m",
+      "c/e",
+      "v/y"
+    ]
+  },
+  "generator_blob_sha1": "1759a3ee680ef51d914d507d3ee2e93ec371f82f",
+  "byte_reproducibility_scope": "macOS 15.7.5 x86_64; identical outputs under Python 3.12.14, 3.13.12 and 3.14.7 with pinned packages",
+  "toolchain": {
+    "fonttools": "4.63.0",
+    "shapely": "2.1.2",
+    "geos": "3.13.1",
+    "pillow": "12.3.0",
+    "freetype": "2.14.3"
   }
 }
