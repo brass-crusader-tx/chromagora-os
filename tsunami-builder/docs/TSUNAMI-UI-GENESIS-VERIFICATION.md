@@ -649,3 +649,20 @@ The public builder mirror in `brass-crusader-tx/chromagora-os:build/tsunami-ui-g
 Fresh hosted build probes remain infrastructure-negative rather than compilation-negative. Public Ubuntu builder run `36258819959` and macOS-15 builder run `36259705346` both materialized job objects but failed before a step sequence or downloadable job log existed (`steps=null` / no usable log blob). The exact-head public self-hosted run `36258822282` remains queued awaiting a matching executor. None of those states is counted as Android build evidence.
 
 The completion boundary is therefore unchanged and explicit: exact-current-head debug APK + AndroidTest APK assembly, installation of isolated package `com.tsunami.shell`, all **38** instrumentation tests, the full **45-state** screenshot matrix, Android TSUNAMI Sans v5.1 raster inspection, crash/logcat scan, derived monochrome/squint evidence, human artwork-removed / monochrome / squint / non-streaming-clone review, and final artifact hashes.
+
+
+## Exact-head ACM continuation handoff — 2026-09-26 17:59 UTC
+
+A fresh authenticated reconciliation was run from the active Genesis head `3d1533e6c4f5dba70e9693dac89eba99fc635955`.
+
+Concrete results:
+
+- PR #16 remains draft and mergeable.
+- The base-to-head comparison is 516 commits / 59 changed files and still touches **zero** production runtime/build paths under `app/`, `wear/`, `control-plane/`, root `build.gradle.kts`, or root `settings.gradle.kts`.
+- The public builder mirror manifest in `brass-crusader-tx/chromagora-os:build/tsunami-ui-genesis-20260925` names this exact private head.
+- All **56 / 56** manifest-bound blobs (40 `ui-shell/` + 16 support files) were compared against the private current tree by Git blob SHA and byte size; mismatches: **0**.
+- Public mirror commit `c8f051cdc7a303c4daccf13105e093636086e41e` explicitly retriggered exact-head build/device acceptance. Its Linux run `36260861754` and macOS run `36260861872` again failed before any step existed; jobs `108456262681` and `108456263016` both expose `steps=null`. This remains runner/allocation infrastructure evidence, not compilation evidence.
+- The public self-hosted lane was extended at mirror commit `f779a9e60cf6fd8275149c481cb53b6cdfd73b44` so that, after a successful canonical host build, it atomically publishes the exact-source preview APK to the stable Chromagora Dev Portal target `/Users/ezra/Downloads/TSUNAMI/dist/TSUNAMI-UI-Shell-Rebrand-v1-debug.apk`, writes a source/hash/byte-count sidecar, and verifies the live portal route when reachable from the runner.
+- Self-hosted run `36260963689`, job `108456555760`, is currently queued awaiting the registered executor. No build/device pass is inferred from that queued state.
+
+The acceptance boundary is unchanged: current-head app APK + AndroidTest APK assembly, isolated-package installation, all 38 Compose instrumentation tests, the exact 45-state visual matrix, Android TSUNAMI Sans v5.1 raster inspection, crash/logcat scan, monochrome/squint/artwork-independent review, and final artifact hashes must execute before completion can be certified.
