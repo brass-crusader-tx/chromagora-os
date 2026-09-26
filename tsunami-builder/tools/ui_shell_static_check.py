@@ -423,6 +423,11 @@ def main() -> int:
         if escaped in publisher:
             fail(f"portal publisher contains escaped shell expansion: {escaped}")
 
+    host_build = read(UI / "tools/build_host.sh")
+    root_gate = read(ROOT / "tools/ui_shell_gate.py")
+    if "OK (38 tests)" not in host_build or "OK (38 tests)" not in root_gate:
+        fail("Android acceptance paths must require all 38 instrumentation tests")
+
     tests = read(TEST)
     expected_test_contracts = (
         "transportAndExpandedListeningAreInteractive",
