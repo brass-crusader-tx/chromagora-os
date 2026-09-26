@@ -4,21 +4,21 @@ This matrix records where the production application's user-facing capability in
 
 | Production capability | Genesis home | Mock interaction/state |
 |---|---|---|
-| Resume / continue listening | LISTEN workspace + persistent Listening Spine | Resume row selects the object; per-item longform positions survive context changes; spine play/pause and expand respond |
+| Resume / continue listening | LISTEN workspace + persistent Listening Spine | `CURRENT THREAD` is a temporal, artwork-independent ledger whose `NOW` row follows the actual current playback object; per-item longform positions survive context/queue changes; spine play/pause and expand respond |
 | Songs | LIBRARY → Tracks lens | Sort, density, offline filter, multi-select, play, favourite, download, playlist insertion, play-next and shuffle-next; Ledger preserves optional artwork while Index becomes an artwork-free alphabetical typographic ledger; track actions reveal by long-press or overflow |
 | Albums | LIBRARY → Albums lens | Ledger object opens a reversible detail depth with album contents; object-level Play/Play next resolve a track from that album rather than an unrelated list position; missing-art state is represented |
 | Artists | LIBRARY → Artists lens | Artist grouping opens reversible detail depth with matching tracks and object-level playback resolves inside that artist |
 | Playlists | LIBRARY → Playlists lens | Create/open/play/queue-next actions and single- or multi-track insertion mutate shared deterministic playlist state |
 | Folders | LIBRARY → Folders lens | Folder objects are derived from the mutable Library-root state, open reversible matching contents and preserve ownership/provenance semantics |
 | Favourites | LISTEN temporal index + track state | Favourite toggles immediately and persists in shell state |
-| History / recently played | LISTEN + SIGNAL history | Temporal resume rows, local-library listening lenses (Deep cuts / Rediscover / Never heard / Most played / Unfinished) and listening statistics |
+| History / recently played | LISTEN + SIGNAL history | `CURRENT THREAD` time markers, pinned owned anchors, local-library lenses (Deep cuts / Rediscover / Never heard / Most played / Unfinished) and listening statistics create a resumptive surface without recommendation shelves |
 | Downloads / offline | LIBRARY filters + listening object state + Settings/Offline | Download cycles local/downloading/downloaded; offline mode toggles |
 | Search | FIND workspace | Live query, bounded one-edit/adjacent-transposition typo tolerance, local/catalogue scope, track/album/artist/folder/longform filters, immediate play/object select and reversible object depth |
 | Connected catalogue results | FIND | Explicit `CATALOGUE` provenance; never masquerades as owned |
 | Connected services | SETTINGS → Connected services | YouTube Music, Apple Music, Amazon Music, Spotify and TIDAL are all represented; dedicated progressive workspace provides connect/disconnect, staged import progress, audit disclosure and retained imported-library state |
 | Provider import | SETTINGS → Connected services | Deterministic 25% progress steps, completion audits with explicit Shorts/video-only/sample/unmatched exclusions, and retained imported-library state after disconnect |
-| Podcasts | LIBRARY → Longform lens + Expanded Listening | Explicit podcast media type, episodic metadata, ±30-second transport and played/unplayed state |
-| Audiobooks | LIBRARY → Longform + Expanded Listening | Explicit audiobook media type, chapter/remaining-time/resume state and bookmark behavior |
+| Podcasts | LIBRARY → Longform lens + Expanded Listening | Explicit podcast media type, episodic metadata, ±30-second transport and played/unplayed state; marking unplayed resets resumptive position to the beginning |
+| Audiobooks | LIBRARY → Longform + Expanded Listening | Explicit audiobook media type, chapter/remaining-time/resume state and bookmark behavior; leaving or removing the current queue item stores its position before context changes |
 | Radio | LIBRARY → Radio lens | Distinct deterministic stations resolve different source sets (owned, connected or favourites), open reversible content depth and expose a stateful play action |
 | Now Playing | Expanded Listening environment | Opens from persistent spine; back collapses to prior workspace |
 | Play / pause | Listening Spine + Expanded Listening | Immediate toggle |
