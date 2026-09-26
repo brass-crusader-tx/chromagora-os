@@ -69,6 +69,7 @@ import com.tsunami.shell.theme.*
                 Modifier.align(Alignment.TopCenter)
                     .padding(top=18.dp)
                     .background(p.ink)
+                    .heightIn(min=48.dp)
                     .border(2.dp,if(bannerFocused)p.selected else Color.Transparent)
                     .semantics{contentDescription="Dismiss message";role=Role.Button}
                     .onFocusChanged{bannerFocused=it.isFocused}
