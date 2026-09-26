@@ -2,7 +2,7 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "b192d6b8c9dd0d20afcc0056857ad20a57b19a35",
+  "source_head": "63d7b1f201b7873a65058150bde364375ab80bd8",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
@@ -171,8 +171,8 @@
     },
     {
       "path": "ui-shell/tools/build_host.sh",
-      "git_blob_sha": "53c6fab0b0a1bca28b5f0bdd429853a19bce0cca",
-      "bytes": 10385
+      "git_blob_sha": "727fc1f2e34f1e94d610dcd6e4dafe345000678b",
+      "bytes": 11315
     },
     {
       "path": "ui-shell/tools/capture_verify.sh",
@@ -302,9 +302,9 @@
     "source_head": "b192d6b8c9dd0d20afcc0056857ad20a57b19a35"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-26T20:17:00Z",
-    "private_head": "b192d6b8c9dd0d20afcc0056857ad20a57b19a35",
-    "reason": "ACM exact-head retry after current-source contrast/type reconciliation; request app + AndroidTest APK, all 38 Compose tests, 45-state device matrix, Android TSUNAMI Sans v5.1 review, crash scan, and Chromagora portal publication",
-    "sequence": 4
+    "requested_at_utc": "2026-09-26T20:36:00Z",
+    "private_head": "63d7b1f201b7873a65058150bde364375ab80bd8",
+    "reason": "exact-head retry after strengthening host artifact source binding; require app + AndroidTest APK, 38 Compose tests, 45-state device matrix, Android TSUNAMI Sans v5.1 review, crash scan, and Chromagora portal publication",
+    "sequence": 5
   }
 }
