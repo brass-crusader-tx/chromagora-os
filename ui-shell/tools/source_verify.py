@@ -101,14 +101,17 @@ FORBIDDEN_MANIFEST = (
 REQUIRED_ANCHORS = {
     "model/MockModels.kt": [
         '"small-list"', '"long-list"', '"huge-list"', '"missing-art"', '"loading"', '"error"', '"buffering"', '"partial"', '"unavailable"', '"podcast"',
+        '"queue-empty"', '"search-error"', '"provider-connecting"', '"provider-error"', '"downloads-active"', '"downloads-error"',
         "LibraryLens", "SearchKind", "FOLDERS", "SearchIntent", "LongformType", "ProviderImportAuditMock",
+        'ServiceConnection("YouTube Music"', 'ServiceConnection("Apple Music"', 'ServiceConnection("Amazon Music"', 'ServiceConnection("TIDAL"', 'ServiceConnection("Spotify"',
     ],
     "state/ShellState.kt": [
         "playNext(", "shuffleNext(", "moveQueue(", "toggleDownload(", "addToPlaylist(",
         "createEmptyPlaylist(", "cycleRepeat(", "cycleCrossfade(", "advanceImport(", "importAudits", "describeImportAudit(", "announceImportAudit(",
-        "selectedTrackIds", "addSelectionToPlaylist(", "hiddenLibrarySections", "metadataTemplate", "if(!track.available && play)", "lyricsGlobalDelayMs", "showArtworkInPlayer", "buffering", "togglePlayback(",
-        "highContrast", "largeControls", "hapticStrength", "wifiOnlyDownloads", "lyricsAutoFetch", "resumePositions", "playedLongform", "seekRelative(", "togglePlayedLongform(", "listenLens",
+        "selectedTrackIds", "addSelectionToPlaylist(", "hiddenLibrarySections", "metadataTemplate", "libraryViewMode", "if(!track.available && play)", "lyricsGlobalDelayMs", "showArtworkInPlayer", "buffering", "togglePlayback(",
+        "highContrast", "largeControls", "hapticStrength", "advancedExperience", "wifiOnlyDownloads", "lyricsAutoFetch", "resumePositions", "playedLongform", "seekRelative(", "togglePlayedLongform(", "listenLens",
         "signalSection", "runGaplessProbe(", "auditLyrics(", "scanDuplicateHashes(", "exportReplay(",
+        "searchFault", "downloadsFault", "providerTransient", "retrySearch(", "retryDownloads(", "retryProvider(",
         "excludedGenres", "excludedPlaylistPaths", "swipeUp", "swipeDown", "albumArtistMode", "prepareDeviceMigration(",
         "miniPlayerExtras", "fullPlayerButtons", "notificationActions", "toggleNotificationAction(", "quickSettingsActions", "toggleQuickSettingsAction(", "widgetLayout", "cycleWidgetLayout(", "wearControlsEnabled", "wearSecondaryAction", "cycleWearSecondaryAction(", "runPlayerAction(",
         "eqBandsDb", "cycleEqBand(", "lyricSourceOrder", "moveLyricSource(", "librarySectionOrder", "moveLibrarySection(",
@@ -118,7 +121,7 @@ REQUIRED_ANCHORS = {
     "navigation/GenesisShell.kt": [
         "IndexRail(", "IndexStrip(", "ListeningSpine(", "AnimatedContent(", "reducedMotion", "miniPlayerExtras", "runPlayerAction(",
     ],
-    "screens/ListenScreen.kt": ["Choose from your library", "Deep cuts", "Rediscover", "Never heard", "Most played", "Unfinished", 'state.settingsExpanded="services"'],
+    "screens/ListenScreen.kt": ["CURRENT THREAD", "LIBRARY LENS", "TemporalTrackRow(", "showArtwork=false", "Deep cuts", "Rediscover", "Never heard", "Most played", "Unfinished", 'state.settingsExpanded="services"'],
     "screens/FindScreen.kt": ["SearchKind.FOLDERS", "folderFor(", "FOLDER MATCH", "fuzzyContains(", "withinOneEditOrTranspose("],
     "screens/SignalScreen.kt": ["Summary", "Audio", "Library", "History", "Logs", "TSUNAMI Replay", "Lyrics quality & repair queue", "Playback integrity"],
     "screens/OnboardingScreen.kt": ['state.settingsExpanded="services"', "Enter with the sample library", "Index a music folder"],
@@ -129,7 +132,7 @@ REQUIRED_ANCHORS = {
     "screens/LibraryScreen.kt": [
         "LibraryLens.TRACKS", "LibraryLens.ALBUMS", "LibraryLens.ARTISTS",
         "LibraryLens.PLAYLISTS", "LibraryLens.FOLDERS", "LibraryLens.LONGFORM",
-        "LibraryLens.RADIO", "animateScrollToItem", "selectionMode",
+        "LibraryLens.RADIO", "animateScrollToItem", "selectionMode", 'if(state.libraryViewMode=="Ledger") TextCommand(state.sortLabel', 'TextCommand("Ledger"', 'TextCommand("Index"', 'if(state.libraryViewMode=="Ledger") TextCommand(if(state.denseLibrary)', 'showArtwork=state.libraryViewMode=="Ledger"', "libraryViewMode", "showArtwork=false",
     ],
     "screens/SettingsScreen.kt": [
         '"audio"', '"visualizer"', '"shuffle"', '"library-roots"', '"library-sections"',
@@ -146,8 +149,8 @@ REQUIRED_ANCHORS = {
 
 PRIMARY_COPY_GUARDS = {
     "screens/ListenScreen.kt": [
-        "Resume first. Choose second.",
-        "The shell stays navigable without inventing recommendations.",
+        "Playback context first; deliberate choice follows it.",
+        "No music is indexed yet.",
     ],
     "screens/OnboardingScreen.kt": [
         "The prototype never asks for production permissions.",
@@ -364,7 +367,14 @@ def main() -> int:
     test_src=TEST.read_text(encoding="utf-8")
     if "externalPlaybackSurfacesHaveExplicitMockContracts" not in test_src:
         die("external playback surfaces lost their instrumentation contract")
+    if "progressiveSettingsRoutesRoundTripToStableRoot" not in test_src:
+        die("progressive settings routes lost their back-topology instrumentation contract")
+    for name in ("adverseFixtureStatesRecoverWithoutDestroyingContext","emptyQueueFixtureCannotPretendToPlay","libraryIndexModeRemovesArtworkDependencyStructurally","listenTemporalLedgerTracksCurrentObjectWithoutArtworkDependency"):
+        if name not in test_src:
+            die(f"adverse/state-identity instrumentation contract missing: {name}")
     print("EXTERNAL_PLAYBACK_SURFACES=PASS notification quick_settings widget wear")
+    print("PROGRESSIVE_SETTINGS_TOPOLOGY=PASS route_depth returns_to_stable_root")
+    print("ADVERSE_STATE_CONTRACT=PASS search provider downloads queue")
 
     all_src = "\n".join(source_text.values())
     direct_clickables = len(re.findall(r"\.clickable\b", all_src))
@@ -396,16 +406,25 @@ def main() -> int:
         "settings_actions": 100,
         "settings_toggles": 45,
         "authored_actions": 280,
-        "instrumentation_tests": 27,
+        "instrumentation_tests": 38,
     }
     collapsed = {name: (counts[name], minimum) for name, minimum in floors.items() if counts[name] < minimum}
     if collapsed:
         die(f"interaction/test surface unexpectedly collapsed: {collapsed}; current={counts}")
 
     font_src = FONT_GEN.read_text(encoding="utf-8")
-    for anchor in ("TSUNAMI Sans", "WEIGHTS=[('Light',300", "'Bold',700", "addOpenTypeFeaturesFromString", "Version 4.700", "FONT_TIMESTAMP=3873139200"):
+    for anchor in ("TSUNAMI Sans", "WEIGHTS=[('Light',300", "'Bold',700", "addOpenTypeFeaturesFromString", "Version 5.100", "FONT_TIMESTAMP=3873139200"):
         if anchor not in font_src:
             die(f"font generator missing anchor: {anchor}")
+    font_manifest = UI.parent / "docs/TSUNAMI-SANS-v5.1-MANIFEST.json"
+    if not font_manifest.is_file():
+        die("canonical TSUNAMI Sans v5.1 manifest is missing")
+    import json
+    manifest = json.loads(font_manifest.read_text(encoding="utf-8"))
+    if manifest.get("family") != "TSUNAMI Sans" or manifest.get("version") != "5.100":
+        die(f"font manifest identity drift: {manifest.get('family')!r} {manifest.get('version')!r}")
+    if set(manifest.get("weights", {})) != {"Light","Regular","Medium","Semibold","Bold"}:
+        die("font manifest must enumerate exactly five static masters")
 
     build_src = BUILD_GRADLE.read_text(encoding="utf-8")
     root_build_src = (UI / "build.gradle.kts").read_text(encoding="utf-8")
@@ -424,6 +443,12 @@ def main() -> int:
     host_build=(UI / "tools/build_host.sh").read_text(encoding="utf-8")
     if 'bootstrap_gradle.sh" --print-gradle' not in host_build:
         die("host build must resolve Gradle through the checksum-verified bootstrap")
+    root_gate=(UI.parent / "tools/ui_shell_gate.py").read_text(encoding="utf-8")
+    for contract_name, contract_source in (("host build",host_build),("root gate",root_gate)):
+        if "TSUNAMI-SANS-v5.1-MANIFEST.json" not in contract_source:
+            die(f"{contract_name} must bind generated fonts to the canonical v5.1 manifest")
+    if "OK (38 tests)" not in host_build or "OK (38 tests)" not in root_gate:
+        die("Android acceptance paths must require the full 38-test instrumentation suite")
     for anchor in (
         'JDK 17 or newer',
         '/usr/libexec/java_home -v 17',
@@ -455,7 +480,7 @@ def main() -> int:
         'test_apk_hash_match',
         'remote_source_verify',
         'remote_accessibility_verify',
-        'if len(base_captures) != 37:',
+        'if len(base_captures) != 45:',
         '--untracked-files=all',
     ):
         if anchor not in codespace_build:
@@ -474,7 +499,7 @@ def main() -> int:
     if not expected_match:
         die("visual sanity EXPECTED state set could not be parsed")
     expected_names=set(re.findall(r'"([0-9][0-9]-[^"]+)"',expected_match.group("body")))
-    if len(capture_names)!=37 or len(set(capture_names))!=37 or len(expected_names)!=37:
+    if len(capture_names)!=45 or len(set(capture_names))!=45 or len(expected_names)!=45:
         die(f"visual matrix cardinality drift capture={len(capture_names)} unique={len(set(capture_names))} expected={len(expected_names)}")
     if set(capture_names)!=expected_names:
         die(
@@ -482,7 +507,26 @@ def main() -> int:
             f"capture_only={sorted(set(capture_names)-expected_names)} "
             f"verifier_only={sorted(expected_names-set(capture_names))}"
         )
-    print("VISUAL_MATRIX_PARITY=PASS states=37 names=exact")
+    required_adversarial={
+        "27-listen-buffering","28-library-unavailable","29-find-partial",
+        "38-find-empty","39-find-error","40-player-queue-empty",
+        "41-settings-provider-connecting","42-settings-provider-error",
+        "43-settings-downloads-active","44-settings-downloads-error","45-library-index",
+    }
+    missing_adversarial=sorted(required_adversarial-expected_names)
+    if missing_adversarial:
+        die(f"adversarial visual acceptance states missing: {missing_adversarial}")
+    for literal in (
+        '("03-find-light","29-find-partial","38-find-empty","39-find-error")',
+        '("09-player-dark-queue","40-player-queue-empty")',
+        '("41-settings-provider-connecting","42-settings-provider-error","35-settings-services")',
+        '("07-settings-dark","43-settings-downloads-active","44-settings-downloads-error")',
+        '("15-library-40","45-library-index")',
+    ):
+        if literal not in visual_sanity:
+            die(f"visual sanity critical-group coverage missing: {literal}")
+    print("VISUAL_MATRIX_PARITY=PASS states=45 names=exact")
+    print("ADVERSARIAL_VISUAL_CONTRACT=PASS search queue provider downloads library-index")
     for anchor in (
         "ARTWORK_IDENTITY_PAIRS",
         "squint_range < 24",
@@ -497,7 +541,7 @@ def main() -> int:
     for anchor in (
         'bash ui-shell/tools/build_host.sh',
         'bash ui-shell/tools/build_host.sh --verify-device "$SERIAL"',
-        'VISUAL_CAPTURE=PASS states=37',
+        'VISUAL_CAPTURE=PASS states=45',
         'VISUAL_SANITY=PASS',
         'CRASH_SCAN=PASS',
         'instrumentation.txt',
@@ -518,7 +562,7 @@ def main() -> int:
     print("BUILD_STACK_CONTRACT=PASS compileSdk=36 targetSdk=36 compose=1.11.4 agp=9.2.1 builtInKotlin=2.2.10 gradle=9.4.1")
     print("PORTAL_PUBLISH_CONTRACT=PASS host_then_codespace hash_bound atomic_manifested")
     print("VISUAL_IDENTITY_GATE_CONTRACT=PASS monochrome squint hierarchy artwork-removal")
-    print("SELFHOSTED_DEVICE_GATE_CONTRACT=PASS build instrumentation visual37 crash_scan")
+    print("SELFHOSTED_DEVICE_GATE_CONTRACT=PASS build instrumentation visual45 crash_scan")
     print("INTERACTION_COUNTS=" + ",".join(f"{k}:{v}" for k,v in counts.items()))
     return 0
 
