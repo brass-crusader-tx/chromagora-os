@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "59df4c30c28da90bb2fce0975cb79756336f3f28",
+  "source_head": "b45c93572c3eccf987af21629f712f42daeedbd1",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 40,
   "support_file_count": 16,
-  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 59df4c30c28da90bb2fce0975cb79756336f3f28. The mirror includes the canonical TSUNAMI Sans v4.8 manifest and root verification gates required by source_verify.py. Build/device PASS remains contingent on executable Android verification.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head b45c93572c3eccf987af21629f712f42daeedbd1. The mirror includes the canonical TSUNAMI Sans v4.8 manifest and root verification gates required by source_verify.py. Build/device PASS remains contingent on executable Android verification.",
   "files": [
     {
       "path": "ui-shell/app/build.gradle.kts",
@@ -66,8 +66,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/ListenScreen.kt",
-      "git_blob_sha": "a894386d60beee3d5988a867c49ed493d18c8938",
-      "bytes": 8136
+      "git_blob_sha": "d633a4def3fe8dc2a62eba24c8a77c28978d7b21",
+      "bytes": 8140
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/OnboardingScreen.kt",
@@ -146,7 +146,7 @@
     },
     {
       "path": "ui-shell/README.md",
-      "git_blob_sha": "ca015b74c7a7d6af7f2acc74b0e9ca4e857b9339",
+      "git_blob_sha": "e1b45ae44f91e66a67131b0d144977fdebcfc8c4",
       "bytes": 8130
     },
     {
@@ -166,8 +166,8 @@
     },
     {
       "path": "ui-shell/tools/build_host.sh",
-      "git_blob_sha": "0d4d82f939fd0be50dab6bccc173ce0b92fcd0f8",
-      "bytes": 10369
+      "git_blob_sha": "fd186616ea7b9791d93d7872d617d498dd04a2bd",
+      "bytes": 10385
     },
     {
       "path": "ui-shell/tools/capture_verify.sh",
@@ -186,8 +186,8 @@
     },
     {
       "path": "ui-shell/tools/jvm_state_gate.sh",
-      "git_blob_sha": "78c5ff9944827a0d734c39ece724ba70ba413507",
-      "bytes": 11147
+      "git_blob_sha": "5e0f836a4c554c338107d129ea064055ff26bb45",
+      "bytes": 11819
     },
     {
       "path": "ui-shell/tools/prepare_fonts.py",
@@ -201,8 +201,8 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "ee156a2f8fb0807a07eb23ed5f49397fe3a2225c",
-      "bytes": 31031
+      "git_blob_sha": "0ed2d7af0818133815b3e6a7d7a3c38dd9588935",
+      "bytes": 31201
     },
     {
       "path": "ui-shell/tools/visual_sanity_verify.py",
@@ -283,17 +283,17 @@
     },
     {
       "path": "tools/ui_shell_gate.py",
-      "git_blob_sha": "99812ffa1f8d687f0c17cd42287fc8ec8d0b4c0b",
+      "git_blob_sha": "96d1ed3868ad63969ac50d4dd0010b64be6128d9",
       "bytes": 26268
     },
     {
       "path": "tools/ui_shell_static_check.py",
-      "git_blob_sha": "12fdc112e87420e9d38e9740fe22ca83aa64cba0",
-      "bytes": 18903
+      "git_blob_sha": "14e9e0aafb6ec69c269b205eb8a67f380a6c1687",
+      "bytes": 19169
     }
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "59df4c30c28da90bb2fce0975cb79756336f3f28"
+    "source_head": "b45c93572c3eccf987af21629f712f42daeedbd1"
   }
 }
