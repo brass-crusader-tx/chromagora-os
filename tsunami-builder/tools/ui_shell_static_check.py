@@ -11,6 +11,7 @@ import re
 import shlex
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -168,7 +169,13 @@ def main() -> int:
         cp = subprocess.run([bash, "-n", str(tool)], text=True, capture_output=True)
         if cp.returncode:
             fail(f"shell tooling syntax error in {tool.relative_to(ROOT)}: {(cp.stderr or cp.stdout).strip()}")
-    print(f"TOOL_SYNTAX=PASS python={len(PYTHON_TOOLS)} shell={len(SHELL_TOOLS)}")
+    resolver = subprocess.run(
+        [sys.executable, str(JITPACK_BUILD), "--self-test"],
+        cwd=ROOT, text=True, capture_output=True,
+    )
+    if resolver.returncode or "JITPACK_RESOLVER_SELF_TEST=PASS" not in resolver.stdout:
+        fail("JitPack resolver self-test failed: " + ((resolver.stdout or "")+(resolver.stderr or ""))[-3000:])
+    print(f"TOOL_SYNTAX=PASS python={len(PYTHON_TOOLS)} shell={len(SHELL_TOOLS)} jitpack_resolver=PASS")
 
     manifest = read(MANIFEST)
     for permission in FORBIDDEN_PERMISSIONS:
