@@ -114,8 +114,8 @@ def verify_source_contract(manifest:dict)->dict:
     return {"entries":len(entries),"mismatches":0}
 
 
-def api_status(mirror_sha:str)->str|None:
-    url=f"{JITPACK}/api/builds/com.github.brass-crusader-tx/{PUBLIC_ARTIFACT}/{mirror_sha}"
+def api_build(version:str)->dict|None:
+    url=f"{JITPACK}/api/builds/com.github.brass-crusader-tx/{PUBLIC_ARTIFACT}/{version}"
     try:
         data=json.loads(http_bytes(url,timeout=30).decode("utf-8"))
     except HTTPError as exc:
@@ -124,55 +124,66 @@ def api_status(mirror_sha:str)->str|None:
         raise
     except (URLError,TimeoutError,json.JSONDecodeError):
         return None
+    return data
+
+
+def api_status(version:str)->tuple[str|None,str|None]:
+    data=api_build(version)
+    if not data:
+        return None,None
     node=data.get("com.github.brass-crusader-tx",{}).get(PUBLIC_ARTIFACT,{})
-    value=node.get(mirror_sha)
-    if isinstance(value,str):
-        return value
-    # JitPack's single-build endpoint can also return a direct version/status object.
-    for key in ("status","outcome","state"):
-        value=data.get(key)
-        if isinstance(value,str):
-            return value
-    return None
+    value=node.get(version)
+    status=value if isinstance(value,str) else None
+    if status is None:
+        for key in ("status","outcome","state"):
+            value=data.get(key)
+            if isinstance(value,str):
+                status=value
+                break
+    commit=data.get("commit")
+    return status,(commit if isinstance(commit,str) else None)
 
 
-def trigger_and_wait(mirror_sha:str, timeout_s:int)->None:
-    pom=f"{JITPACK}/{GROUP_PATH}/{mirror_sha}/{PUBLIC_ARTIFACT}-{mirror_sha}.pom"
-    try:
-        http_bytes(pom,timeout=90)
-        return
-    except HTTPError as exc:
-        # A first request commonly blocks until JitPack has registered the build and can return 404/401/500.
-        if exc.code not in {401,404,409,500,502,503,504}:
-            raise
-    except (URLError,TimeoutError):
-        pass
-
+def trigger_and_wait(mirror_sha:str, timeout_s:int)->str:
+    # JitPack documents short commit hashes as canonical ad-hoc versions, but current
+    # deployments also accept full SHAs. Probe both while keeping the source contract
+    # bound to the full 40-character mirror commit.
+    versions=(mirror_sha,mirror_sha[:10])
     deadline=time.monotonic()+timeout_s
-    last=None
+    last={}
     while time.monotonic()<deadline:
-        status=api_status(mirror_sha)
-        if status!=last:
-            print(f"JITPACK_STATUS={status or 'pending'}",flush=True)
-            last=status
-        normalized=(status or "").lower()
-        if normalized in {"ok","success","successful","built"}:
-            return
-        if normalized in {"error","failed","failure"}:
-            log=f"{JITPACK}/{GROUP_PATH}/{mirror_sha}/build.log"
+        for version in versions:
+            pom=f"{JITPACK}/{GROUP_PATH}/{version}/{PUBLIC_ARTIFACT}-{version}.pom"
             try:
-                detail=http_bytes(log,timeout=30).decode("utf-8","replace")[-12000:]
-            except Exception:
-                detail="(build log unavailable)"
-            raise BuildError(f"JitPack build failed for {mirror_sha}\n{detail}")
+                http_bytes(pom,timeout=90)
+                print(f"JITPACK_VERSION={version}",flush=True)
+                return version
+            except HTTPError as exc:
+                if exc.code not in {401,404,409,500,502,503,504}:
+                    raise
+            except (URLError,TimeoutError):
+                pass
+
+            status,commit=api_status(version)
+            marker=(status,commit)
+            if marker!=last.get(version):
+                print(f"JITPACK_STATUS version={version} status={status or 'pending'} commit={commit or 'unknown'}",flush=True)
+                last[version]=marker
+            normalized=(status or "").lower()
+            if commit and not mirror_sha.startswith(commit) and not commit.startswith(mirror_sha):
+                raise BuildError(f"JitPack version {version} resolved unexpected commit {commit}; expected {mirror_sha}")
+            if normalized in {"ok","success","successful","built"}:
+                print(f"JITPACK_VERSION={version}",flush=True)
+                return version
+            if normalized in {"error","failed","failure"}:
+                log=f"{JITPACK}/{GROUP_PATH}/{version}/build.log"
+                try:
+                    detail=http_bytes(log,timeout=30).decode("utf-8","replace")[-12000:]
+                except Exception:
+                    detail="(build log unavailable)"
+                raise BuildError(f"JitPack build failed for {version} ({mirror_sha})\n{detail}")
         time.sleep(8)
-        # Re-requesting the immutable POM is idempotent and ensures a missing build is actually queued.
-        try:
-            http_bytes(pom,timeout=30)
-            return
-        except Exception:
-            pass
-    raise BuildError(f"JitPack did not produce build {mirror_sha} within {timeout_s}s")
+    raise BuildError(f"JitPack did not produce build {mirror_sha} (full or short version) within {timeout_s}s")
 
 
 def validate_apk(path:Path)->None:
@@ -186,9 +197,9 @@ def validate_apk(path:Path)->None:
             raise BuildError(f"{path.name}: no DEX payload")
 
 
-def download_artifacts(mirror_sha:str)->tuple[Path,Path]:
+def download_artifacts(version:str)->tuple[Path,Path]:
     OUT.mkdir(parents=True,exist_ok=True)
-    base=f"{JITPACK}/{GROUP_PATH}/{mirror_sha}/{PUBLIC_ARTIFACT}-{mirror_sha}"
+    base=f"{JITPACK}/{GROUP_PATH}/{version}/{PUBLIC_ARTIFACT}-{version}"
     pairs=[
         (f"{base}.apk",OUT/"TSUNAMI-UI-Genesis-debug.apk"),
         (f"{base}-androidTest.apk",OUT/"TSUNAMI-UI-Genesis-debug-androidTest.apk"),
@@ -217,8 +228,8 @@ def main()->int:
     manifest=manifest_for(mirror_sha)
     contract=verify_source_contract(manifest)
     print(f"MIRROR_CONTRACT=PASS entries={contract['entries']} mirror={mirror_sha}")
-    trigger_and_wait(mirror_sha,timeout_s)
-    app,test=download_artifacts(mirror_sha)
+    jitpack_version=trigger_and_wait(mirror_sha,timeout_s)
+    app,test=download_artifacts(jitpack_version)
     evidence={
         "status":"BUILT",
         "backend":"jitpack-public-mirror",
@@ -229,6 +240,7 @@ def main()->int:
         "mirror_repository":"brass-crusader-tx/chromagora-os",
         "mirror_branch":PUBLIC_BRANCH,
         "mirror_commit":mirror_sha,
+        "jitpack_version":jitpack_version,
         "app_apk":str(app.relative_to(ROOT)),
         "app_bytes":app.stat().st_size,
         "app_sha256":sha256(app),
