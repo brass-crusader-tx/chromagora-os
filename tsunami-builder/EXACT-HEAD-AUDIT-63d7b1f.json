@@ -5,7 +5,7 @@
   "source_head": "63d7b1f201b7873a65058150bde364375ab80bd8",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
-  "mirror_manifest_blob": "a8c28ff6634732b29f41dbf481f289e8bb504fdb",
+  "mirror_manifest_blob": "64ccc04288c895eccb3140f16db211e21ad9b977",
   "mirror_parity": {
     "checked_entries": 57,
     "ui_shell_entries": 41,
@@ -39,8 +39,8 @@
   },
   "android_build_execution": {
     "hosted_linux": {
-      "run_id": 36270532398,
-      "job_id": 108483498173,
+      "run_id": 36271489643,
+      "job_id": 108486177171,
       "status": "completed",
       "conclusion": "failure",
       "steps_materialized": false,
@@ -48,22 +48,25 @@
       "classification": "pre-step runner/infrastructure failure"
     },
     "hosted_macos": {
-      "run_id": 36270534859,
-      "job_id": 108483505519,
+      "run_id": 36271489659,
+      "job_id": 108486177213,
       "status": "completed",
       "conclusion": "failure",
-      "classification": "pre-step runner/infrastructure failure",
       "steps_materialized": false,
-      "logs_materialized": false
+      "logs_materialized": false,
+      "classification": "pre-step runner/infrastructure failure"
     },
     "self_hosted": {
-      "run_id": 36270369063,
-      "job_id": 108483044562,
+      "run_id": 36271489639,
+      "job_id": 108486178903,
       "status": "queued",
       "conclusion": null,
+      "steps_materialized": false,
       "source_binding": "exact manifest source_head 63d7b1f201b7873a65058150bde364375ab80bd8"
     },
     "result": "PENDING_EXECUTABLE_ANDROID_EVIDENCE"
   },
-  "completion_claim": false
+  "completion_claim": false,
+  "public_mirror_head": "ece6e62787ad2ea8ab5921ce4c7c7b0b934b7e0f",
+  "audit_refreshed_at_utc": "2026-09-26T21:03:00Z"
 }
