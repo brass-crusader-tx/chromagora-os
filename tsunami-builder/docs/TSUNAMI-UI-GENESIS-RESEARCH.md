@@ -129,7 +129,7 @@ The shell synthesizes A and C, borrowing only the spatial continuity of B.
 
 ## Home/start rationale
 
-There is no storefront “Home.” **LISTEN** is a resumptive workspace. It answers, in order: “what was I doing?”, “what can I continue?”, and “what deserves attention from my own collection?” It uses a temporal/indexed ledger rather than recommendation shelves. Discovery can exist, but connected-catalogue exploration belongs in FIND where its provenance is explicit.
+There is no storefront “Home.” **LISTEN** is a resumptive workspace. It answers, in order: “what is playing now?”, “where was I recently?”, and “what from my own collection deserves deliberate attention?” The implementation makes that thesis literal: a `CURRENT THREAD` time axis keeps the active object at `NOW`, recent objects sit beneath dated markers, `OWNED ANCHORS` expose pinned library objects, and `LIBRARY LENS` changes the owned-collection view without becoming a shelf stack. Those temporal rows intentionally suppress artwork, so LISTEN remains recognizably TSUNAMI through typography, rules, time markers and the persistent Listening Spine even when every cover is removed. Connected-catalogue exploration belongs in FIND, where provenance stays explicit.
 
 ## Now Playing rationale
 
