@@ -1,5 +1,7 @@
 name: TSUNAMI UI Genesis Self Hosted
 
+# Canonical isolated acceptance lane for the backend-free Genesis shell; never enters production app runtime.
+
 on:
   push:
     branches:
