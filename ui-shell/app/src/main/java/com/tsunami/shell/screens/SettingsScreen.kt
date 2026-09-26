@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -23,7 +24,7 @@ import com.tsunami.shell.theme.*
     val page=state.settingsExpanded ?: "root"
     val goBack={ val parent=settingsParentPage(page);if(parent==null)onClose() else state.settingsExpanded=parent }
     Box(Modifier.fillMaxSize().background(p.ground)){
-        Column(Modifier.fillMaxSize().statusBarsPadding().padding(horizontal=20.dp)){
+        Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(horizontal=20.dp)){
             Row(Modifier.fillMaxWidth().height(58.dp),verticalAlignment=Alignment.CenterVertically){
                 HitIcon(Glyph.BACK,"Back",goBack)
                 Spacer(Modifier.width(4.dp))
@@ -89,7 +90,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.SettingsRoot(state:ShellState,onClose:()->Unit){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-root-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Appearance")
             ToggleRow("Theme",if(state.theme==ThemeMode.LIGHT)"Light" else "Dark"){state.theme=if(state.theme==ThemeMode.LIGHT)ThemeMode.DARK else ThemeMode.LIGHT}
@@ -98,6 +99,7 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Haptic intensity",when(state.hapticStrength){0->"OFF";1->"STANDARD";else->"STRONG"}){state.cycleHapticStrength()}
             ToggleRow("Reduced motion",if(state.reducedMotion)"ON" else "OFF"){state.reducedMotion=!state.reducedMotion}
             ToggleRow("Library density",if(state.denseLibrary)"DENSE" else "COMFORTABLE"){state.denseLibrary=!state.denseLibrary}
+            ActionRow("Experience level",if(state.advancedExperience)"ADVANCED" else "STANDARD"){state.advancedExperience=!state.advancedExperience}
             ActionRow("Presentation","Player geometry · orientation · artwork"){state.settingsExpanded="presentation"}
         }
         item{
@@ -129,7 +131,15 @@ private fun settingsTitle(page:String)=when(page){
             ToggleRow("Wi‑Fi downloads",if(state.wifiOnlyDownloads)"ONLY" else "ANY NETWORK"){state.wifiOnlyDownloads=!state.wifiOnlyDownloads}
             ToggleRow("Online library on mobile data",if(state.showOnlineOnMobileData)"VISIBLE" else "HIDDEN"){state.showOnlineOnMobileData=!state.showOnlineOnMobileData}
             ActionRow("Download quality",state.downloadQuality){state.cycleDownloadQuality()}
-            ActionRow("Downloads","3.2 GB · ${if(state.wifiOnlyDownloads)"Wi‑Fi preferred" else "network allowed"}"){state.banner="Download policy · ${state.downloadQuality}"}
+            val activeDownloads=state.downloads.values.count{it==DownloadState.DOWNLOADING}
+            ActionRow(
+                "Downloads",
+                when{
+                    state.downloadsFault -> "ATTENTION · transfer failed"
+                    activeDownloads>0 -> "$activeDownloads active · 3.2 GB offline"
+                    else -> "3.2 GB · ${if(state.wifiOnlyDownloads)"Wi‑Fi preferred" else "network allowed"}"
+                }
+            ){if(state.downloadsFault)state.retryDownloads() else state.banner="Download policy · ${state.downloadQuality}"}
         }
         item{
             IntentSection("Services")
@@ -143,7 +153,7 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Listening services","${if(state.listenBrainzEnabled)"ListenBrainz " else ""}${if(state.lastFmEnabled)"Last.fm" else if(!state.listenBrainzEnabled)"OFF" else ""}"){state.settingsExpanded="scrobbling"}
             ActionRow("Clear history","LOCAL PREVIEW DATA"){state.requestClearHistory()}
         }
-        item{
+        if(state.advancedExperience) item{
             IntentSection("Advanced")
             ActionRow("Context rules","${state.contextRules.count{it.enabled}} active · ${state.contextRules.size} total"){state.settingsExpanded="context-rules"}
             ActionRow("Quick actions & sessions",state.activeSession?.let{"SESSION · $it"}?:"No active session"){state.settingsExpanded="quick-actions"}
@@ -156,14 +166,24 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.ServicesSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Connections")
             state.services.forEachIndexed{i,s->
                 val progress=state.importProgress[s.name]
                 val audit=state.importAudits[s.name]
-                ActionRow(s.name,if(s.connected)"CONNECTED · ${s.detail}" else s.detail.uppercase()){state.toggleService(i)}
-                if(s.connected){
+                val transient=if(s.name=="Apple Music")state.providerTransient else ""
+                ActionRow(
+                    s.name,
+                    when(transient){
+                        "connecting" -> "CONNECTING · awaiting authorization"
+                        "error" -> "CONNECTION FAILED · retry available"
+                        else -> if(s.connected)"CONNECTED · ${s.detail}" else s.detail.uppercase()
+                    }
+                ){
+                    if(transient.isNotBlank()) state.retryProvider() else state.toggleService(i)
+                }
+                if(s.connected && transient.isBlank()){
                     ActionRow("Import ${s.name}",when(progress){null->"READY";100->"COMPLETE · tap to re-audit";else->"${progress}% · tap to continue"}){state.advanceImport(i)}
                 }
                 if(audit!=null){
@@ -181,7 +201,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.LyricsSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Synchronization")
             ToggleRow("Follow playback",if(state.lyricsFollowPlayback)"ON" else "OFF"){state.lyricsFollowPlayback=!state.lyricsFollowPlayback}
@@ -201,7 +221,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.PresentationSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Now playing")
             ToggleRow("Artwork",if(state.showArtworkInPlayer)"VISIBLE" else "HIDDEN"){state.showArtworkInPlayer=!state.showArtworkInPlayer}
@@ -218,7 +238,7 @@ private fun settingsTitle(page:String)=when(page){
     }
 }
 @Composable private fun ColumnScope.AudioSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Playback gain")
             ActionRow("ReplayGain",state.replayGainMode){state.cycleReplayGain()}
@@ -261,7 +281,7 @@ private fun settingsTitle(page:String)=when(page){
 
 @Composable private fun ColumnScope.EqualizerSettings(state:ShellState){
     val labels=listOf("31 Hz","62 Hz","125 Hz","250 Hz","500 Hz","1 kHz","2 kHz","4 kHz","8 kHz","16 kHz")
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Graphic equalizer","Reset"){state.resetEq()}
             labels.forEachIndexed{index,label->
@@ -273,7 +293,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.LyricSourcesSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Resolution order")
             state.lyricSourceOrder.forEachIndexed{index,name->
@@ -291,7 +311,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.VisualizerSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Rendering")
             ActionRow("Mode",state.visualizerMode){state.cycleVisualizerMode()}
@@ -312,7 +332,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.ShuffleSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Queue intelligence")
             ActionRow("Mode",state.shuffleMode){state.cycleShuffleMode()}
@@ -348,7 +368,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.LibraryRootsSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Indexed locations","Add"){state.addMockLibraryRoot()}
             state.libraryRoots.forEach{root->
@@ -365,7 +385,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.LibrarySectionsSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Library lens order")
             state.librarySectionOrder.forEachIndexed{index,section->
@@ -385,7 +405,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.LibraryProfilesSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Active profile")
             ActionRow("Main library",if(state.activeLibraryProfile=="Main library")"ACTIVE · 2 roots" else "2 roots"){state.activeLibraryProfile="Main library";state.banner="Library profile · Main library"}
@@ -396,7 +416,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.MetadataSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Presentation")
             ActionRow("Track rows",state.metadataTemplate){state.cycleMetadataTemplate()}
@@ -409,7 +429,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.ScrobblingSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("External listening history")
             ToggleRow("ListenBrainz",if(state.listenBrainzEnabled)"ON" else "OFF"){state.listenBrainzEnabled=!state.listenBrainzEnabled}
@@ -419,13 +439,13 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Scrobble threshold","${state.scrobbleThreshold}%"){state.cycleScrobbleThreshold()}
             ActionRow("Threshold cap","${state.scrobbleThresholdCapSeconds}s"){state.cycleScrobbleCap()}
             ActionRow("Import listening history","CSV / JSON preview"){state.banner="History import preview · 128 matched · 7 unmatched"}
-            Text("SIMULATED STATE · no credentials, OAuth, scrobble or network operation.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("SIMULATED STATE · no credentials, authorization handshake, scrobble or network operation.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
 
 @Composable private fun ColumnScope.ControlSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Reachability")
             ToggleRow("One-handed now playing",if(state.oneHandedNowPlaying)"ON" else "OFF"){state.oneHandedNowPlaying=!state.oneHandedNowPlaying}
@@ -443,7 +463,7 @@ private fun settingsTitle(page:String)=when(page){
             }
             Rule()
             Text("Full listening environment keeps transport and mode navigation stable; choose up to five object actions beneath the track metadata.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(top=12.dp,bottom=4.dp))
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).testTag("full-player-action-row")){
                 listOf("Favourite","Offline","Share","Play next","Add to playlist").forEach{action->
                     TextCommand(action,{state.toggleFullPlayerButton(action)},action in state.fullPlayerButtons,modifier=Modifier.semantics{contentDescription="Full player action: $action"})
                 }
@@ -470,7 +490,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.ExternalControlSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Notification transport")
             Text("Keep the stable transport visible outside the app; choose up to five actions.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=8.dp))
@@ -502,7 +522,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.ContextRuleSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Adaptive queue rules","Add"){state.addContextRule()}
             state.contextRules.forEachIndexed{index,rule->
@@ -521,7 +541,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.QuickActionSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Player quick actions","Add"){state.addQuickAction()}
             state.quickActions.forEach{label->
@@ -541,7 +561,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.CustomSectionsSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Saved library lenses","Add"){state.addCustomSection()}
             state.customSections.forEachIndexed{index,section->
@@ -556,7 +576,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.AudioProfilesSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Route-bound processing","Save current"){state.addAudioProfile()}
             state.audioProfiles.forEachIndexed{index,profile->
@@ -573,7 +593,7 @@ private fun settingsTitle(page:String)=when(page){
 }
 
 @Composable private fun ColumnScope.BackupSettings(state:ShellState){
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=30.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Portability")
             ActionRow("Export TSUNAMI backup","Settings · playlists · history · progress"){state.banner="Backup export preview ready"}
