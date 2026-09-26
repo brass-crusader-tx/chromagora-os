@@ -18,6 +18,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -244,7 +245,7 @@ enum class Glyph { PLAY, PAUSE, NEXT, PREVIOUS, STAR, DOWNLOAD, SEARCH, SETTINGS
             }
         }
         if(showActions && !selectionMode){
-            Row(Modifier.padding(start=if(showArtwork)64.dp else 14.dp).fillMaxWidth().horizontalScroll(rememberScrollState()),verticalAlignment=Alignment.CenterVertically){
+            Row(Modifier.padding(start=if(showArtwork)64.dp else 14.dp).fillMaxWidth().horizontalScroll(rememberScrollState()).testTag("track-action-row-${track.id}"),verticalAlignment=Alignment.CenterVertically){
                 TextCommand("Favourite",onFavourite)
                 TextCommand(when(downloadState){DownloadState.REMOTE->"Make offline";DownloadState.DOWNLOADING->"Finish download";DownloadState.DOWNLOADED->"Remove offline"},onDownload,downloadState==DownloadState.DOWNLOADED,enabled=!unavailable)
                 onPlayNext?.let{ TextCommand("Play next",it,enabled=!unavailable) }
