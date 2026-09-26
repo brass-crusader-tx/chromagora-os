@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "1fe4d52eaf9deee0b334e10caf6670442da41bc2",
+  "source_head": "494afd6bebddee2e121841a197995516013093a6",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 16,
-  "note": "Every listed build-critical blob is byte-identical to private Genesis source head b109db25b716b7a6b503ee6f05b272e15a5b674d. This head is tree-identical to the manifest-coherent v5.1 refinement commit 4d194f587e009eb7e1e19e3bcfbf6d4f36f025e6. The mirror includes TSUNAMI Sans v5.1 proof hashes, accessibility gates, host artifact source binding, and canonical verification tooling. Production runtime/root build files remain untouched.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 494afd6bebddee2e121841a197995516013093a6. Executable ui-shell source remains tree-identical to the manifest-coherent v5.1 source boundary 1fe4d52eaf9deee0b334e10caf6670442da41bc2; subsequent private commits reconcile verification documentation only. The mirror includes TSUNAMI Sans v5.1 canonical hashes, accessibility gates, host artifact source binding, and canonical verification tooling. Production runtime/root build files remain untouched.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -248,13 +248,13 @@
     },
     {
       "path": "docs/TSUNAMI-SANS-VISUAL-REVIEW.md",
-      "git_blob_sha": "12af7bbe055b06a9533fb662ade39c2cf8885563",
-      "bytes": 6765
+      "git_blob_sha": "9bd1a553e384e26bb9f5063a938c6da171111d65",
+      "bytes": 6455
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-BUILD-BLOCKER.md",
-      "git_blob_sha": "bafe419efdc1b905d5324619ec03b1a0114d67dc",
-      "bytes": 12237
+      "git_blob_sha": "8ec777b8db3c3f456469ee42c41ac7cc3c51cc36",
+      "bytes": 13529
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-COVERAGE.md",
@@ -268,13 +268,13 @@
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-STATIC-AUDIT.md",
-      "git_blob_sha": "e7b3e8e905c020e79bdd51af22e33bdff9fe5470",
-      "bytes": 20676
+      "git_blob_sha": "a868a5e43a2bad30c8735caccad1fb0e8ec873aa",
+      "bytes": 22463
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VERIFICATION.md",
-      "git_blob_sha": "fcd63f0de5dd61ef822ea91b108b011fbe50eccd",
-      "bytes": 65312
+      "git_blob_sha": "98c7835d6d38e942e3b905483d6255a46f9c3094",
+      "bytes": 67780
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md",
@@ -299,13 +299,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "1fe4d52eaf9deee0b334e10caf6670442da41bc2"
+    "source_head": "494afd6bebddee2e121841a197995516013093a6"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-26T21:22:00Z",
-    "private_head": "1fe4d52eaf9deee0b334e10caf6670442da41bc2",
-    "reason": "exact current-head retry after status-banner 48dp target and regression gate; require app + AndroidTest APK, 38 Compose tests, 45-state visual/device matrix, Android TSUNAMI Sans v5.1 raster review, crash scan, and Chromagora portal publication",
-    "sequence": 10
+    "requested_at_utc": "2026-09-26T21:40:00Z",
+    "private_head": "494afd6bebddee2e121841a197995516013093a6",
+    "reason": "exact current-head retry after v5.1 documentation/hash reconciliation; require app + AndroidTest APK, 38 Compose tests, 45-state visual/device matrix, Android TSUNAMI Sans v5.1 raster review, crash scan, and Chromagora portal publication",
+    "sequence": 11
   },
-  "generated_at_utc": "2026-09-26T21:23:00Z"
+  "generated_at_utc": "2026-09-26T21:40:00Z"
 }
