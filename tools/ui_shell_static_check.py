@@ -21,6 +21,7 @@ CAPTURE = UI / "tools/capture_verify.sh"
 VISUAL_SANITY = UI / "tools/visual_sanity_verify.py"
 MANIFEST = UI / "app/src/main/AndroidManifest.xml"
 CODESPACE_BUILD = ROOT / "tools/ui_shell_codespace_build.py"
+JITPACK_BUILD = ROOT / "tools/ui_shell_jitpack_fetch.py"
 PORTAL_PUBLISH = UI / "tools/publish_chromagora_apk.sh"
 MARK_SPEC = ROOT / "brand/TSUNAMI-MARK-SPEC.md"
 MARK_SVG = ROOT / "brand/tsunami-mark.svg"
@@ -35,6 +36,7 @@ SHELL_TOOLS = [
 PYTHON_TOOLS = [
     ROOT / "tools/ui_shell_gate.py",
     CODESPACE_BUILD,
+    JITPACK_BUILD,
     UI / "tools/accessibility_verify.py",
     UI / "tools/derive_review_images.py",
     UI / "tools/generate_tsunami_sans.py",
@@ -61,6 +63,7 @@ REQUIRED = [
     VISUAL_SANITY,
     MANIFEST,
     CODESPACE_BUILD,
+    JITPACK_BUILD,
     PORTAL_PUBLISH,
     MARK_SPEC,
     MARK_SVG,
@@ -358,6 +361,27 @@ def main() -> int:
         if anchor not in codespace_source:
             fail(f"Codespace fallback missing verification anchor: {anchor}")
 
+    jitpack_source = read(JITPACK_BUILD)
+    try:
+        compile(jitpack_source, str(JITPACK_BUILD), "exec")
+    except SyntaxError as exc:
+        fail(f"JitPack fallback syntax error: {exc}")
+    for anchor in (
+        'PUBLIC_BRANCH="build/tsunami-ui-genesis-20260925"',
+        'MIRROR_MANIFEST_PATH="tsunami-builder/MIRROR-MANIFEST.json"',
+        'resolve_mirror_head()',
+        'verify_source_contract(manifest)',
+        'trigger_and_wait(mirror_sha,timeout_s)',
+        'TSUNAMI-UI-Genesis-debug.apk',
+        'TSUNAMI-UI-Genesis-debug-androidTest.apk',
+        '"source_contract_match":True',
+        '"mirror_commit":mirror_sha',
+        'validate_apk(tmp)',
+    ):
+        if anchor not in jitpack_source:
+            fail(f"JitPack fallback missing exact-source/artifact anchor: {anchor}")
+    print("JITPACK_FALLBACK=PASS immutable-mirror+blob-contract+apk-pair")
+
     mark_spec = read(MARK_SPEC)
     for anchor in (
         "Outer arch circle",
@@ -404,7 +428,11 @@ def main() -> int:
         'DIST="$ROOT/dist"',
         'BUILT="$DIST/TSUNAMI-UI-Genesis-debug.apk"',
         'CODESPACE_MANIFEST="$DIST/codespace-build.json"',
+        'JITPACK_MANIFEST="$DIST/jitpack-build.json"',
         'CODESPACE_MANIFEST_BINDING=PASS',
+        'JITPACK_MANIFEST_BINDING=PASS',
+        'TSUNAMI_FORCE_JITPACK_BUILD',
+        'tools/ui_shell_jitpack_fetch.py',
         'payload.get("source_dirty") is False',
         'refusing portal publish from dirty UI Genesis source',
         'APK_ZIP_STRUCTURE=PASS',
@@ -417,6 +445,7 @@ def main() -> int:
     escaped_expansions = (
         slash + "${TSUNAMI_PORTAL_APK_TARGET",
         slash + "${TSUNAMI_FORCE_CODESPACE_BUILD",
+        slash + "${TSUNAMI_FORCE_JITPACK_BUILD",
         slash + "${TARGET}",
     )
     for escaped in escaped_expansions:
@@ -449,7 +478,7 @@ def main() -> int:
         if f"fun {name}(" not in tests:
             fail(f"missing interaction regression: {name}")
 
-    print(f"UI_SHELL_STATIC=PASS kotlin_files={len(kotlin_files())} state_members={len(members)} state_refs={len(referenced)} settings_routes={len(cases)} captures={len(captures)} focus_visible=all_direct_clickables codespace_build=syntax+apk+test-apk+instrumentation+derived-visual-evidence portal_publish=current-head+clean-source+hash-bound")
+    print(f"UI_SHELL_STATIC=PASS kotlin_files={len(kotlin_files())} state_members={len(members)} state_refs={len(referenced)} settings_routes={len(cases)} captures={len(captures)} focus_visible=all_direct_clickables codespace_build=syntax+apk+test-apk+instrumentation+derived-visual-evidence jitpack_build=immutable-mirror+blob-contract+apk-pair portal_publish=current-head+clean-source+hash-bound")
     return 0
 
 
