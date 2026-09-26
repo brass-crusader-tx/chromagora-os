@@ -11,6 +11,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
@@ -32,9 +33,11 @@ import com.tsunami.shell.theme.*
     BoxWithConstraints(Modifier.fillMaxSize().background(p.ground)){
         val expanded=maxWidth>=840.dp && maxHeight>=600.dp
         val medium=maxWidth>=600.dp && maxHeight>=480.dp
-        if(state.expandedPlayer){ ExpandedListening(state,expanded) { state.expandedPlayer=false }; return@BoxWithConstraints }
-        if(scenario=="onboarding" && !state.onboardingComplete){ OnboardingScreen(state); return@BoxWithConstraints }
-        if(expanded){
+        if(state.expandedPlayer){
+            ExpandedListening(state,expanded) { state.expandedPlayer=false }
+        }else if(scenario=="onboarding" && !state.onboardingComplete){
+            OnboardingScreen(state)
+        }else if(expanded){
             Row(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()){
                 IndexRail(state,Modifier.width(138.dp).fillMaxHeight())
                 Box(Modifier.width(1.dp).fillMaxHeight().background(p.rule))
