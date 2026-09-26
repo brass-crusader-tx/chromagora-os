@@ -535,6 +535,8 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
         if(!item.longform) return
         if(item.id in playedLongform){
             playedLongform.remove(item.id)
+            resumePositions[item.id]=0L
+            if(item.id==currentTrack?.id) positionMs=0L
             banner="Marked unplayed · ${item.title}"
         }else{
             playedLongform.add(item.id)
@@ -548,6 +550,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
         if(index !in queue.indices)return
         val currentId=currentTrack?.id
         val removingCurrent=queue[index].id==currentId
+        if(removingCurrent) storeCurrentLongformPosition()
         queue.removeAt(index)
         if(queue.isEmpty()){
             currentIndex=0
