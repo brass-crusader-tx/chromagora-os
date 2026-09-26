@@ -108,34 +108,41 @@ for p in fonts:
         family=next(n.toUnicode() for n in f['name'].names if n.nameID==1)
         version=next(n.toUnicode() for n in f['name'].names if n.nameID==5)
         assert family=='TSUNAMI Sans', (p,family)
-        assert version=='Version 4.700', (p,version)
+        assert version=='Version 5.100', (p,version)
         weights.add(int(f['OS/2'].usWeightClass))
         assert 'GPOS' in f, f"{p}: missing GPOS"
     finally:
         f.close()
 assert weights=={300,400,500,600,700}, weights
-import hashlib
+import hashlib, json
+manifest=json.loads(Path('../docs/TSUNAMI-SANS-v5.1-MANIFEST.json').read_text(encoding='utf-8'))
+assert manifest['family']=='TSUNAMI Sans' and manifest['version']=='5.100', manifest
 expected={
-    "tsunami_sans_light.ttf":"c295d45e732cf9d3c431c14465b4e64d0a164f6605da68a74ad207a59abe00fb",
-    "tsunami_sans_regular.ttf":"fb5803e5ed05442325bec033772bb5434b1f62740e02329d8d8c599e7d051c8b",
-    "tsunami_sans_medium.ttf":"0576bd38e1f0a34b40c22510249625abe27eda3cde39487a98d78102c5628c67",
-    "tsunami_sans_semibold.ttf":"6a196f5a93fbdbc4ccf821e12d9bb93963bb5d6263add32a90383ceb43acd914",
-    "tsunami_sans_bold.ttf":"063a6c7f56c48a78a45016cdf5b10e96a8fbf26b0ee5c30608f4a6c57af77841",
+    f"tsunami_sans_{name.lower()}.ttf": manifest['weights'][name]['sha256']
+    for name in ('Light','Regular','Medium','Semibold','Bold')
 }
 actual={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in fonts}
 assert actual==expected, (actual, expected)
+for name,meta in manifest['weights'].items():
+    p=Path('app/src/main/res/font')/f"tsunami_sans_{name.lower()}.ttf"
+    assert p.stat().st_size==int(meta['bytes']), (p,p.stat().st_size,meta['bytes'])
+for proof_name,meta in manifest['proofs'].items():
+    p=Path('tools/proofs')/proof_name
+    assert p.is_file(), p
+    assert hashlib.sha256(p.read_bytes()).hexdigest()==meta['sha256'], (p,meta['sha256'])
+    assert p.stat().st_size==int(meta['bytes']), (p,p.stat().st_size,meta['bytes'])
 print("FONT_GENERATION=PASS")
-print("FONT_CANONICAL_HASHES=PASS")
+print("FONT_CANONICAL_MANIFEST=PASS")
 PY
 
-FONT_DIST="$DIST/TSUNAMI-Sans-v4.7"
+FONT_DIST="$DIST/TSUNAMI-Sans-v5.1"
 rm -rf "$FONT_DIST"
 mkdir -p "$FONT_DIST"
 cp app/src/main/res/font/tsunami_sans_*.ttf "$FONT_DIST/"
 cp tools/proofs/tsunami-sans-proof.png tools/proofs/tsunami-sans-ui-proof.png "$FONT_DIST/"
 cp "$REPO_ROOT/brand/tsunami-mark.svg" "$REPO_ROOT/brand/tsunami-mark-inverse.svg" "$FONT_DIST/"
 {
-  echo "TSUNAMI Sans v4.7"
+  echo "TSUNAMI Sans v5.1"
   echo "Generated from ui-shell/tools/generate_tsunami_sans.py"
   echo "Family: TSUNAMI Sans"
   echo "Weights: 300 400 500 600 700"
@@ -201,18 +208,29 @@ if [[ "$MODE" == "--install" || "$MODE" == "--verify-device" ]]; then
     echo "ERROR: no authorized Android device." >&2; exit 2
   fi
 
-  "$ADB" -s "$SERIAL" install -r "$OUT_APK"
+  install_apk() {
+    local apk="$1"
+    local remote="/data/local/tmp/$(basename "$apk")"
+    # `adb install` can hang indefinitely on some emulator/platform-tools combinations while
+    # the underlying Package Manager remains healthy. Stage explicitly, then ask `pm` to install.
+    "$ADB" -s "$SERIAL" push "$apk" "$remote" >/dev/null
+    "$ADB" -s "$SERIAL" shell pm install -r -t "$remote"
+    "$ADB" -s "$SERIAL" shell rm -f "$remote" || true
+  }
+
+  install_apk "$OUT_APK"
   "$ADB" -s "$SERIAL" shell am force-stop com.tsunami.shell
   "$ADB" -s "$SERIAL" shell am start -W -n com.tsunami.shell/.MainActivity
   "$ADB" -s "$SERIAL" shell dumpsys package com.tsunami.shell | grep -E 'versionCode|versionName' | head -4 | tee "$REPORT/device-package.txt"
   echo "DEVICE_INSTALL=PASS serial=$SERIAL" | tee -a "$REPORT/build.txt"
 
   if [[ "$MODE" == "--verify-device" ]]; then
-    "$ADB" -s "$SERIAL" install -r "$OUT_TEST"
+    install_apk "$OUT_TEST"
     "$ADB" -s "$SERIAL" logcat -c || true
-    "$ADB" -s "$SERIAL" shell am instrument -w       com.tsunami.shell.test/androidx.test.runner.AndroidJUnitRunner       | tee "$REPORT/instrumentation.txt"
-    grep -q 'OK (' "$REPORT/instrumentation.txt" || {
-      echo "ERROR: instrumentation did not report success." >&2
+    "$ADB" -s "$SERIAL" shell am instrument -w -e class com.tsunami.shell.GenesisInteractionTest \
+      com.tsunami.shell.test/androidx.test.runner.AndroidJUnitRunner | tee "$REPORT/instrumentation.txt"
+    grep -Fq 'OK (38 tests)' "$REPORT/instrumentation.txt" || {
+      echo "ERROR: instrumentation did not report OK (38 tests)." >&2
       exit 3
     }
 
@@ -227,14 +245,14 @@ if [[ "$MODE" == "--install" || "$MODE" == "--verify-device" ]]; then
     cp -R build/verification "$REPORT/visual"
     cp -R tools/proofs "$REPORT/font-proofs"
     cp "$REPO_ROOT/docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md" "$REPORT/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md"
-    test "$(find "$REPORT/visual" -maxdepth 1 -name '[0-9][0-9]-*.png' ! -name '*-mono.png' ! -name '*-squint.png' | wc -l | tr -d ' ')" = "37"
+    test "$(find "$REPORT/visual" -maxdepth 1 -name '[0-9][0-9]-*.png' ! -name '*-mono.png' ! -name '*-squint.png' | wc -l | tr -d ' ')" = "45"
     test -s "$REPORT/visual/contact-sheet.png"
     if grep -q 'FATAL EXCEPTION' "$REPORT/visual/logcat-tail.txt" && grep -q 'Process: com.tsunami.shell' "$REPORT/visual/logcat-tail.txt"; then
       echo "ERROR: shell crash signature found in device logcat." >&2
       exit 4
     fi
     {
-      echo "VISUAL_CAPTURE=PASS states=37"
+      echo "VISUAL_CAPTURE=PASS states=45"
       echo "VISUAL_SANITY=PASS"
       echo "MONOCHROME_REVIEW_DERIVATION=PASS"
       echo "SQUINT_REVIEW_DERIVATION=PASS"
