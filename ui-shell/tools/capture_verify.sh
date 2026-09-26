@@ -15,13 +15,20 @@ restore_device() {
 }
 trap restore_device EXIT
 test -s "$APK" || { echo "APK missing: $APK" >&2; exit 2; }
-adb install -r "$APK" >/dev/null
+REMOTE_APK="/data/local/tmp/tsunami-ui-genesis-capture.apk"
+adb push "$APK" "$REMOTE_APK" >/dev/null
+adb shell pm install -r -t "$REMOTE_APK" >/dev/null
+adb shell rm -f "$REMOTE_APK" || true
 adb logcat -c || true
 capture() {
   local name="$1" screen="$2" scenario="$3" theme="$4" mode="${5:-}" page="${6:-}"
   adb shell am force-stop "$PKG"
-  if [[ -n "$mode" || -n "$page" ]]; then
+  if [[ -n "$mode" && -n "$page" ]]; then
     adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" --es mode "$mode" --es page "$page" >/dev/null
+  elif [[ -n "$mode" ]]; then
+    adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" --es mode "$mode" >/dev/null
+  elif [[ -n "$page" ]]; then
+    adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" --es page "$page" >/dev/null
   else
     adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" >/dev/null
   fi
@@ -52,6 +59,14 @@ capture 29-find-partial find partial light
 capture 30-settings-audio settings default light "" audio
 capture 31-settings-controls settings default light "" controls
 capture 37-settings-external-controls settings default light "" external-controls
+capture 38-find-empty find search-empty light
+capture 39-find-error find search-error light
+capture 40-player-queue-empty player queue-empty light queue
+capture 41-settings-provider-connecting settings provider-connecting light "" services
+capture 42-settings-provider-error settings provider-error light "" services
+capture 43-settings-downloads-active settings downloads-active light
+capture 44-settings-downloads-error settings downloads-error light
+capture 45-library-index library library-index light
 capture 32-settings-backup settings default dark "" backup
 capture 35-settings-services settings default light "" services
 capture 33-listen-no-artwork listen no-artwork light
@@ -90,5 +105,5 @@ sleep 2
 adb logcat -d -t 1200 > "$OUT/logcat-tail.txt" || true
 for f in "$OUT"/*.png; do test "$(wc -c < "$f")" -gt 10000 || { echo "capture too small: $f"; exit 1; }; done
 BASE_COUNT="$(find "$OUT" -maxdepth 1 -name '[0-9][0-9]-*.png' ! -name '*-mono.png' ! -name '*-squint.png' | wc -l | tr -d ' ')"
-[[ "$BASE_COUNT" == "37" ]] || { echo "expected exactly 37 base captures, found $BASE_COUNT" >&2; exit 1; }
+[[ "$BASE_COUNT" == "45" ]] || { echo "expected exactly 45 base captures, found $BASE_COUNT" >&2; exit 1; }
 printf 'captures=%s\n' "$BASE_COUNT" | tee "$OUT/capture-summary.txt"
