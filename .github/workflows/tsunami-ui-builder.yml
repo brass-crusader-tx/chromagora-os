@@ -39,8 +39,10 @@ jobs:
           import json, pathlib, subprocess
           root=pathlib.Path("tsunami-builder")
           manifest=json.loads((root/"MIRROR-MANIFEST.json").read_text())
+          assert manifest["ui_shell_file_count"]==len(manifest["files"]), manifest
+          assert manifest["support_file_count"]==len(manifest["support_files"]), manifest
           assert manifest["ui_shell_file_count"]==40, manifest
-          assert manifest["support_file_count"]==8, manifest
+          assert manifest["support_file_count"]>=10, manifest
           mismatches=[]
           for row in manifest["files"] + manifest["support_files"]:
               p=root/row["path"]

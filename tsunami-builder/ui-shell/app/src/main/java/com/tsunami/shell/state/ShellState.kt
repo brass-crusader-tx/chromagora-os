@@ -436,7 +436,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     }
     fun cycleMetadataTemplate(){ metadataTemplate=when(metadataTemplate){"Title · Artist · Album"->"Title · Album · Year";"Title · Album · Year"->"Title · Format · Source";else->"Title · Artist · Album"} }
     fun cycleAlbumArtistMode(){ albumArtistMode=when(albumArtistMode){"Prefer album artist"->"Track artist only";"Track artist only"->"Album artist first";else->"Prefer album artist"};banner="Album artist · $albumArtistMode" }
-    fun runGaplessProbe(){ gaplessProbeResult=if(gaplessProbeResult=="PASS")"Not run" else "PASS"; diagnosticLog.add("15:09:02 · gapless probe · $gaplessProbeResult"); banner="Gapless probe · $gaplessProbeResult" }
+    fun runGaplessProbe(){ gaplessProbeResult="PASS"; diagnosticLog.add("15:09:02 · gapless probe · $gaplessProbeResult"); banner="Gapless probe · $gaplessProbeResult" }
     fun resetDiagnosticCounters(){ diagnosticUnderruns=0;diagnosticSinkErrors=0;diagnosticCodecErrors=0;diagnosticsFault=false;diagnosticLog.add("15:09:05 · counters reset");banner="Playback counters reset" }
     fun auditLyrics(){ lyricAuditStatus="Audit complete"; lyricMissingCount=if(fixture.missingLyrics)3 else 1; diagnosticLog.add("15:09:12 · lyrics audit · $lyricMissingCount missing");banner="Lyrics audit · $lyricMissingCount missing" }
     fun fetchMissingLyrics(){ if(lyricMissingCount>0)lyricMissingCount=(lyricMissingCount-1).coerceAtLeast(0); lyricAuditStatus="Exact fetch complete";banner="Exact lyric fetch · $lyricMissingCount still missing" }

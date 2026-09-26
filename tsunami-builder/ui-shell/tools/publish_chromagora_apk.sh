@@ -6,7 +6,16 @@ SHELL_ROOT="$ROOT/ui-shell"
 DIST="$ROOT/dist"
 BUILT="$DIST/TSUNAMI-UI-Genesis-debug.apk"
 CODESPACE_MANIFEST="$DIST/codespace-build.json"
-TARGET="${TSUNAMI_PORTAL_APK_TARGET:-$DIST/TSUNAMI-UI-Shell-Rebrand-v1-debug.apk}"
+# The live Chromagora gateway serves from the primary TSUNAMI worktree, not necessarily
+# from the current linked worktree. Resolve Git's common directory so Genesis worktrees
+# publish to the same stable portal path as the primary checkout.
+GIT_COMMON_DIR="$(git -C "$ROOT" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
+if [[ -n "$GIT_COMMON_DIR" && "$(basename "$GIT_COMMON_DIR")" == ".git" ]]; then
+  PORTAL_REPO_ROOT="$(cd "$GIT_COMMON_DIR/.." && pwd -P)"
+else
+  PORTAL_REPO_ROOT="$ROOT"
+fi
+TARGET="${TSUNAMI_PORTAL_APK_TARGET:-$PORTAL_REPO_ROOT/dist/TSUNAMI-UI-Shell-Rebrand-v1-debug.apk}"
 MANIFEST="${TARGET}.json"
 BUILD_BACKEND=""
 

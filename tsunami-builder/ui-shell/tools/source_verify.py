@@ -416,6 +416,15 @@ def main() -> int:
     for anchor in ("TSUNAMI Sans", "WEIGHTS=[('Light',300", "'Bold',700", "addOpenTypeFeaturesFromString", "Version 4.800", "FONT_TIMESTAMP=3873139200"):
         if anchor not in font_src:
             die(f"font generator missing anchor: {anchor}")
+    font_manifest = UI.parent / "docs/TSUNAMI-SANS-v4.8-MANIFEST.json"
+    if not font_manifest.is_file():
+        die("canonical TSUNAMI Sans v4.8 manifest is missing")
+    import json
+    manifest = json.loads(font_manifest.read_text(encoding="utf-8"))
+    if manifest.get("family") != "TSUNAMI Sans" or manifest.get("version") != "4.800":
+        die(f"font manifest identity drift: {manifest.get('family')!r} {manifest.get('version')!r}")
+    if set(manifest.get("weights", {})) != {"Light","Regular","Medium","Semibold","Bold"}:
+        die("font manifest must enumerate exactly five static masters")
 
     build_src = BUILD_GRADLE.read_text(encoding="utf-8")
     root_build_src = (UI / "build.gradle.kts").read_text(encoding="utf-8")
@@ -434,6 +443,10 @@ def main() -> int:
     host_build=(UI / "tools/build_host.sh").read_text(encoding="utf-8")
     if 'bootstrap_gradle.sh" --print-gradle' not in host_build:
         die("host build must resolve Gradle through the checksum-verified bootstrap")
+    root_gate=(UI.parent / "tools/ui_shell_gate.py").read_text(encoding="utf-8")
+    for contract_name, contract_source in (("host build",host_build),("root gate",root_gate)):
+        if "TSUNAMI-SANS-v4.8-MANIFEST.json" not in contract_source:
+            die(f"{contract_name} must bind generated fonts to the canonical v4.8 manifest")
     for anchor in (
         'JDK 17 or newer',
         '/usr/libexec/java_home -v 17',

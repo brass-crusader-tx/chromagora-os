@@ -72,6 +72,9 @@ with zipfile.ZipFile(src) as z:
         z.extract(item,dst)
 PY
   mv "$CACHE_ROOT/.extract-$GRADLE_VERSION/gradle-$GRADLE_VERSION" "$DIST"
+  # Python's zipfile extraction does not reliably preserve POSIX executable bits on macOS.
+  # Reassert the Gradle launcher mode so a pristine checksum-pinned bootstrap is runnable.
+  chmod +x "$DIST/bin/gradle"
   rm -rf "$CACHE_ROOT/.extract-$GRADLE_VERSION"
 }
 

@@ -15,13 +15,20 @@ restore_device() {
 }
 trap restore_device EXIT
 test -s "$APK" || { echo "APK missing: $APK" >&2; exit 2; }
-adb install -r "$APK" >/dev/null
+REMOTE_APK="/data/local/tmp/tsunami-ui-genesis-capture.apk"
+adb push "$APK" "$REMOTE_APK" >/dev/null
+adb shell pm install -r -t "$REMOTE_APK" >/dev/null
+adb shell rm -f "$REMOTE_APK" || true
 adb logcat -c || true
 capture() {
   local name="$1" screen="$2" scenario="$3" theme="$4" mode="${5:-}" page="${6:-}"
   adb shell am force-stop "$PKG"
-  if [[ -n "$mode" || -n "$page" ]]; then
+  if [[ -n "$mode" && -n "$page" ]]; then
     adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" --es mode "$mode" --es page "$page" >/dev/null
+  elif [[ -n "$mode" ]]; then
+    adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" --es mode "$mode" >/dev/null
+  elif [[ -n "$page" ]]; then
+    adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" --es page "$page" >/dev/null
   else
     adb shell am start -W -n "$PKG/$ACT" --es screen "$screen" --es scenario "$scenario" --es theme "$theme" >/dev/null
   fi

@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -200,7 +201,7 @@ import com.tsunami.shell.theme.*
 
 @Composable private fun ColumnScope.ObjectLedger(state:ShellState,rows:List<Triple<String,String,String>>,playable:Boolean=false,queueable:Boolean=false){
     val p=LocalTsunamiPalette.current
-    LazyColumn(Modifier.fillMaxWidth().weight(1f)){itemsIndexed(rows){index,(name,type,meta)->
+    LazyColumn(Modifier.fillMaxWidth().weight(1f).testTag("library-object-list")){itemsIndexed(rows){index,(name,type,meta)->
         val representative=when(type){
             "Playlist","Smart list" -> state.playlistTracks[name]?.firstOrNull()?.let{id->state.fixture.tracks.firstOrNull{it.id==id}}
             "Album" -> state.fixture.tracks.firstOrNull{it.album==name}
@@ -278,7 +279,7 @@ import com.tsunami.shell.theme.*
         if(contents.isEmpty()){
             Text("Nothing in this object matches the active library filter.",style=Type.body.copy(color=p.ink2),modifier=Modifier.padding(vertical=18.dp))
         }else{
-            LazyColumn(Modifier.weight(1f)){
+            LazyColumn(Modifier.weight(1f).testTag("library-object-contents-list")){
                 items(contents,key={it.id}){t->
                     TrackLedgerRow(
                         t,

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tsunami.shell.components.*
@@ -99,7 +100,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
 @Composable private fun ColumnScope.AudioSignal(state:ShellState){
     val p=LocalTsunamiPalette.current
     val t=state.currentTrack
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=28.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("signal-audio-list"),contentPadding=PaddingValues(bottom=28.dp)){
         item{
             SectionHeader("Source capability")
             SignalLine("Track",t?.let{"${it.artist} — ${it.title}"}?:"Nothing playing")
@@ -144,7 +145,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
             SignalLine("PCM peak","L 0.842 · R 0.816")
             SignalLine("Clipping events","0")
             SignalLine("Gapless probe",state.gaplessProbeResult)
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+            Column(Modifier.fillMaxWidth()){
                 TextCommand(if(state.gaplessProbeResult=="Not run")"Test next transition" else "Retest transition",{state.runGaplessProbe()})
                 TextCommand("Reset counters",{state.resetDiagnosticCounters()})
             }
@@ -155,7 +156,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
 
 @Composable private fun ColumnScope.LibrarySignal(state:ShellState){
     val p=LocalTsunamiPalette.current
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=28.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("signal-library-list"),contentPadding=PaddingValues(bottom=28.dp)){
         item{
             SectionHeader("Health audit")
             MetricGrid(listOf(
@@ -341,7 +342,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
         values.chunked(2).forEach{row->
             Row(Modifier.fillMaxWidth()){
                 row.forEach{(k,v)->
-                    Column(Modifier.weight(1f).padding(vertical=12.dp,end=12.dp)){
+                    Column(Modifier.weight(1f).padding(start=0.dp,top=12.dp,end=12.dp,bottom=12.dp)){
                         Text(k,style=Type.micro.copy(color=LocalTsunamiPalette.current.ink3))
                         Spacer(Modifier.height(4.dp))
                         Text(v,style=Type.row.copy(color=LocalTsunamiPalette.current.ink),maxLines=3)

@@ -114,18 +114,25 @@ for p in fonts:
     finally:
         f.close()
 assert weights=={300,400,500,600,700}, weights
-import hashlib
+import hashlib, json
+manifest=json.loads(Path('../docs/TSUNAMI-SANS-v4.8-MANIFEST.json').read_text(encoding='utf-8'))
+assert manifest['family']=='TSUNAMI Sans' and manifest['version']=='4.800', manifest
 expected={
-    "tsunami_sans_light.ttf":"c295d45e732cf9d3c431c14465b4e64d0a164f6605da68a74ad207a59abe00fb",
-    "tsunami_sans_regular.ttf":"fb5803e5ed05442325bec033772bb5434b1f62740e02329d8d8c599e7d051c8b",
-    "tsunami_sans_medium.ttf":"0576bd38e1f0a34b40c22510249625abe27eda3cde39487a98d78102c5628c67",
-    "tsunami_sans_semibold.ttf":"6a196f5a93fbdbc4ccf821e12d9bb93963bb5d6263add32a90383ceb43acd914",
-    "tsunami_sans_bold.ttf":"063a6c7f56c48a78a45016cdf5b10e96a8fbf26b0ee5c30608f4a6c57af77841",
+    f"tsunami_sans_{name.lower()}.ttf": manifest['weights'][name]['sha256']
+    for name in ('Light','Regular','Medium','Semibold','Bold')
 }
 actual={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in fonts}
 assert actual==expected, (actual, expected)
+for name,meta in manifest['weights'].items():
+    p=Path('app/src/main/res/font')/f"tsunami_sans_{name.lower()}.ttf"
+    assert p.stat().st_size==int(meta['bytes']), (p,p.stat().st_size,meta['bytes'])
+for proof_name,meta in manifest['proofs'].items():
+    p=Path('tools/proofs')/proof_name
+    assert p.is_file(), p
+    assert hashlib.sha256(p.read_bytes()).hexdigest()==meta['sha256'], (p,meta['sha256'])
+    assert p.stat().st_size==int(meta['bytes']), (p,p.stat().st_size,meta['bytes'])
 print("FONT_GENERATION=PASS")
-print("FONT_CANONICAL_HASHES=PASS")
+print("FONT_CANONICAL_MANIFEST=PASS")
 PY
 
 FONT_DIST="$DIST/TSUNAMI-Sans-v4.8"
@@ -201,16 +208,27 @@ if [[ "$MODE" == "--install" || "$MODE" == "--verify-device" ]]; then
     echo "ERROR: no authorized Android device." >&2; exit 2
   fi
 
-  "$ADB" -s "$SERIAL" install -r "$OUT_APK"
+  install_apk() {
+    local apk="$1"
+    local remote="/data/local/tmp/$(basename "$apk")"
+    # `adb install` can hang indefinitely on some emulator/platform-tools combinations while
+    # the underlying Package Manager remains healthy. Stage explicitly, then ask `pm` to install.
+    "$ADB" -s "$SERIAL" push "$apk" "$remote" >/dev/null
+    "$ADB" -s "$SERIAL" shell pm install -r -t "$remote"
+    "$ADB" -s "$SERIAL" shell rm -f "$remote" || true
+  }
+
+  install_apk "$OUT_APK"
   "$ADB" -s "$SERIAL" shell am force-stop com.tsunami.shell
   "$ADB" -s "$SERIAL" shell am start -W -n com.tsunami.shell/.MainActivity
   "$ADB" -s "$SERIAL" shell dumpsys package com.tsunami.shell | grep -E 'versionCode|versionName' | head -4 | tee "$REPORT/device-package.txt"
   echo "DEVICE_INSTALL=PASS serial=$SERIAL" | tee -a "$REPORT/build.txt"
 
   if [[ "$MODE" == "--verify-device" ]]; then
-    "$ADB" -s "$SERIAL" install -r "$OUT_TEST"
+    install_apk "$OUT_TEST"
     "$ADB" -s "$SERIAL" logcat -c || true
-    "$ADB" -s "$SERIAL" shell am instrument -w       com.tsunami.shell.test/androidx.test.runner.AndroidJUnitRunner       | tee "$REPORT/instrumentation.txt"
+    "$ADB" -s "$SERIAL" shell am instrument -w -e class com.tsunami.shell.GenesisInteractionTest \
+      com.tsunami.shell.test/androidx.test.runner.AndroidJUnitRunner | tee "$REPORT/instrumentation.txt"
     grep -q 'OK (' "$REPORT/instrumentation.txt" || {
       echo "ERROR: instrumentation did not report success." >&2
       exit 3

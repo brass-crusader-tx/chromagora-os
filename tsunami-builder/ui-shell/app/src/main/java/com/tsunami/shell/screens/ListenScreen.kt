@@ -1,9 +1,12 @@
 package com.tsunami.shell.screens
 
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -18,7 +21,7 @@ import com.tsunami.shell.theme.*
 @Composable fun ListenScreen(state:ShellState,scenario:String){
     val p=LocalTsunamiPalette.current
     if(state.loading) LaunchedEffect("loading-resolve"){ delay(2200); state.loading=false; state.banner="Listening context ready" }
-    LazyColumn(Modifier.fillMaxSize(),contentPadding=PaddingValues(bottom=24.dp)){
+    LazyColumn(Modifier.fillMaxSize().testTag("listen-list"),contentPadding=PaddingValues(bottom=24.dp)){
         item {
             Text("LISTEN",style=Type.micro.copy(color=p.ink3,fontWeight=FontWeight.SemiBold));Spacer(Modifier.height(10.dp))
             Text("Your listening line",style=Type.display.copy(color=p.ink));Spacer(Modifier.height(10.dp))

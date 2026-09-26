@@ -88,6 +88,8 @@ REQUIRED_SCENARIOS = {
     "default", "empty", "loading", "error", "missing-lyrics", "longform",
     "long-title", "no-artwork", "small-list", "long-list", "huge-list",
     "buffering", "unavailable", "partial", "accessibility", "onboarding", "podcast",
+    "search-empty", "search-error", "queue-empty", "provider-connecting", "provider-error",
+    "downloads-active", "downloads-error", "library-index",
 }
 
 REQUIRED_PLAYER_MODES = {"queue", "lyrics", "output", "visual"}
@@ -279,8 +281,9 @@ def main() -> int:
     # Some deterministic scenarios are presentation/topology routes rather than fixture mutations.
     activity = read(SRC / "MainActivity.kt")
     shell = read(SRC / "navigation/GenesisShell.kt")
-    if 'scenario=="accessibility"' in activity:
-        scenarios.add("accessibility")
+    for presentation_scenario in ("accessibility", "search-empty", "library-index"):
+        if f'scenario=="{presentation_scenario}"' in activity:
+            scenarios.add(presentation_scenario)
     if 'scenario=="onboarding"' in shell:
         scenarios.add("onboarding")
     if not REQUIRED_SCENARIOS <= scenarios:

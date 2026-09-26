@@ -11,6 +11,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,7 +50,7 @@ import kotlin.math.sin
     Column(Modifier.fillMaxSize().background(p.ground).statusBarsPadding().navigationBarsPadding()){
         Row(Modifier.fillMaxWidth().height(64.dp).padding(horizontal=12.dp),verticalAlignment=Alignment.CenterVertically){HitIcon(Glyph.BACK,"Back",onBack);Spacer(Modifier.width(6.dp));Text("LISTENING",style=Type.micro.copy(color=p.ink3,fontWeight=FontWeight.SemiBold));Spacer(Modifier.weight(1f));Text(state.output,style=Type.meta.copy(color=p.ink2));HitIcon(Glyph.OUTPUT,"Output",{state.playerMode=PlayerMode.OUTPUT},selected=state.playerMode==PlayerMode.OUTPUT)};Rule()
         if(wide){Row(Modifier.weight(1f).padding(28.dp)){ListeningCore(state,t,progress,Modifier.weight(1f));Spacer(Modifier.width(32.dp));Box(Modifier.width(1.dp).fillMaxHeight().background(p.rule));Spacer(Modifier.width(32.dp));ListeningModePane(state,Modifier.weight(.9f))}}
-        else{Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal=20.dp)){ListeningCore(state,t,progress,Modifier.fillMaxWidth());Spacer(Modifier.height(20.dp));Rule();ListeningModePane(state,Modifier.fillMaxWidth().height(360.dp))}}
+        else{Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).testTag("expanded-listening-scroll").padding(horizontal=20.dp)){ListeningCore(state,t,progress,Modifier.fillMaxWidth());Spacer(Modifier.height(20.dp));Rule();ListeningModePane(state,Modifier.fillMaxWidth().height(360.dp))}}
         CompactTransport(state,t)
     }
 }
@@ -78,7 +79,7 @@ import kotlin.math.sin
         Spacer(Modifier.height(26.dp));TimeRuler(progress,state::seekFraction,enabled=t.available);Row(Modifier.fillMaxWidth()){Text(formatTime(state.positionMs),style=Type.numeric.copy(color=p.ink3));Spacer(Modifier.weight(1f));Text("−${formatTime((t.durationMs-state.positionMs).coerceAtLeast(0))}",style=Type.numeric.copy(color=p.ink3))}
         Spacer(Modifier.height(16.dp));Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){Text(t.quality,style=Type.meta.copy(color=p.ink3));Text(if(state.downloads[t.id]==DownloadState.DOWNLOADED)"OFFLINE" else t.provenance.name,style=Type.micro.copy(color=if(state.downloads[t.id]==DownloadState.DOWNLOADED)p.possession else p.ink3))}
         if(state.fullPlayerButtons.isNotEmpty()){
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+            FlowRow(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(4.dp),verticalArrangement=Arrangement.spacedBy(2.dp)){
                 state.fullPlayerButtons.forEach{label->
                     val display=when(label){
                         "Offline" -> if(state.downloads[t.id]==DownloadState.DOWNLOADED)"Offline" else "Make offline"

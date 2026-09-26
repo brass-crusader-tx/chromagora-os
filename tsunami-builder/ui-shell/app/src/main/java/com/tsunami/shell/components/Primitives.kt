@@ -6,7 +6,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.shape.RectangleShape
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.*
@@ -125,10 +126,9 @@ enum class Glyph { PLAY, PAUSE, NEXT, PREVIOUS, STAR, DOWNLOAD, SEARCH, SETTINGS
     Column(
         modifier
             .sizeIn(minHeight=target)
-            .semantics{role=Role.Button;contentDescription=text;if(selected) stateDescription="Selected";if(!enabled) disabled()}
             .onFocusChanged{focused=it.isFocused}
             .focusable(enabled)
-            .clickable(interactionSource=interactions,indication=null,enabled=enabled,onClick=onClick)
+            .selectable(selected=selected,interactionSource=interactions,indication=null,enabled=enabled,role=Role.Button,onClick=onClick)
             .padding(horizontal=6.dp),
         verticalArrangement=Arrangement.Center
     ){

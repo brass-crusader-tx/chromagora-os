@@ -84,16 +84,16 @@ def caps(ch,t):
 def lower(ch,t):
     h=XH; w=540; m=54; tl=max(34,t*.95)
     o=lambda: ring(w/2,h/2,w*.39,h/2+OV_X,tl)
-    if ch=='a': return U(o(),R(w-m-tl,0,w-m,h*.60)),w
+    if ch=='a': return U(o(),R(w-m-tl,0,w-m,h)),w
     if ch=='b': return U(R(m,0,m+tl,ASC),translate(o(),xoff=18)),w
     if ch=='c': return o().difference(R(w*.66,h*.16,w+80,h*.84)),w
     if ch=='d': return U(R(w-m-tl,0,w-m,ASC),translate(o(),xoff=-18)),w
     if ch=='e':
-        # Build e from the o skeleton but cut a genuine right aperture through the bowl.
-        # The previous shallow cut read like a theta at 12–18 px; this construction keeps
-        # the eye/bar relationship unmistakable at every static master.
-        bowl=o().difference(R(w*.64,h*.17,w+80,h*.83))
-        bar=R(w*.22,h*.46,w*.79,h*.46+tl*.88)
+        # Preserve almost the entire circular bowl and open only the middle-right aperture.
+        # This keeps e unmistakably Latin at Android UI sizes instead of collapsing toward
+        # epsilon/theta while retaining the geometric single-storey family grammar.
+        bowl=o().difference(R(w*.68,h*.36,w+80,h*.66))
+        bar=R(w*.20,h*.46,w*.82,h*.46+tl*.86)
         return U(bowl,bar),w
     if ch=='f':
         top_y=ASC-82
