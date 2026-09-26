@@ -1,13 +1,12 @@
 # TSUNAMI UI Genesis JitPack trigger
 
-Private Genesis source head: `59a3bec71e468d8442cd1df2160bff0d418b87ea`.
+Exact build-transport commit: `8db11b126d6a798dd543c3cee1791d4742745e93`.
 
-This commit is an immutable build-transport trigger for the byte-identical public mirror. The mirrored build-critical source is bound by `tsunami-builder/MIRROR-MANIFEST.json`; JitPack is expected to build `tsunami-builder/ui-shell` through the repository `jitpack.yml`.
+That immutable public-mirror commit is bound by `tsunami-builder/MIRROR-MANIFEST.json` to private Genesis source head `59a3bec71e468d8442cd1df2160bff0d418b87ea`.
 
-Rebuild request: sequence 25 · 2026-09-26T23:40:00Z.
+- [Request exact JitPack POM](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/8db11b126d/chromagora-os-8db11b126d.pom)
+- [Request exact UI Genesis APK](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/8db11b126d/chromagora-os-8db11b126d.apk)
+- [Request exact AndroidTest APK](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/8db11b126d/chromagora-os-8db11b126d-androidTest.apk)
+- [Exact JitPack build log](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/8db11b126d/build.log)
 
-After this file is committed, use the resulting commit SHA (or its canonical 10-character prefix) as the JitPack version:
-
-- APK: `https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/<VERSION>/chromagora-os-<VERSION>.apk`
-- AndroidTest APK: `https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/<VERSION>/chromagora-os-<VERSION>-androidTest.apk`
-- Build log: `https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/<VERSION>/build.log`
+The normal hosted Actions lanes still fail before steps on this account; the self-hosted exact-source run remains the preferred device-acceptance path when its runner is online. This file is outside those workflow path filters and exists only as an immutable JitPack build trigger/reference.
