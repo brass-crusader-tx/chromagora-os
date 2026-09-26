@@ -1,0 +1,67 @@
+{
+  "schema": "tsunami.ui-genesis.exact-head-audit.v1",
+  "source_repository": "brass-crusader-tx/TSUNAMI",
+  "source_branch": "genesis/ui-shell-20260923",
+  "source_head": "63d7b1f201b7873a65058150bde364375ab80bd8",
+  "mirror_repository": "brass-crusader-tx/chromagora-os",
+  "mirror_branch": "build/tsunami-ui-genesis-20260925",
+  "mirror_manifest_blob": "a8c28ff6634732b29f41dbf481f289e8bb504fdb",
+  "mirror_parity": {
+    "checked_entries": 57,
+    "ui_shell_entries": 41,
+    "support_entries": 16,
+    "missing": 0,
+    "divergent_sha": 0,
+    "divergent_bytes": 0,
+    "result": "PASS"
+  },
+  "connector_source_audit": {
+    "kotlin_source_and_test_files": 15,
+    "instrumentation_tests": 38,
+    "duplicate_test_names": 0,
+    "unfinished_markers": 0,
+    "direct_backend_coupling_files": 0,
+    "settings_routes_assigned": 20,
+    "settings_routes_rendered": 20,
+    "settings_missing_rendered": 0,
+    "settings_orphan_rendered": 0,
+    "manifest_uses_permission": false,
+    "deterministic_capture_rows": 45,
+    "unique_capture_rows": 45,
+    "visual_expected_states": 45,
+    "capture_verifier_mismatches": 0,
+    "result": "PASS"
+  },
+  "isolation": {
+    "compared_against_main": "2543cb39737557133a37d600050f9c4aa50a3fae",
+    "production_runtime_or_root_build_changes": 0,
+    "result": "PASS"
+  },
+  "android_build_execution": {
+    "hosted_linux": {
+      "run_id": 36270532398,
+      "job_id": 108483498173,
+      "status": "completed",
+      "conclusion": "failure",
+      "steps_materialized": false,
+      "logs_materialized": false,
+      "classification": "pre-step runner/infrastructure failure"
+    },
+    "hosted_macos": {
+      "run_id": 36270534859,
+      "job_id": 108483505519,
+      "status": "completed",
+      "conclusion": "failure",
+      "classification": "pre-step runner/infrastructure failure"
+    },
+    "self_hosted": {
+      "run_id": 36270369063,
+      "job_id": 108483044562,
+      "status": "queued",
+      "conclusion": null,
+      "source_binding": "exact manifest source_head 63d7b1f201b7873a65058150bde364375ab80bd8"
+    },
+    "result": "PENDING_EXECUTABLE_ANDROID_EVIDENCE"
+  },
+  "completion_claim": false
+}
