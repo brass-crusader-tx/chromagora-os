@@ -1,0 +1,6 @@
+jdk:
+  - openjdk17
+
+install:
+  - cd tsunami-builder && bash ui-shell/tools/build_host.sh
+  - python3 tsunami-builder/tools/jitpack_publish_apk.py
