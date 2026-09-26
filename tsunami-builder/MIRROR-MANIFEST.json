@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "494afd6bebddee2e121841a197995516013093a6",
+  "source_head": "f464bce9f9bfc937f2ba868b90c7647ae42421b7",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 16,
-  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 494afd6bebddee2e121841a197995516013093a6. Executable ui-shell source remains tree-identical to the manifest-coherent v5.1 source boundary 1fe4d52eaf9deee0b334e10caf6670442da41bc2; subsequent private commits reconcile verification documentation only. The mirror includes TSUNAMI Sans v5.1 canonical hashes, accessibility gates, host artifact source binding, and canonical verification tooling. Production runtime/root build files remain untouched.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head f464bce9f9bfc937f2ba868b90c7647ae42421b7. Android app/Kotlin product source remains tree-identical to 1fe4d52eaf9deee0b334e10caf6670442da41bc2; the current head additionally hardens the visual acceptance harness so every screenshot is gated on an explicit successful MainActivity launch and resumed-activity check. The mirror includes TSUNAMI Sans v5.1 canonical hashes, accessibility gates, host artifact source binding, and canonical verification tooling. Production runtime/root build files remain untouched.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -176,8 +176,8 @@
     },
     {
       "path": "ui-shell/tools/capture_verify.sh",
-      "git_blob_sha": "05d2e8f2ea5c207fd834e83087bfb0c9929ae0e9",
-      "bytes": 5178
+      "git_blob_sha": "85620f76a30f236ee5e1c5b5a2fd434b42ec0c5a",
+      "bytes": 5749
     },
     {
       "path": "ui-shell/tools/derive_review_images.py",
@@ -299,13 +299,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "494afd6bebddee2e121841a197995516013093a6"
+    "source_head": "f464bce9f9bfc937f2ba868b90c7647ae42421b7"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-26T21:40:00Z",
-    "private_head": "494afd6bebddee2e121841a197995516013093a6",
-    "reason": "exact current-head retry after v5.1 documentation/hash reconciliation; require app + AndroidTest APK, 38 Compose tests, 45-state visual/device matrix, Android TSUNAMI Sans v5.1 raster review, crash scan, and Chromagora portal publication",
-    "sequence": 11
+    "requested_at_utc": "2026-09-26T21:50:00Z",
+    "private_head": "f464bce9f9bfc937f2ba868b90c7647ae42421b7",
+    "reason": "exact current-head retry after confirmed-launch capture-gate hardening; require app + AndroidTest APK, 38 Compose tests, 45-state visual/device matrix, Android TSUNAMI Sans v5.1 raster review, crash scan, and Chromagora portal publication",
+    "sequence": 12
   },
-  "generated_at_utc": "2026-09-26T21:40:00Z"
+  "generated_at_utc": "2026-09-26T21:50:00Z"
 }
