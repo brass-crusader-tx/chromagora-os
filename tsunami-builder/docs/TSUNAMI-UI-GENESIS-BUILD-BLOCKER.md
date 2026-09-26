@@ -167,3 +167,17 @@ At private Genesis head `71f49a21681bf357cd32afcc0a04545e245a332a`, the public b
 The public builder workflow was then given a branch-scoped push trigger at commit `adaea32834796e6247d857948d18a04bdec7e280`, producing fresh run **36170036683**. GitHub created job **108187058460**, but the job completed as failure before exposing any executable step list; the jobs API returned `steps=null`, and the job-log endpoint returned no materialized log blob (404). The run began at 2026-09-25T17:54:19Z and completed four seconds later.
 
 This is fresh evidence against the exact current mirrored source. It still does **not** constitute an Android compile failure: checkout, Java setup, SDK setup, mirror binding, the canonical host build, Gradle, Kotlin/Compose compilation and artifact upload produced no step-level evidence. The current-head APK/device acceptance boundary therefore remains outstanding.
+
+
+## Experiment 10 — 2026-09-26 current-source public mirror retry
+
+After the v4.8 font manifest became part of the executable source contract, the public builder mirror was refreshed again rather than relying on the September 25 snapshot. Private head `11388f2ce43bb8c518a494e8044e5dba0f854e09` was compared against `brass-crusader-tx/chromagora-os:build/tsunami-ui-genesis-20260925` by Git blob SHA. The refreshed mirror contains **40 ui-shell files + 16 build/support files = 56 byte-identical blobs**, with **0 missing and 0 divergent paths**. Public commit `03d38e5a42587f9a2beb140aa132214954149d60` binds `MIRROR-MANIFEST.json` to that exact private head.
+
+That push created:
+
+- hosted builder run **36246923694**, job **108417723315**;
+- public self-hosted run **36246923706**, job **108417724911**.
+
+The hosted job first entered the queue and obtained a job object, then completed as failure without ever materializing a step list (`steps=null`). Fetching the job log returned HTTP 404 / `BlobNotFound`, so there is still no checkout, shell-command, Gradle or Android log to attribute the failure to repository code. The self-hosted job remains queued awaiting a matching runner.
+
+This fresh run is useful for one reason: it eliminates stale mirror content—including the newly required TSUNAMI Sans v4.8 manifest and root gate—as a confounder. It still cannot satisfy the APK/device acceptance boundary because no user step ran.
