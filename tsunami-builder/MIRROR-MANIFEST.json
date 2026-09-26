@@ -2,7 +2,7 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "c6bab4dfa1d3c0315287bfd56b7b8a47d5f578bc",
+  "source_head": "e7856d9c488071fa541298ecb9ab95f48175280e",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
@@ -71,8 +71,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/ListenScreen.kt",
-      "git_blob_sha": "d633a4def3fe8dc2a62eba24c8a77c28978d7b21",
-      "bytes": 8140
+      "git_blob_sha": "f52b8f26703af93a6de6e26e6668fa4617c17941",
+      "bytes": 8141
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/OnboardingScreen.kt",
