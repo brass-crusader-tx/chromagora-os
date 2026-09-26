@@ -118,6 +118,8 @@ payload=json.loads(manifest_path.read_text(encoding="utf-8"))
 assert payload.get("status")=="BUILT", payload
 assert payload.get("source_head")==expected_head, (payload.get("source_head"), expected_head)
 assert payload.get("source_contract_match") is True, payload
+assert payload.get("exact_source_head_match") is True, payload
+assert payload.get("mirror_manifest_source_head")==expected_head, (payload.get("mirror_manifest_source_head"), expected_head)
 actual=hashlib.sha256(apk_path.read_bytes()).hexdigest()
 assert payload.get("app_sha256")==actual, (payload.get("app_sha256"), actual)
 assert len(str(payload.get("mirror_commit","")))==40, payload
