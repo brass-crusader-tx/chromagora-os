@@ -181,3 +181,14 @@ That push created:
 The hosted job first entered the queue and obtained a job object, then completed as failure without ever materializing a step list (`steps=null`). Fetching the job log returned HTTP 404 / `BlobNotFound`, so there is still no checkout, shell-command, Gradle or Android log to attribute the failure to repository code. The self-hosted job remains queued awaiting a matching runner.
 
 This fresh run is useful for one reason: it eliminates stale mirror content—including the newly required TSUNAMI Sans v4.8 manifest and root gate—as a confounder. It still cannot satisfy the APK/device acceptance boundary because no user step ran.
+
+
+## Experiment 11 — current-lineage repository-wide startup failure
+
+The latest documentation/source reconciliation produced fresh branch run **36273383976** at head **`483b5122588641a113319ee6de23381cf1f147db`**. It again completed as synthetic **`BuildFailed` / `startup_failure`** on a normal branch push, and the jobs endpoint returned **`jobs=[]`**.
+
+The same repository's unchanged production `main` branch independently produced issue-triggered run **36273159255** at **`2543cb39737557133a37d600050f9c4aa50a3fae`** minutes earlier. That run has the same **`BuildFailed` / `startup_failure`** conclusion and likewise exposes **`jobs=[]`**.
+
+This is useful control evidence because the two runs differ in branch, event type, commit lineage, and workflow purpose. Neither run allocates a job. The common failure therefore cannot be treated as evidence that current Genesis Kotlin, Compose, Gradle, Android SDK setup, font generation, or instrumentation is failing: none of those user-controlled steps begins.
+
+The executable acceptance boundary remains unchanged. The shell still requires a host/Codespace/self-hosted environment that actually executes `ui-shell/tools/build_host.sh --verify-device <serial>` or the equivalent canonical gate before an APK/device PASS can be recorded.
