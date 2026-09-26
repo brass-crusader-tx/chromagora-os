@@ -302,10 +302,10 @@
     "source_head": "4d194f587e009eb7e1e19e3bcfbf6d4f36f025e6"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-26T21:14:00Z",
+    "requested_at_utc": "2026-09-26T21:16:00Z",
     "private_head": "4d194f587e009eb7e1e19e3bcfbf6d4f36f025e6",
-    "reason": "exact-head retry after manifest-coherent TSUNAMI Sans v5.1 aperture refinement; require app + AndroidTest APK, 38 Compose tests, 45-state device matrix, Android font raster review, crash scan, and Chromagora portal publication",
-    "sequence": 7
+    "reason": "exact-head retry after public mirror generator was synchronized to the manifest-coherent private v5.1 aperture refinement; require app + AndroidTest APK, 38 Compose tests, 45-state device matrix, Android font raster review, crash scan, and Chromagora portal publication",
+    "sequence": 8
   },
   "generated_at_utc": "2026-09-26T21:20:00Z"
 }
