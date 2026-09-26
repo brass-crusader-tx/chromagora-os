@@ -56,6 +56,12 @@ data class ShellFixture(
     val missingLyrics: Boolean = false,
     val buffering: Boolean = false,
     val partial: Boolean = false,
+    val queueEmpty: Boolean = false,
+    val searchError: Boolean = false,
+    val providerConnecting: Boolean = false,
+    val providerError: Boolean = false,
+    val downloadsActive: Boolean = false,
+    val downloadsError: Boolean = false,
 )
 
 fun defaultFixture(scenario: String): ShellFixture {
@@ -99,6 +105,8 @@ fun defaultFixture(scenario: String): ShellFixture {
         tracks = if (scenario == "empty") emptyList() else tracks,
         services = listOf(
             ServiceConnection("YouTube Music", true, "Library available · 1,842 indexed"),
+            ServiceConnection("Apple Music", false, "Not connected"),
+            ServiceConnection("Amazon Music", false, "Not connected"),
             ServiceConnection("TIDAL", false, "Not connected"),
             ServiceConnection("Spotify", true, "History only · enrichment paused"),
         ),
@@ -110,6 +118,12 @@ fun defaultFixture(scenario: String): ShellFixture {
         missingLyrics = scenario == "missing-lyrics",
         buffering = scenario == "buffering",
         partial = scenario == "partial",
+        queueEmpty = scenario == "queue-empty",
+        searchError = scenario == "search-error",
+        providerConnecting = scenario == "provider-connecting",
+        providerError = scenario == "provider-error",
+        downloadsActive = scenario == "downloads-active",
+        downloadsError = scenario == "downloads-error",
     )
 }
 
