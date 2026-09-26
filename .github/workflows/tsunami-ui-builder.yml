@@ -79,3 +79,5 @@ jobs:
           if-no-files-found: error
 
 # current-head mirror contract is manifest-bound; file counts may grow as isolated verification tooling grows
+
+# exact-source retry probe 2026-09-26 c6bab4
