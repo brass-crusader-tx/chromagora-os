@@ -98,7 +98,7 @@ jobs:
           print(json.load(open("MIRROR-MANIFEST.json"))["source_head"])
           PY
           )"
-          tmp="$TARGET.tmp.$"
+          tmp="${TARGET}.tmp.${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
           cp "$SRC" "$tmp"
           chmod 0644 "$tmp"
           mv -f "$tmp" "$TARGET"
