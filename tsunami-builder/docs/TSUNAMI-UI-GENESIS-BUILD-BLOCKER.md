@@ -192,3 +192,22 @@ The same repository's unchanged production `main` branch independently produced 
 This is useful control evidence because the two runs differ in branch, event type, commit lineage, and workflow purpose. Neither run allocates a job. The common failure therefore cannot be treated as evidence that current Genesis Kotlin, Compose, Gradle, Android SDK setup, font generation, or instrumentation is failing: none of those user-controlled steps begins.
 
 The executable acceptance boundary remains unchanged. The shell still requires a host/Codespace/self-hosted environment that actually executes `ui-shell/tools/build_host.sh --verify-device <serial>` or the equivalent canonical gate before an APK/device PASS can be recorded.
+
+
+## Experiment 12 — exact-head mirror + independent JitPack version fallback
+
+At private Genesis head `d062ac5c55863fd86054e7c9b5277b8ea533438c`, the public build mirror was rebound at `brass-crusader-tx/chromagora-os:build/tsunami-ui-genesis-20260925`. The mirror manifest currently covers **58 build-critical files/support files**, and a fresh comparison against the private Git tree returned **0 blob-SHA or byte-size mismatches**. Public mirror commit `4a1ac366837c175dd0fa3ce421d2df9f67cc7350` records that source binding.
+
+That push created fresh hosted runs **36278621123** (Ubuntu) and **36278621138** (macOS). Both again failed before yielding executable TSUNAMI build evidence. The corresponding public self-hosted run **36278621109** reached the queue with job **108506071804** and remains queued pending a matching self-hosted runner. This preserves a viable exact-source route to the attached-Motorola acceptance path if the Mac runner comes online.
+
+The immutable JitPack fallback was also hardened after identifying a real transport bug: JitPack accepts canonical short commit versions, while some deployments also accept full 40-character SHAs. The previous resolver could abort as soon as one spelling reported a terminal failure, preventing the other spelling from succeeding. The current resolver now:
+
+- validates and probes both the full mirror SHA and its canonical 10-character form;
+- preserves terminal state per candidate across polling iterations;
+- continues the alternate candidate after a single spelling fails;
+- declares transport failure only when **all** accepted commit spellings are terminal;
+- includes an offline resolver self-test, now invoked by the static source gate.
+
+This changes only the build transport. It does not relax the source binding: the private current HEAD, the mirror manifest `source_head`, all 58 Git blob IDs/byte sizes, and the JitPack-resolved commit must still agree before an APK can be accepted.
+
+The Android acceptance boundary therefore remains explicit rather than inferred: exact-head app APK + AndroidTest APK, binary manifest/permission gate, the full Compose interaction suite, the deterministic visual-state matrix, Android-raster TSUNAMI Sans review, crash/logcat scan, and final artifact hashes are still required.
