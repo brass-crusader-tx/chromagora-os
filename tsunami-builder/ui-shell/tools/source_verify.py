@@ -20,6 +20,7 @@ CAPTURE = UI / "tools/capture_verify.sh"
 VISUAL_SANITY = UI / "tools/visual_sanity_verify.py"
 BUILD_GRADLE = UI / "app/build.gradle.kts"
 LAUNCHER_FOREGROUND = UI / "app/src/main/res/drawable/ic_tsunami_launcher_foreground.xml"
+MARK_VECTOR = UI / "app/src/main/res/drawable/ic_tsunami_mark.xml"
 LAUNCHER_ADAPTIVE = UI / "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml"
 LAUNCHER_ROUND = UI / "app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml"
 
@@ -43,6 +44,7 @@ REQUIRED = [
     FONT_GEN,
     BUILD_GRADLE,
     LAUNCHER_FOREGROUND,
+    MARK_VECTOR,
     LAUNCHER_ADAPTIVE,
     LAUNCHER_ROUND,
     UI / "tools/jvm_state_gate.sh",
@@ -282,11 +284,16 @@ def main() -> int:
         if anchor not in manifest:
             die(f"launcher/product identity missing manifest anchor: {anchor}")
     foreground = LAUNCHER_FOREGROUND.read_text(encoding="utf-8")
+    mark_vector = MARK_VECTOR.read_text(encoding="utf-8")
     adaptive = LAUNCHER_ADAPTIVE.read_text(encoding="utf-8")
     round_adaptive = LAUNCHER_ROUND.read_text(encoding="utf-8")
-    for anchor in ("M0,411.11", "A509.61,509.61", "M500,242", "A289,289"):
-        if anchor not in foreground:
-            die(f"launcher foreground is not derived from master mark geometry: {anchor}")
+    master_arch = "M0,411.11 A509.61,509.61 0,0 1,1000,411.11 L883.84,411.11 A394.61,394.61 0,0 0,116.16,411.11 Z"
+    master_body = "M500,242 A289,289 0,1 1,500,820 A289,289 0,1 1,500,242 Z"
+    for label, xml in (("launcher foreground", foreground), ("standalone mark vector", mark_vector)):
+        if master_arch not in xml:
+            die(f"{label} arch diverged from canonical master-mark geometry")
+        if master_body not in xml:
+            die(f"{label} body diverged from canonical 289-radius circle geometry")
     for xml in (adaptive, round_adaptive):
         if "@color/tsunami_launcher_ground" not in xml or "@drawable/ic_tsunami_launcher_foreground" not in xml:
             die("adaptive launcher icon must use authored TSUNAMI ground + foreground")
