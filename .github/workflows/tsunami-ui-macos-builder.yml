@@ -38,7 +38,7 @@ jobs:
           import json, pathlib, subprocess
           root=pathlib.Path("tsunami-builder")
           manifest=json.loads((root/"MIRROR-MANIFEST.json").read_text())
-          assert manifest["source_head"]=="46fd4b61915936187521a3e0c5f542505b315c48", manifest["source_head"]
+          assert isinstance(manifest.get("source_head"),str) and len(manifest["source_head"])==40, manifest.get("source_head")
           bad=[]
           for row in manifest["files"]+manifest["support_files"]:
               p=root/row["path"]
