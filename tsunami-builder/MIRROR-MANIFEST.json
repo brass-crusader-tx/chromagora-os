@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "e7856d9c488071fa541298ecb9ab95f48175280e",
+  "source_head": "2d2613efdf483475ea7ae01023562634ea005fc0",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 16,
-  "note": "Every listed build-critical blob is byte-identical to private Genesis source head e7856d9c488071fa541298ecb9ab95f48175280e. The mirror includes the canonical TSUNAMI Sans v5.1 manifest and root verification gates required by source_verify.py. Production CI/root ignore policy remain byte-identical to main and are deliberately outside the Genesis payload. Build/device PASS remains contingent on executable Android verification.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head 2d2613efdf483475ea7ae01023562634ea005fc0. The mirror includes the canonical TSUNAMI Sans v5.1 manifest and root verification gates required by source_verify.py. The latest source delta removes designer-facing rationale/provenance jargon from product microcopy without changing runtime architecture. Production CI/root ignore policy remain byte-identical to main and are deliberately outside the Genesis payload. Build/device PASS remains contingent on executable Android verification.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -61,8 +61,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/FindScreen.kt",
-      "git_blob_sha": "1990294045fe513f5a452595364e940df570077c",
-      "bytes": 14572
+      "git_blob_sha": "82055fb3f347b1718d112007e87f0f17ab89e70a",
+      "bytes": 14547
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/LibraryScreen.kt",
@@ -76,13 +76,13 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/OnboardingScreen.kt",
-      "git_blob_sha": "1bbeaf50bc55f5794cd4ebfa2ff3bba01c2e5fb1",
-      "bytes": 3164
+      "git_blob_sha": "64d0434a28a6034134b799ed149f33655e9a6abb",
+      "bytes": 3160
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/SettingsScreen.kt",
-      "git_blob_sha": "8f98155a37ef62b9de1a63331f0db361fbc24913",
-      "bytes": 46639
+      "git_blob_sha": "08738eae53ff2239f0ac4d5d5caa13bfbf0ec412",
+      "bytes": 46520
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/SignalScreen.kt",
@@ -299,11 +299,11 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "e7856d9c488071fa541298ecb9ab95f48175280e"
+    "source_head": "2d2613efdf483475ea7ae01023562634ea005fc0"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-26T19:36:00Z",
-    "private_head": "e7856d9c488071fa541298ecb9ab95f48175280e",
-    "reason": "ACM exact-head rebind after restoring canonical TSUNAMI Sans v5.1 and reconciling Listen copy/source gates; request APK + AndroidTest + 38-test instrumentation + 45-state device acceptance + portal publication"
+    "requested_at_utc": "2026-09-26T19:55:00Z",
+    "private_head": "2d2613efdf483475ea7ae01023562634ea005fc0",
+    "reason": "ACM exact-head rebind after de-tackification microcopy pass; request APK + AndroidTest + 38-test instrumentation + 45-state device acceptance + Android TSUNAMI Sans v5.1 review + portal publication"
   }
 }
