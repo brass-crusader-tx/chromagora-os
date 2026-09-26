@@ -1,0 +1,144 @@
+{
+  "schema": "tsunami.ui-genesis.exact-head-audit.v1",
+  "source_repository": "brass-crusader-tx/TSUNAMI",
+  "source_branch": "genesis/ui-shell-20260923",
+  "source_head": "1fe4d52eaf9deee0b334e10caf6670442da41bc2",
+  "source_changes_this_boundary": [
+    "Dismissible status banner now has a 48dp minimum target.",
+    "Accessibility verifier now guards the banner target against regression.",
+    "TSUNAMI Sans v5.1 aperture refinement remains manifest-coherent and reproducible."
+  ],
+  "mirror_repository": "brass-crusader-tx/chromagora-os",
+  "mirror_branch": "build/tsunami-ui-genesis-20260925",
+  "mirror_workflow_head": "dc3f6d8e34e98e5f8355020e0b7d3cf45677deae",
+  "mirror_manifest_blob": "b15a55d7a4bce4fee574a5e0e7e4715c663f0741",
+  "mirror_parity": {
+    "checked_entries": 57,
+    "missing": 0,
+    "divergent_sha": 0,
+    "divergent_bytes": 0,
+    "result": "PASS"
+  },
+  "static_contract": {
+    "kotlin_files": 15,
+    "compose_instrumentation_tests": {
+      "count": 38,
+      "unique": 38
+    },
+    "settings_routes": {
+      "assigned": 21,
+      "unrendered": 0,
+      "orphaned": 0
+    },
+    "visual_capture_matrix": {
+      "count": 45,
+      "unique": 45,
+      "visual_sanity_expected": 45,
+      "mismatch": 0
+    },
+    "declared_permissions": 0,
+    "unfinished_markers": 0,
+    "direct_backend_tokens": 0,
+    "visible_interactive_handlers": {
+      "direct_clicks": 11,
+      "text_commands": 84,
+      "hit_icons": 34,
+      "action_rows": 116,
+      "toggle_rows": 48,
+      "empty_handlers": 0
+    },
+    "direct_clickable_focus_gate": true,
+    "touch_target_regression_gate": true
+  },
+  "type_contract": {
+    "family": "TSUNAMI Sans",
+    "version": "5.100",
+    "generator_blob": "43ae1290ae3063a717cddb0272080dc0c27d3b7f",
+    "weights": {
+      "Light": {
+        "bytes": 103552,
+        "sha256": "2fc7f7b9ccbedcd1b60865fc97b28719789ed769aa0e048cd99dbb0dca18c7f2"
+      },
+      "Regular": {
+        "bytes": 106124,
+        "sha256": "cf77ddb6a23bdd961735b8a7c61ecf9e7d06bcba636e4fa772e4da0212afdc42"
+      },
+      "Medium": {
+        "bytes": 107116,
+        "sha256": "53989e4315a71de4b890adb63aa25ba2314a0bdf4e7d35fc43dccb4b55424c07"
+      },
+      "Semibold": {
+        "bytes": 107720,
+        "sha256": "7e9f4610d206c3553e3697941200da6e2131053deb43faed440ba2e006f0f3c3"
+      },
+      "Bold": {
+        "bytes": 107072,
+        "sha256": "42dd3412a4e611bbb4b81bcfdc829e15b91fab24bbfc4fee5a75d1f89b4c524f"
+      }
+    },
+    "glyphs_per_master": 176,
+    "gpos_all_masters": true,
+    "required_ui_and_western_european_coverage": true,
+    "control_pair_raster_distinctness": {
+      "sizes_px": [
+        18,
+        24,
+        34
+      ],
+      "pairs": [
+        "I/l",
+        "I/1",
+        "O/0",
+        "rn/m",
+        "c/e",
+        "v/y"
+      ],
+      "zero_difference_pairs": 0
+    },
+    "proof_review": {
+      "desktop_specimen_reviewed": true,
+      "android_raster_review": false
+    }
+  },
+  "android_execution": {
+    "hosted_linux": {
+      "run_id": 36272753776,
+      "status": "completed",
+      "conclusion": "failure",
+      "steps_materialized": false,
+      "classification": "pre-step runner/infrastructure failure"
+    },
+    "hosted_macos": {
+      "run_id": 36272753841,
+      "status": "completed",
+      "conclusion": "failure",
+      "steps_materialized": false,
+      "classification": "pre-step runner/infrastructure failure"
+    },
+    "self_hosted": {
+      "run_id": 36272753784,
+      "status": "queued",
+      "conclusion": null,
+      "steps_materialized": false
+    },
+    "result": "PENDING_EXECUTABLE_ANDROID_EVIDENCE"
+  },
+  "rpc": {
+    "issue": 31,
+    "status": "open",
+    "duplicate_closed": 32,
+    "source_sha": "1fe4d52eaf9deee0b334e10caf6670442da41bc2"
+  },
+  "final_acceptance_required": {
+    "host_build": true,
+    "apk": true,
+    "android_test_apk": true,
+    "instrumentation_tests": 38,
+    "visual_states": 45,
+    "physical_device_if_attached": "ZY22L2PTS5",
+    "crash_scan": true,
+    "portal_publish": true
+  },
+  "completion_claim": false,
+  "refreshed_at_utc": "2026-09-26T21:25:00Z"
+}
