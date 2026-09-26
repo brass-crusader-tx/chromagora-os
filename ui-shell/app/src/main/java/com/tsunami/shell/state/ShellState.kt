@@ -14,12 +14,14 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     var largeControls by mutableStateOf(false)
     var hapticStrength by mutableIntStateOf(1)
     var denseLibrary by mutableStateOf(false)
+    var libraryViewMode by mutableStateOf("Ledger")
+    var advancedExperience by mutableStateOf(true)
     var listenLens by mutableStateOf("Deep cuts")
     var selectionMode by mutableStateOf(false)
     var currentIndex by mutableIntStateOf(0)
-    var playing by mutableStateOf(!fixture.buffering && fixture.tracks.firstOrNull()?.available != false)
+    var playing by mutableStateOf(!fixture.queueEmpty && !fixture.buffering && fixture.tracks.firstOrNull()?.available != false)
     var buffering by mutableStateOf(fixture.buffering)
-    var positionMs by mutableLongStateOf(94_000L)
+    var positionMs by mutableLongStateOf(if(fixture.queueEmpty)0L else 94_000L)
     var shuffle by mutableStateOf(false)
     var repeat by mutableStateOf(RepeatMode.OFF)
     var sleepMinutes by mutableIntStateOf(0)
@@ -159,6 +161,9 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
         "15:08:33 · library index coherent"
     )
     var sourceError by mutableStateOf(fixture.error)
+    var searchFault by mutableStateOf(fixture.searchError)
+    var downloadsFault by mutableStateOf(fixture.downloadsError)
+    var providerTransient by mutableStateOf(when{fixture.providerConnecting->"connecting";fixture.providerError->"error";else->""})
     var loading by mutableStateOf(fixture.loading)
     var onboardingComplete by mutableStateOf(false)
     var banner by mutableStateOf<String?>(null)
@@ -166,8 +171,9 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     val selectedTrackIds = mutableStateListOf<String>()
     val downloads = mutableStateMapOf<String, DownloadState>().apply {
         fixture.tracks.take(4).forEach { put(it.id, DownloadState.DOWNLOADED) }
+        if(fixture.downloadsActive) fixture.tracks.firstOrNull{it.provenance!=Provenance.OWNED}?.let{put(it.id,DownloadState.DOWNLOADING)}
     }
-    val queue = mutableStateListOf<Track>().apply { addAll(fixture.tracks.take(8)) }
+    val queue = mutableStateListOf<Track>().apply { if(!fixture.queueEmpty) addAll(fixture.tracks.take(8)) }
     val bookmarks = mutableStateMapOf<String, Long>()
     val playedLongform = mutableStateListOf<String>()
     val resumePositions = mutableStateMapOf<String, Long>().apply {
@@ -329,6 +335,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
         clearSelection()
     }
     fun toggleDownload(id:String){
+        downloadsFault=false
         when(downloads[id] ?: DownloadState.REMOTE){
             DownloadState.REMOTE -> { downloads[id]=DownloadState.DOWNLOADING; banner="Download queued" }
             DownloadState.DOWNLOADING -> { downloads[id]=DownloadState.DOWNLOADED; banner="Available offline" }
@@ -408,7 +415,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     fun cycleBackupKeep(){ backupKeep=when(backupKeep){5->10;10->20;else->5} }
     fun cycleBackupInterval(){ backupIntervalHours=when(backupIntervalHours){24->72;72->168;else->24} }
     fun cycleLibraryProfile(){ activeLibraryProfile=if(activeLibraryProfile=="Main library")"Travel library" else "Main library"; banner="Library profile · $activeLibraryProfile" }
-    fun addMockLibraryRoot(){ val root=if("/Field Recordings" in libraryRoots)"/Imported Music" else "/Field Recordings"; if(root !in libraryRoots)libraryRoots.add(root); banner="Library root added · $root" }
+    fun addMockLibraryRoot(){ val root=if("/Music/Field Recordings" in libraryRoots)"/Music/Imported" else "/Music/Field Recordings"; if(root !in libraryRoots)libraryRoots.add(root); banner="Library root added · $root" }
     fun removeLibraryRoot(root:String){ if(libraryRoots.size<=1){banner="Keep at least one library root";return}; libraryRoots.remove(root); banner="Library root removed · $root" }
     fun toggleLibrarySection(section:String){
         if(section in hiddenLibrarySections) hiddenLibrarySections.remove(section)
@@ -429,7 +436,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     }
     fun cycleMetadataTemplate(){ metadataTemplate=when(metadataTemplate){"Title · Artist · Album"->"Title · Album · Year";"Title · Album · Year"->"Title · Format · Source";else->"Title · Artist · Album"} }
     fun cycleAlbumArtistMode(){ albumArtistMode=when(albumArtistMode){"Prefer album artist"->"Track artist only";"Track artist only"->"Album artist first";else->"Prefer album artist"};banner="Album artist · $albumArtistMode" }
-    fun runGaplessProbe(){ gaplessProbeResult=if(gaplessProbeResult=="PASS")"Not run" else "PASS"; diagnosticLog.add("15:09:02 · gapless probe · $gaplessProbeResult"); banner="Gapless probe · $gaplessProbeResult" }
+    fun runGaplessProbe(){ gaplessProbeResult="PASS"; diagnosticLog.add("15:09:02 · gapless probe · $gaplessProbeResult"); banner="Gapless probe · $gaplessProbeResult" }
     fun resetDiagnosticCounters(){ diagnosticUnderruns=0;diagnosticSinkErrors=0;diagnosticCodecErrors=0;diagnosticsFault=false;diagnosticLog.add("15:09:05 · counters reset");banner="Playback counters reset" }
     fun auditLyrics(){ lyricAuditStatus="Audit complete"; lyricMissingCount=if(fixture.missingLyrics)3 else 1; diagnosticLog.add("15:09:12 · lyrics audit · $lyricMissingCount missing");banner="Lyrics audit · $lyricMissingCount missing" }
     fun fetchMissingLyrics(){ if(lyricMissingCount>0)lyricMissingCount=(lyricMissingCount-1).coerceAtLeast(0); lyricAuditStatus="Exact fetch complete";banner="Exact lyric fetch · $lyricMissingCount still missing" }
@@ -496,10 +503,20 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
         }
         pendingConfirmation=null
     }
-    fun resolveBuffering(){ buffering=false; playing=currentTrack?.available != false; banner=if(playing)"Playback ready" else "Current item unavailable" }
+    fun resolveBuffering(){
+        val track=currentTrack
+        buffering=false
+        playing=track?.available==true
+        banner=when{
+            track==null -> "Queue empty"
+            playing -> "Playback ready"
+            else -> "Current item unavailable"
+        }
+    }
     fun togglePlayback(){
         val track=currentTrack
-        if(track?.available==false){ playing=false; buffering=false; banner="Unavailable · ${track.title}"; return }
+        if(track==null){ playing=false; buffering=false; banner="Queue empty"; return }
+        if(!track.available){ playing=false; buffering=false; banner="Unavailable · ${track.title}"; return }
         if(buffering){ resolveBuffering(); return }
         playing=!playing
     }
@@ -518,6 +535,8 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
         if(!item.longform) return
         if(item.id in playedLongform){
             playedLongform.remove(item.id)
+            resumePositions[item.id]=0L
+            if(item.id==currentTrack?.id) positionMs=0L
             banner="Marked unplayed · ${item.title}"
         }else{
             playedLongform.add(item.id)
@@ -531,6 +550,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
         if(index !in queue.indices)return
         val currentId=currentTrack?.id
         val removingCurrent=queue[index].id==currentId
+        if(removingCurrent) storeCurrentLongformPosition()
         queue.removeAt(index)
         if(queue.isEmpty()){
             currentIndex=0
@@ -550,7 +570,11 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
             buffering=false
         }
     }
+    fun retrySearch(){ searchFault=false; banner="Search source recovered" }
+    fun retryDownloads(){ downloadsFault=false; banner="Downloads recovered · queued work preserved" }
+    fun retryProvider(){ providerTransient=""; banner="Provider connection ready to retry" }
     fun toggleService(index:Int){
+        providerTransient=""
         val s=services[index]
         val connected=!s.connected
         val retained=importAudits[s.name]!=null
