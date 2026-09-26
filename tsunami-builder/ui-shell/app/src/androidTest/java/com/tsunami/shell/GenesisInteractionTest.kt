@@ -47,6 +47,15 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Your listening line").assertExists()
     }
 
+    @Test fun listenTemporalLedgerTracksCurrentObjectWithoutArtworkDependency() {
+        compose.onNodeWithText("CURRENT THREAD").assertExists()
+        compose.onNodeWithText("LIBRARY LENS").assertExists()
+        compose.onNodeWithTag("listen-current-afterglow").assertExists()
+        compose.onAllNodesWithContentDescription("Artwork for Afterglow at the Edge of the City").assertCountEquals(0)
+        compose.onAllNodesWithContentDescription("Play Passage / Northbound").onFirst().performClick()
+        compose.onNodeWithTag("listen-current-passage").assertExists()
+    }
+
     @Test fun transportAndExpandedListeningAreInteractive() {
         compose.onAllNodesWithContentDescription("Track actions").onFirst().performClick()
         compose.onNodeWithText("Play next").performClick()
@@ -424,6 +433,9 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Back 30 seconds").assertExists()
         compose.onNodeWithText("Mark played").performClick()
         compose.onNodeWithText("Marked played · Designing for Interruption").assertExists()
+        compose.onNodeWithText("Played").performClick()
+        compose.onNodeWithText("Marked unplayed · Designing for Interruption").assertExists()
+        compose.onNodeWithText("0:00").assertExists()
         compose.onNodeWithContentDescription("Back").performClick()
 
         compose.onNodeWithText("Audiobooks").performClick()
