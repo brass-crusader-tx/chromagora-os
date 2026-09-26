@@ -2,7 +2,7 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "63d7b1f201b7873a65058150bde364375ab80bd8",
+  "source_head": "da4753aa005e6486d8379c78b09ac1e6ac6a2437",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
@@ -186,7 +186,7 @@
     },
     {
       "path": "ui-shell/tools/generate_tsunami_sans.py",
-      "git_blob_sha": "40647ffaebca8de8e8b24baddd4346cfb79166e2",
+      "git_blob_sha": "43ae1290ae3063a717cddb0272080dc0c27d3b7f",
       "bytes": 24366
     },
     {
@@ -306,5 +306,6 @@
     "private_head": "63d7b1f201b7873a65058150bde364375ab80bd8",
     "reason": "exact-head retry after source-binding and contrast fixes; require app + AndroidTest APK, 38 Compose tests, 45-state device matrix, Android TSUNAMI Sans v5.1 review, crash scan, and Chromagora portal publication",
     "sequence": 6
-  }
+  },
+  "generated_at_utc": "2026-09-26T21:12:00Z"
 }
