@@ -26,8 +26,8 @@ import com.tsunami.shell.theme.*
 
     val resumeTracks=remember(state.currentTrack?.id,state.fixture.tracks){
         buildList {
-            state.currentTrack?.let(::add)
-            state.fixture.tracks.filterNot{it.id==state.currentTrack?.id}.take(2).forEach(::add)
+            state.currentTrack?.let{add(it)}
+            state.fixture.tracks.filterNot{it.id==state.currentTrack?.id}.take(2).forEach{add(it)}
         }
     }
     val resumeIds=resumeTracks.map{it.id}.toSet()
