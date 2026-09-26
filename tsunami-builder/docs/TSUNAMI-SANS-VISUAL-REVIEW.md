@@ -1,6 +1,6 @@
 # TSUNAMI Sans — visual review log
 
-## 2026-09-25 · v4.8 current source
+## 2026-09-26 · v4.8 current source
 
 The checked-in generator is now **TSUNAMI Sans v4.8**. This supersedes the v4.5 proof pass recorded below. Subsequent type-specific revisions deliberately changed construction rather than merely changing metadata: the C/G aperture model was reopened as weight increases, cap/x-height optical overshoot was made explicit, and the difficult geometric control pairs retained separate constructions instead of collapsing toward mathematical circles or uniform stroke expansion.
 
@@ -21,15 +21,21 @@ Current canonical generator facts, cross-checked against the build gate:
 
 | Master | Weight | SHA-256 |
 |---|---:|---|
-| Light | 300 | `41c1ba2f9e4cd988b5892e08ae76eab7d2ce40fc00d9a89e7135591ae6822f54` |
-| Regular | 400 | `35fc1529ae8d3de472a5531321e1e319d0dd3b6c502e095120f346d950ef71fc` |
-| Medium | 500 | `cf4ff17d02dfc3992689d3567defba11e3a1b997fec4e4b97523bc5a59a403a5` |
-| Semibold | 600 | `cf142704507b95488dc53c1fa66ad7c62ba4a40dcfd4e228fe67f4fc340f56f1` |
-| Bold | 700 | `17d5046a74b5b38a63378093a883cdedcb2b2baee0cc32023411bd79bdac64b4` |
+| Light | 300 | `845348eb5eed0a11551122e11f882c4f1c04b2f002c6651cb659f2e00dfc78e3` |
+| Regular | 400 | `036bdedd69bc1565d140faec9cb17d3c27d55cef5e435c8d89068943953711a8` |
+| Medium | 500 | `47b778217bc8f55f2777080454c3236571e16961caef708cbe967d98d322b3d7` |
+| Semibold | 600 | `812a1cf08101cc1abd5f29c6094ab2f6117e93a3d3471c31da298eaa48175a5d` |
+| Bold | 700 | `f7c0197e54b1c352469fac1e54baf9518453eab106ee09111d5ae183c4ae8013` |
 
-The canonical host and CI gates pin those five font-file hashes. Proof PNGs are intentionally treated as regenerated review artifacts rather than canonical binary source, so this document no longer assigns current v4.8 truth to the older v4.5 bitmap hashes below.
+The canonical v4.8 manifest pins both the five generated master hashes **and** the two proof-image hashes/byte sizes against generator blob `1759a3ee680ef51d914d507d3ee2e93ec371f82f`. During the 2026-09-26 Mac acceptance pass, the preceding manifest was found not to reproduce from that current source. Fresh executions with the pinned FontTools 4.63.0 / Shapely 2.1.2 / Pillow 12.3.0 toolchain produced byte-identical outputs under Python 3.12.14, 3.13.12 and 3.14.7 on macOS 15.7.5 x86_64. The current five masters are 102868 / 105204 / 106020 / 107108 / 106912 bytes and the proofs are:
+- `tsunami-sans-proof.png` — 159128 bytes, SHA-256 `4b64248e1243a22997819d4e9a13671320ca55b51a46b2cd3b2d1c85b2212e88`
+- `tsunami-sans-ui-proof.png` — 70419 bytes, SHA-256 `14a9002e5021c48368c104680249bb0a7df8816e30fba4fec9af608cbd757986`
 
-**Acceptance boundary remains unchanged:** desktop/Pillow proofing validates construction and obvious raster defects, but final type acceptance still requires the current v4.8 masters to be rendered by Android on the same current-head shell and inspected at the actual UI sizes. That device-renderer review has not yet executed because the Android runner is still blocked before job allocation.
+This is a canonical **Mac-host** byte contract. Cross-platform byte identity is not asserted without executed Linux evidence; the Codespaces diagnostic could not run because the account had exhausted its Codespaces usage/budget.
+
+The canonical Android gate and host build now read `docs/TSUNAMI-SANS-v4.8-MANIFEST.json` instead of duplicating stale hash literals; source verification rejects any pipeline that ceases to bind to that manifest.
+
+**Acceptance boundary remains unchanged:** desktop/Pillow proofing validates construction and obvious raster defects, but final type acceptance still requires the current v4.8 masters to be rendered by Android on the exact current-head shell and inspected at actual UI sizes. The Mac Android runner is available; the final current-head rebuild/device pass is required after this manifest reconciliation.
 
 ## 2026-09-25 · v4.5 historical proof pass
 The v4.4 generator was executed independently from the Android build graph and both emitted specimens were inspected at full resolution. That pass removed the early malformed forms, but a second inspection at UI scale still exposed three weaknesses: Regular/Medium were too anaemic for small Android labels, the lowercase `e` aperture remained too occluded, and `t` retained a gratuitous foot that read as calligraphic rather than geometric.
@@ -60,4 +66,6 @@ The current expanded specimens remain generated artifacts rather than checked-in
 - `ui-shell/tools/proofs/tsunami-sans-proof.png` — 1700×1510, SHA-256 `868a874159173f21009ca250a0523c6f6f0c4c66678c883bc57a8aa51ca7aaf6`
 - `ui-shell/tools/proofs/tsunami-sans-ui-proof.png` — 1280×1260, SHA-256 `b76b2792f0038471e58739e1e2464a6c3f7ba156c4448e020d91a56bcf5de5fa`
 
-The generator source used for this review was independently reconstructed from the connected repository and verified byte-for-byte with Git blob id `954b6b614e70a18b4d08dc5518725f277e9788dd` before execution. The five TTFs reproduced the canonical hashes above exactly. The main proof also reproduced its recorded hash exactly; the UI-size PNG was regenerated as `b76b2792…`, superseding the stale hash previously recorded for that bitmap. Font-file hashes, rather than raster-proof PNG hashes, are now pinned by the canonical host and CI gates.\n\nThese expanded v4.5 desktop/Pillow proofs have been inspected directly and are materially more coherent at small and intermediate sizes than the prior pass. The expanded specimens include body copy, all-caps labels, deliberately long metadata, song/artist hierarchy, numerals/timestamps, punctuation, accented text and mixed weights. Android renderer inspection remains mandatory before final type acceptance; the desktop proof is necessary evidence, not a substitute for device rendering.
+The generator source used for this review was independently reconstructed from the connected repository and verified byte-for-byte with Git blob id `954b6b614e70a18b4d08dc5518725f277e9788dd` before execution. The five TTFs reproduced the canonical hashes above exactly. The main proof also reproduced its recorded hash exactly; the UI-size PNG was regenerated as `b76b2792…`, superseding the stale hash previously recorded for that bitmap. Font-file hashes, rather than raster-proof PNG hashes, are now pinned by the canonical host and CI gates.
+
+These expanded v4.5 desktop/Pillow proofs have been inspected directly and are materially more coherent at small and intermediate sizes than the prior pass. The expanded specimens include body copy, all-caps labels, deliberately long metadata, song/artist hierarchy, numerals/timestamps, punctuation, accented text and mixed weights. Android renderer inspection remains mandatory before final type acceptance; the desktop proof is necessary evidence, not a substitute for device rendering.
