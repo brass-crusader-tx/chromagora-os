@@ -152,4 +152,4 @@ jobs:
             tsunami-builder/MIRROR-MANIFEST.json
           if-no-files-found: warn
 
-# current-head retry 2026-09-26 source=46fd4b61915936187521a3e0c5f542505b315c48 type=v5.1
+# current-head retry 2026-09-26 source=63d7b1f201b7873a65058150bde364375ab80bd8 type=v5.1 exact-private
