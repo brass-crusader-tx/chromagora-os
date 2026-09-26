@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -63,7 +64,20 @@ import com.tsunami.shell.theme.*
             Text("CONNECTED SOURCE DEGRADED · local and indexed results remain available",style=Type.micro.copy(color=p.possession,fontWeight=FontWeight.SemiBold),modifier=Modifier.padding(vertical=8.dp))
             Rule()
         }
-        if(q.isEmpty() && state.searchIntent==null && state.searchKind==SearchKind.ALL){
+        if(state.searchFault){
+            Spacer(Modifier.height(28.dp))
+            Text("Search source unavailable",style=Type.title.copy(color=p.ink))
+            Spacer(Modifier.height(8.dp))
+            Text("Your indexed library is intact. Connected search failed before results could be resolved.",style=Type.body.copy(color=p.ink2))
+            Spacer(Modifier.height(16.dp))
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+                TextCommand("Retry",{state.retrySearch()})
+                TextCommand("Owned only",{state.searchFault=false;state.searchOwnedOnly=true})
+            }
+            Spacer(Modifier.height(18.dp))
+            Rule()
+            Text("No query or selection was discarded.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
+        }else if(q.isEmpty() && state.searchIntent==null && state.searchKind==SearchKind.ALL){
             SectionHeader("Start with intent")
             listOf(
                 Triple(SearchIntent.UNFINISHED,"Resume something unfinished","history · longform"),
@@ -99,7 +113,7 @@ import com.tsunami.shell.theme.*
                 Text("${rows.size} results",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=10.dp).weight(1f))
                 state.searchIntent?.let{intent->TextCommand(when(intent){SearchIntent.UNFINISHED->"Unfinished";SearchIntent.DOWNLOADED->"Downloaded";SearchIntent.CATALOGUE->"Catalogue";SearchIntent.ARTISTS->"Artists"},{state.clearSearchIntent()},true)}
             };Rule()
-            LazyColumn(Modifier.weight(1f)){
+            LazyColumn(Modifier.weight(1f).testTag("find-results-list")){
                 val local=rows.filter{it.provenance!=Provenance.CATALOGUE}; if(local.isNotEmpty()){item{SectionHeader("Library")};local.forEach{t->item(t.id){TrackLedgerRow(t,when(state.searchKind){SearchKind.ALBUMS->"ALBUM MATCH · ${t.album}";SearchKind.ARTISTS->"ARTIST MATCH · ${t.artist}";SearchKind.FOLDERS->"FOLDER MATCH · ${folderFor(t)}";SearchKind.LONGFORM->"LONGFORM";else->if(t.provenance==Provenance.OWNED)"OWNED" else "CONNECTED LIBRARY"},{
                     when(state.searchKind){
                         SearchKind.ALBUMS -> state.findFocusedObject=LibraryObject(t.album,"Album","${t.artist} · ${results.count{it.album==t.album}} tracks")
