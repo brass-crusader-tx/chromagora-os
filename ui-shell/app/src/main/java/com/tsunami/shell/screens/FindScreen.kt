@@ -78,11 +78,11 @@ import com.tsunami.shell.theme.*
             Rule()
             Text("No query or selection was discarded.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
         }else if(q.isEmpty() && state.searchIntent==null && state.searchKind==SearchKind.ALL){
-            SectionHeader("Start with intent")
+            SectionHeader("Start with a task")
             listOf(
                 Triple(SearchIntent.UNFINISHED,"Resume something unfinished","history · longform"),
                 Triple(SearchIntent.DOWNLOADED,"Find downloaded music","offline · owned"),
-                Triple(SearchIntent.CATALOGUE,"Browse connected catalogue","catalogue · explicit provenance"),
+                Triple(SearchIntent.CATALOGUE,"Browse connected catalogue","catalogue · source shown"),
                 Triple(SearchIntent.ARTISTS,"Jump to an artist","library index")
             ).forEach{(intent,label,detail)->
                 val enabled=!(state.offlineMode && intent==SearchIntent.CATALOGUE)
@@ -133,7 +133,7 @@ import com.tsunami.shell.theme.*
                         else -> state.banner="Opened catalogue release"
                     }
                 },{state.selectTrack(t,true)},{state.toggleFavourite(t.id)},{state.toggleDownload(t.id)},compact=true,onPlayNext={state.playNext(t)},onShuffleNext={state.shuffleNext(t)},onAddToPlaylist={state.addToPlaylist(t)},downloadState=state.downloads[t.id]?:DownloadState.REMOTE)}}}
-                if(rows.isEmpty())item{Spacer(Modifier.height(28.dp));Text("Nothing matched. Try fewer terms or switch provenance scope.",style=Type.body.copy(color=p.ink2))}
+                if(rows.isEmpty())item{Spacer(Modifier.height(28.dp));Text("Nothing matched. Try fewer terms or another source.",style=Type.body.copy(color=p.ink2))}
             }
         }
     }
@@ -168,7 +168,7 @@ import com.tsunami.shell.theme.*
         Rule()
         SectionHeader("Matches")
         if(contents.isEmpty()){
-            Text("This connected object has no local tracks. Its provenance remains explicit until playback resolves it.",style=Type.body.copy(color=p.ink2),modifier=Modifier.padding(vertical=18.dp))
+            Text("This connected object has no local tracks. Its source stays identified until playback starts.",style=Type.body.copy(color=p.ink2),modifier=Modifier.padding(vertical=18.dp))
         }else{
             LazyColumn(Modifier.weight(1f)){
                 contents.forEach{t->item(t.id){
