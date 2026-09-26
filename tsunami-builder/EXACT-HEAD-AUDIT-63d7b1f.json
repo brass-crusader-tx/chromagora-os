@@ -52,7 +52,9 @@
       "job_id": 108483505519,
       "status": "completed",
       "conclusion": "failure",
-      "classification": "pre-step runner/infrastructure failure"
+      "classification": "pre-step runner/infrastructure failure",
+      "steps_materialized": false,
+      "logs_materialized": false
     },
     "self_hosted": {
       "run_id": 36270369063,
