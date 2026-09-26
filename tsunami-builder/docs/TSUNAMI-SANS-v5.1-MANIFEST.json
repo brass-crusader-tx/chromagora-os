@@ -1,0 +1,54 @@
+{
+  "family": "TSUNAMI Sans",
+  "version": "5.100",
+  "generated_from": "ui-shell/tools/generate_tsunami_sans.py",
+  "proof_status": "Generated twice from the exact branch generator with pinned fontTools/Shapely/Pillow and visually inspected on 2026-09-26",
+  "weights": {
+    "Light": {
+      "bytes": 103600,
+      "sha256": "43980be643894110df96e021df0ed18d71317e0877a8e5d4efd9d190c3a4979a"
+    },
+    "Regular": {
+      "bytes": 106172,
+      "sha256": "995c2ee2799203e4a30ce1f2b2cb300b6f5838595f02765aa8890ff7f4adc0f9"
+    },
+    "Medium": {
+      "bytes": 107168,
+      "sha256": "75e5b6b9703ef5395b534256cd494e2fa59b2e25f824ebee7dbd8af5a8cd5ac6"
+    },
+    "Semibold": {
+      "bytes": 107784,
+      "sha256": "a5f2f2ce832a436daf9f984b97df90f181bea4bf6b6d47001edd4df9b8a561b6"
+    },
+    "Bold": {
+      "bytes": 107200,
+      "sha256": "1fd9d193b12672d17267dea686eca88e2e490c2c949d74bf9f75a04c463b3f67"
+    }
+  },
+  "proofs": {
+    "tsunami-sans-proof.png": {
+      "bytes": 164201,
+      "sha256": "99b9cd461eaeb1518afb4eaa63e8e9913c052d07de99dfa6527ed61e686cb789"
+    },
+    "tsunami-sans-ui-proof.png": {
+      "bytes": 74390,
+      "sha256": "31ebdae4e3fe5228e070c43af148bb9cf6a2cdce76ca759ac511eccd10d91c4c"
+    }
+  },
+  "validated": {
+    "family_metadata": "TSUNAMI Sans",
+    "weight_classes": [300, 400, 500, 600, 700],
+    "glyph_count_per_master": 176,
+    "required_ui_glyph_coverage": true,
+    "western_european_ui_coverage": true,
+    "gpos_kerning": true,
+    "control_pairs": ["I/l/1", "O/0", "rn/m", "c/e", "v/y"]
+  },
+  "generator_blob_sha1": "40647ffaebca8de8e8b24baddd4346cfb79166e2",
+  "byte_reproducibility_scope": "Exact branch generator reproduced twice in the isolated verification environment with identical outputs; canonical Android-host verification remains part of ui_shell_gate.py",
+  "toolchain": {
+    "fonttools": "4.63.0",
+    "shapely": "2.1.2",
+    "pillow": "12.3.0"
+  }
+}

@@ -1,41 +1,41 @@
 # TSUNAMI Sans — visual review log
 
-## 2026-09-26 · v4.8 current source
+## 2026-09-26 · v5.1 current source
 
-The checked-in generator is now **TSUNAMI Sans v4.8**. This supersedes the v4.5 proof pass recorded below. Subsequent type-specific revisions deliberately changed construction rather than merely changing metadata: the C/G aperture model was reopened as weight increases, cap/x-height optical overshoot was made explicit, and the difficult geometric control pairs retained separate constructions instead of collapsing toward mathematical circles or uniform stroke expansion.
+The checked-in generator is now **TSUNAMI Sans v5.1**. This pass is a construction revision, not a metadata bump. The exact branch generator was reconstructed byte-for-byte from Git blob `40647ffaebca8de8e8b24baddd4346cfb79166e2`, executed twice with FontTools 4.63.0 / Shapely 2.1.2 / Pillow 12.3.0, and both executions emitted byte-identical masters and proofs. The resulting proof sheets were inspected directly before the canonical manifest was advanced.
 
-Current canonical generator facts, cross-checked against the build gate:
+The v5.1 revision specifically addresses the remaining UI-scale weaknesses in the prior proof: `S/s` uses a smoother asymmetric double-curve rather than two near-circular lobes; lowercase `e` retains more bowl while carrying a full-weight horizontal bar; `g` has a simpler descender hook; `r` has a shorter shoulder; `t` regains a restrained geometric foot so its baseline silhouette does not collapse into `l`; zero retains a subtler diagonal distinction from capital O; and side bearings are slightly widened to recover word rhythm as workhorse weights become firmer.
+
+Current canonical generator facts:
 
 - family: **TSUNAMI Sans**
-- version metadata: **Version 4.800**
+- version metadata: **Version 5.100**
 - masters: Light 300 / Regular 400 / Medium 500 / Semibold 600 / Bold 700
-- stem targets: 42 / 68 / 86 / 102 / 120
-- cap height / x-height: 710 / 500, with explicit cap and x-height overshoot
-- fixed OpenType timestamp for byte-reproducible masters
-- Western-European and operational-symbol coverage
+- construction stem targets: 44 / 70 / 90 / 108 / 128
+- cap height / x-height: 710 / 500 with explicit overshoot
+- fixed OpenType timestamp for deterministic binaries
+- 176 glyphs per master with Western-European and operational-symbol coverage
 - GPOS kerning
-- ambiguity checks for the UI control pairs (I/l/1, O/0, rn/m, S/s, G/C, e/c)
-- Android build gates regenerate the fonts and reject metadata, coverage, ambiguity, kerning or canonical-hash drift
+- ambiguity checks for I/l/1, O/0, rn/m, c/e and v/y
+- Android/build gates regenerate the family and reject metadata, coverage, kerning, hash, byte-size or proof drift
 
-### Canonical v4.8 master hashes
+### Canonical v5.1 master hashes
 
-| Master | Weight | SHA-256 |
-|---|---:|---|
-| Light | 300 | `845348eb5eed0a11551122e11f882c4f1c04b2f002c6651cb659f2e00dfc78e3` |
-| Regular | 400 | `036bdedd69bc1565d140faec9cb17d3c27d55cef5e435c8d89068943953711a8` |
-| Medium | 500 | `47b778217bc8f55f2777080454c3236571e16961caef708cbe967d98d322b3d7` |
-| Semibold | 600 | `812a1cf08101cc1abd5f29c6094ab2f6117e93a3d3471c31da298eaa48175a5d` |
-| Bold | 700 | `f7c0197e54b1c352469fac1e54baf9518453eab106ee09111d5ae183c4ae8013` |
+| Master | Weight | Bytes | SHA-256 |
+|---|---:|---:|---|
+| Light | 300 | 103600 | `43980be643894110df96e021df0ed18d71317e0877a8e5d4efd9d190c3a4979a` |
+| Regular | 400 | 106172 | `995c2ee2799203e4a30ce1f2b2cb300b6f5838595f02765aa8890ff7f4adc0f9` |
+| Medium | 500 | 107168 | `75e5b6b9703ef5395b534256cd494e2fa59b2e25f824ebee7dbd8af5a8cd5ac6` |
+| Semibold | 600 | 107784 | `a5f2f2ce832a436daf9f984b97df90f181bea4bf6b6d47001edd4df9b8a561b6` |
+| Bold | 700 | 107200 | `1fd9d193b12672d17267dea686eca88e2e490c2c949d74bf9f75a04c463b3f67` |
 
-The canonical v4.8 manifest pins both the five generated master hashes **and** the two proof-image hashes/byte sizes against generator blob `1759a3ee680ef51d914d507d3ee2e93ec371f82f`. During the 2026-09-26 Mac acceptance pass, the preceding manifest was found not to reproduce from that current source. Fresh executions with the pinned FontTools 4.63.0 / Shapely 2.1.2 / Pillow 12.3.0 toolchain produced byte-identical outputs under Python 3.12.14, 3.13.12 and 3.14.7 on macOS 15.7.5 x86_64. The current five masters are 102868 / 105204 / 106020 / 107108 / 106912 bytes and the proofs are:
-- `tsunami-sans-proof.png` — 159128 bytes, SHA-256 `4b64248e1243a22997819d4e9a13671320ca55b51a46b2cd3b2d1c85b2212e88`
-- `tsunami-sans-ui-proof.png` — 70419 bytes, SHA-256 `14a9002e5021c48368c104680249bb0a7df8816e30fba4fec9af608cbd757986`
+The proof artifacts are likewise pinned:
+- `tsunami-sans-proof.png` — 164201 bytes, SHA-256 `99b9cd461eaeb1518afb4eaa63e8e9913c052d07de99dfa6527ed61e686cb789`
+- `tsunami-sans-ui-proof.png` — 74390 bytes, SHA-256 `31ebdae4e3fe5228e070c43af148bb9cf6a2cdce76ca759ac511eccd10d91c4c`
 
-This is a canonical **Mac-host** byte contract. Cross-platform byte identity is not asserted without executed Linux evidence; the Codespaces diagnostic could not run because the account had exhausted its Codespaces usage/budget.
+The canonical contract is now `docs/TSUNAMI-SANS-v5.1-MANIFEST.json`. `tools/ui_shell_gate.py`, `ui-shell/tools/source_verify.py`, and `ui-shell/tools/build_host.sh` bind to that single manifest rather than duplicating hash tables.
 
-The canonical Android gate and host build now read `docs/TSUNAMI-SANS-v4.8-MANIFEST.json` instead of duplicating stale hash literals; source verification rejects any pipeline that ceases to bind to that manifest.
-
-**Acceptance boundary remains unchanged:** desktop/Pillow proofing validates construction and obvious raster defects, but final type acceptance still requires the current v4.8 masters to be rendered by Android on the exact current-head shell and inspected at actual UI sizes. The Mac Android runner is available; the final current-head rebuild/device pass is required after this manifest reconciliation.
+The desktop/Pillow proof is materially useful because it exposes construction and UI-scale raster defects; it is not the final renderer. **Final type acceptance still requires v5.1 to render in the exact-current-head Android shell and survive the mandatory device screenshots, large-font states, no-artwork state, monochrome review and human visual pass.**
 
 ## 2026-09-25 · v4.5 historical proof pass
 The v4.4 generator was executed independently from the Android build graph and both emitted specimens were inspected at full resolution. That pass removed the early malformed forms, but a second inspection at UI scale still exposed three weaknesses: Regular/Medium were too anaemic for small Android labels, the lowercase `e` aperture remained too occluded, and `t` retained a gratuitous foot that read as calligraphic rather than geometric.

@@ -108,15 +108,15 @@ for p in fonts:
         family=next(n.toUnicode() for n in f['name'].names if n.nameID==1)
         version=next(n.toUnicode() for n in f['name'].names if n.nameID==5)
         assert family=='TSUNAMI Sans', (p,family)
-        assert version=='Version 4.800', (p,version)
+        assert version=='Version 5.100', (p,version)
         weights.add(int(f['OS/2'].usWeightClass))
         assert 'GPOS' in f, f"{p}: missing GPOS"
     finally:
         f.close()
 assert weights=={300,400,500,600,700}, weights
 import hashlib, json
-manifest=json.loads(Path('../docs/TSUNAMI-SANS-v4.8-MANIFEST.json').read_text(encoding='utf-8'))
-assert manifest['family']=='TSUNAMI Sans' and manifest['version']=='4.800', manifest
+manifest=json.loads(Path('../docs/TSUNAMI-SANS-v5.1-MANIFEST.json').read_text(encoding='utf-8'))
+assert manifest['family']=='TSUNAMI Sans' and manifest['version']=='5.100', manifest
 expected={
     f"tsunami_sans_{name.lower()}.ttf": manifest['weights'][name]['sha256']
     for name in ('Light','Regular','Medium','Semibold','Bold')
@@ -135,14 +135,14 @@ print("FONT_GENERATION=PASS")
 print("FONT_CANONICAL_MANIFEST=PASS")
 PY
 
-FONT_DIST="$DIST/TSUNAMI-Sans-v4.8"
+FONT_DIST="$DIST/TSUNAMI-Sans-v5.1"
 rm -rf "$FONT_DIST"
 mkdir -p "$FONT_DIST"
 cp app/src/main/res/font/tsunami_sans_*.ttf "$FONT_DIST/"
 cp tools/proofs/tsunami-sans-proof.png tools/proofs/tsunami-sans-ui-proof.png "$FONT_DIST/"
 cp "$REPO_ROOT/brand/tsunami-mark.svg" "$REPO_ROOT/brand/tsunami-mark-inverse.svg" "$FONT_DIST/"
 {
-  echo "TSUNAMI Sans v4.8"
+  echo "TSUNAMI Sans v5.1"
   echo "Generated from ui-shell/tools/generate_tsunami_sans.py"
   echo "Family: TSUNAMI Sans"
   echo "Weights: 300 400 500 600 700"

@@ -131,7 +131,12 @@ def snapshot() -> Path:
             p.startswith("ui-shell/")
             or p.startswith("brand/")
             or p.startswith("docs/TSUNAMI-UI-GENESIS-")
-            or p in {"tools/ui_shell_gate.py", "tools/ui_shell_static_check.py"}
+            or p in {
+                "docs/TSUNAMI-SANS-v5.1-MANIFEST.json",
+                "docs/TSUNAMI-SANS-VISUAL-REVIEW.md",
+                "tools/ui_shell_gate.py",
+                "tools/ui_shell_static_check.py",
+            }
         )
     ]
     if not wanted:

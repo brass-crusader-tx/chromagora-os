@@ -413,15 +413,15 @@ def main() -> int:
         die(f"interaction/test surface unexpectedly collapsed: {collapsed}; current={counts}")
 
     font_src = FONT_GEN.read_text(encoding="utf-8")
-    for anchor in ("TSUNAMI Sans", "WEIGHTS=[('Light',300", "'Bold',700", "addOpenTypeFeaturesFromString", "Version 4.800", "FONT_TIMESTAMP=3873139200"):
+    for anchor in ("TSUNAMI Sans", "WEIGHTS=[('Light',300", "'Bold',700", "addOpenTypeFeaturesFromString", "Version 5.100", "FONT_TIMESTAMP=3873139200"):
         if anchor not in font_src:
             die(f"font generator missing anchor: {anchor}")
-    font_manifest = UI.parent / "docs/TSUNAMI-SANS-v4.8-MANIFEST.json"
+    font_manifest = UI.parent / "docs/TSUNAMI-SANS-v5.1-MANIFEST.json"
     if not font_manifest.is_file():
-        die("canonical TSUNAMI Sans v4.8 manifest is missing")
+        die("canonical TSUNAMI Sans v5.1 manifest is missing")
     import json
     manifest = json.loads(font_manifest.read_text(encoding="utf-8"))
-    if manifest.get("family") != "TSUNAMI Sans" or manifest.get("version") != "4.800":
+    if manifest.get("family") != "TSUNAMI Sans" or manifest.get("version") != "5.100":
         die(f"font manifest identity drift: {manifest.get('family')!r} {manifest.get('version')!r}")
     if set(manifest.get("weights", {})) != {"Light","Regular","Medium","Semibold","Bold"}:
         die("font manifest must enumerate exactly five static masters")
@@ -445,8 +445,8 @@ def main() -> int:
         die("host build must resolve Gradle through the checksum-verified bootstrap")
     root_gate=(UI.parent / "tools/ui_shell_gate.py").read_text(encoding="utf-8")
     for contract_name, contract_source in (("host build",host_build),("root gate",root_gate)):
-        if "TSUNAMI-SANS-v4.8-MANIFEST.json" not in contract_source:
-            die(f"{contract_name} must bind generated fonts to the canonical v4.8 manifest")
+        if "TSUNAMI-SANS-v5.1-MANIFEST.json" not in contract_source:
+            die(f"{contract_name} must bind generated fonts to the canonical v5.1 manifest")
     if "OK (38 tests)" not in host_build or "OK (38 tests)" not in root_gate:
         die("Android acceptance paths must require the full 38-test instrumentation suite")
     for anchor in (

@@ -1,6 +1,17 @@
 name: TSUNAMI UI Genesis Self Hosted
 
 on:
+  push:
+    branches:
+      - genesis/ui-shell-20260923
+    paths:
+      - ".github/workflows/ui-shell-genesis-selfhosted.yml"
+      - "ui-shell/**"
+      - "brand/**"
+      - "docs/TSUNAMI-SANS-*.json"
+      - "docs/TSUNAMI-SANS-*.md"
+      - "docs/TSUNAMI-UI-GENESIS-*.md"
+      - "tools/ui_shell_*.py"
   workflow_dispatch:
 
 concurrency:
@@ -93,7 +104,7 @@ jobs:
           path: |
             dist/TSUNAMI-UI-Genesis-debug.apk
             dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
-            dist/TSUNAMI-Sans-v4.8/
+            dist/TSUNAMI-Sans-v5.1/
             build/reports/tsunami/ui-shell/host/
             ui-shell/tools/proofs/
           if-no-files-found: warn

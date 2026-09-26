@@ -11,7 +11,7 @@ A backend-free Android experiential prototype for the TSUNAMI product genesis. T
 - `components/` reusable authored primitives; no stock Material component surface defines the visual language
 - `navigation/` responsive Index + Listening Spine architecture
 - `screens/` listening, library, find, signal, settings and expanded listening environments
-- `tools/generate_tsunami_sans.py` procedural TSUNAMI Sans v4.8 source/generator: five weight-specific geometric masters with explicit screen-legibility control glyphs
+- `tools/generate_tsunami_sans.py` procedural TSUNAMI Sans v5.1 source/generator: five weight-specific geometric masters with explicit screen-legibility control glyphs
 - `tools/source_verify.py` static architecture/back-end isolation/interaction contract
 - `tools/accessibility_verify.py` WCAG text-contrast and 48/56dp authored-control target gate
 - `tools/build_host.sh` reproducible host build entry point; optionally installs the isolated package

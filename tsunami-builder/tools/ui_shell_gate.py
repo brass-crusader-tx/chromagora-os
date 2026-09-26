@@ -23,14 +23,14 @@ ROOT = Path(__file__).resolve().parents[1]
 UI = ROOT / "ui-shell"
 REPORT = ROOT / "build" / "reports" / "tsunami" / "ui-shell"
 JVM_STATE_STATUS = "NOT_RUN"
-FONT_MANIFEST = ROOT / "docs" / "TSUNAMI-SANS-v4.8-MANIFEST.json"
+FONT_MANIFEST = ROOT / "docs" / "TSUNAMI-SANS-v5.1-MANIFEST.json"
 
 
 def load_font_manifest() -> dict:
     if not FONT_MANIFEST.is_file():
         raise RuntimeError(f"canonical TSUNAMI Sans manifest missing: {FONT_MANIFEST}")
     data = json.loads(FONT_MANIFEST.read_text(encoding="utf-8"))
-    if data.get("family") != "TSUNAMI Sans" or data.get("version") != "4.800":
+    if data.get("family") != "TSUNAMI Sans" or data.get("version") != "5.100":
         raise RuntimeError(f"unexpected TSUNAMI Sans manifest identity: {data.get('family')!r} {data.get('version')!r}")
     return data
 
@@ -240,7 +240,7 @@ def generate_and_build() -> Path:
             names=font["name"]
             family=next((n.toUnicode() for n in names.names if n.nameID==1), None)
             version=next((n.toUnicode() for n in names.names if n.nameID==5), None)
-            if family != "TSUNAMI Sans" or version != "Version 4.800":
+            if family != "TSUNAMI Sans" or version != "Version 5.100":
                 raise RuntimeError(f"{font_path.name} has inconsistent family/version metadata: {family!r} {version!r}")
             glyph_map={cp:g for table in font["cmap"].tables for cp,g in table.cmap.items()}
             glyf=font["glyf"]
