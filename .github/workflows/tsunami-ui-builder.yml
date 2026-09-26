@@ -72,10 +72,10 @@ jobs:
           path: |
             tsunami-builder/dist/TSUNAMI-UI-Genesis-debug.apk
             tsunami-builder/dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
-            tsunami-builder/dist/TSUNAMI-Sans-v4.8/
+            tsunami-builder/dist/TSUNAMI-Sans-v5.1/
             tsunami-builder/build/reports/tsunami/ui-shell/host/
             tsunami-builder/ui-shell/tools/proofs/
             tsunami-builder/MIRROR-MANIFEST.json
           if-no-files-found: error
 
-# current-head retry 2026-09-26 source=59df4c30c28da90bb2fce0975cb79756336f3f28 runner=ubuntu-24.04
+# current-head retry 2026-09-26 source=46fd4b61915936187521a3e0c5f542505b315c48 type=v5.1
