@@ -55,11 +55,20 @@ def main()->int:
         missing=[role for role in text_roles if role not in p]
         if missing:
             raise SystemExit(f"ACCESSIBILITY_VERIFY_FAIL {name} missing roles {missing}")
-        ratios={role:contrast(p["ground"],p[role]) for role in text_roles}
-        failed={role:ratio for role,ratio in ratios.items() if ratio<4.5}
+        backgrounds=("ground","groundAlt")
+        ratios={bg:{role:contrast(p[bg],p[role]) for role in text_roles} for bg in backgrounds}
+        failed={
+            f"{bg}/{role}":ratio
+            for bg in backgrounds
+            for role,ratio in ratios[bg].items()
+            if ratio<4.5
+        }
         if failed:
             raise SystemExit(f"ACCESSIBILITY_VERIFY_FAIL {name} contrast {failed}")
-        print(name+" "+" ".join(f"{role}={ratios[role]:.2f}:1" for role in text_roles))
+        print(name+" "+" ".join(
+            f"{bg}/{role}={ratios[bg][role]:.2f}:1"
+            for bg in backgrounds for role in text_roles
+        ))
     for anchor in ("LocalControlTarget=staticCompositionLocalOf<Dp> { 48.dp }","if(largeControls) 56.dp else 48.dp"):
         if anchor not in src:
             raise SystemExit(f"ACCESSIBILITY_VERIFY_FAIL missing touch-target anchor: {anchor}")
@@ -156,7 +165,7 @@ def main()->int:
         raise SystemExit("ACCESSIBILITY_VERIFY_FAIL clickable surfaces without visible focus: "+", ".join(focus_gaps))
     print("ACCESSIBILITY_DIRECT_CLICKABLE_FOCUS=PASS")
     print("ACCESSIBILITY_SEMANTICS=PASS tabs buttons switches seek disabled-state labels visible-focus navigation-ledgers-settings-listening-header-download-actions-banner-spine-transport")
-    print("ACCESSIBILITY_VERIFY=PASS text_contrast>=4.5 touch_targets=48/56dp")
+    print("ACCESSIBILITY_VERIFY=PASS text_contrast>=4.5_on_ground_and_groundAlt touch_targets=48/56dp")
     return 0
 
 if __name__=="__main__":
