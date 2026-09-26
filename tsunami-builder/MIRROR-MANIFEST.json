@@ -7,7 +7,7 @@
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 16,
-  "note": "Every listed build-critical blob is byte-identical to private Genesis source head c6bab4dfa1d3c0315287bfd56b7b8a47d5f578bc. The mirror includes the canonical TSUNAMI Sans v5.1 manifest and root verification gates required by source_verify.py. Production CI/root ignore policy remain byte-identical to main and are deliberately outside the Genesis payload. Build/device PASS remains contingent on executable Android verification.",
+  "note": "Every listed build-critical blob is byte-identical to private Genesis source head e7856d9c488071fa541298ecb9ab95f48175280e. The mirror includes the canonical TSUNAMI Sans v5.1 manifest and root verification gates required by source_verify.py. Production CI/root ignore policy remain byte-identical to main and are deliberately outside the Genesis payload. Build/device PASS remains contingent on executable Android verification.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -299,11 +299,11 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "c6bab4dfa1d3c0315287bfd56b7b8a47d5f578bc"
+    "source_head": "e7856d9c488071fa541298ecb9ab95f48175280e"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-26T18:38:00Z",
-    "private_head": "c6bab4dfa1d3c0315287bfd56b7b8a47d5f578bc",
-    "reason": "ACM exact-head rebind after isolating generated-artifact ignore policy inside ui-shell; request APK + AndroidTest + 38-test instrumentation + 45-state device acceptance + portal publication"
+    "requested_at_utc": "2026-09-26T19:36:00Z",
+    "private_head": "e7856d9c488071fa541298ecb9ab95f48175280e",
+    "reason": "ACM exact-head rebind after restoring canonical TSUNAMI Sans v5.1 and reconciling Listen copy/source gates; request APK + AndroidTest + 38-test instrumentation + 45-state device acceptance + portal publication"
   }
 }
