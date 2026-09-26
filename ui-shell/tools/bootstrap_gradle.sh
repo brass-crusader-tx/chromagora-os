@@ -9,6 +9,13 @@ ZIP="$CACHE_ROOT/gradle-$GRADLE_VERSION-bin.zip"
 DIST="$CACHE_ROOT/gradle-$GRADLE_VERSION"
 URL="https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip"
 
+# A prepared host may already expose the exact pinned Gradle. Prefer it over
+# reaching the network; all callers still verify the version before use.
+SYSTEM_GRADLE=""
+if command -v gradle >/dev/null 2>&1 && gradle --version 2>/dev/null | grep -q "Gradle $GRADLE_VERSION"; then
+  SYSTEM_GRADLE="$(command -v gradle)"
+fi
+
 sha256_file() {
   if command -v shasum >/dev/null 2>&1; then
     shasum -a 256 "$1" | awk '{print $1}'
@@ -77,6 +84,18 @@ PY
   chmod +x "$DIST/bin/gradle"
   rm -rf "$CACHE_ROOT/.extract-$GRADLE_VERSION"
 }
+
+if [[ -n "$SYSTEM_GRADLE" ]]; then
+  if [[ "${1:-}" == "--print-gradle" ]]; then
+    printf '%s\n' "$SYSTEM_GRADLE"
+    exit 0
+  fi
+  cd "$ROOT"
+  if [[ "$#" -eq 0 ]]; then
+    set -- :app:assembleDebug --console=plain --stacktrace
+  fi
+  exec "$SYSTEM_GRADLE" "$@"
+fi
 
 fetch
 extract
