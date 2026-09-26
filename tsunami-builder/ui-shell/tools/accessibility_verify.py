@@ -83,6 +83,7 @@ def main()->int:
             '.background(if(settingsFocused)p.groundAlt else Color.Transparent)',
             '.onFocusChanged{bannerFocused=it.isFocused}',
             '.border(2.dp,if(bannerFocused)p.selected else Color.Transparent)',
+            '.heightIn(min=48.dp)\n                    .border(2.dp,if(bannerFocused)p.selected else Color.Transparent)',
             '.onFocusChanged{spineFocused=it.isFocused}',
             '.border(2.dp,if(spineFocused)p.selected else Color.Transparent)',
         ),
