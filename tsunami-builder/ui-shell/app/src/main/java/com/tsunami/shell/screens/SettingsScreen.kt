@@ -215,7 +215,7 @@ private fun settingsTitle(page:String)=when(page){
             IntentSection("Environment")
             ToggleRow("Artwork backdrop",if(state.lyricsArtworkBackdrop)"ON" else "OFF"){state.lyricsArtworkBackdrop=!state.lyricsArtworkBackdrop}
             ToggleRow("Visualizer behind lyrics",if(state.visualizerBehindLyrics)"ON" else "OFF"){state.visualizerBehindLyrics=!state.visualizerBehindLyrics}
-            Text("SIMULATED STATE · no transcription, network lookup, microphone capture or production lyric store.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Preview only · no transcription, network lookup, microphone access, or lyric store is used.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -233,7 +233,7 @@ private fun settingsTitle(page:String)=when(page){
         }
         item{
             IntentSection("Artwork independence")
-            Text("Artwork can be hidden without changing navigation, selection, transport hierarchy, or the product’s neutral and selected-state system.",style=Type.body.copy(color=LocalTsunamiPalette.current.ink2),modifier=Modifier.padding(vertical=14.dp))
+            Text("Hide artwork for a more typographic listening view. Navigation and controls stay in place.",style=Type.body.copy(color=LocalTsunamiPalette.current.ink2),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -305,7 +305,7 @@ private fun settingsTitle(page:String)=when(page){
                 }
                 Rule()
             }
-            Text("This preview represents source precedence only. It performs no lyric lookup, transcription, authentication, or network request.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Source order is previewed locally; no lyric lookup, transcription, sign-in, or network request occurs.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -362,7 +362,7 @@ private fun settingsTitle(page:String)=when(page){
         item{
             IntentSection("Presets","Save"){state.saveShufflePreset()}
             state.shufflePresets.forEach{preset->ActionRow(preset,if(preset.contains(state.shuffleMode,true))"CURRENT-LIKE" else "SAVED"){state.banner="Applied shuffle preset · $preset"}}
-            Text("SIMULATED QUEUE · shuffle policies affect this preview queue only.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Preview queue only · these shuffle choices do not affect your music library.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -439,7 +439,7 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Scrobble threshold","${state.scrobbleThreshold}%"){state.cycleScrobbleThreshold()}
             ActionRow("Threshold cap","${state.scrobbleThresholdCapSeconds}s"){state.cycleScrobbleCap()}
             ActionRow("Import listening history","CSV / JSON preview"){state.banner="History import preview · 128 matched · 7 unmatched"}
-            Text("SIMULATED STATE · no credentials, authorization handshake, scrobble or network operation.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Preview only · no credentials, sign-in, scrobble, or network request occurs.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -484,7 +484,7 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Double",state.headsetDouble){state.headsetDouble=if(state.headsetDouble=="Next")"Seek +30s" else "Next"}
             ActionRow("Triple",state.headsetTriple){state.headsetTriple=if(state.headsetTriple=="Previous")"Seek −15s" else "Previous"}
             ActionRow("Long",state.headsetLong){state.headsetLong=if(state.headsetLong=="Actions")"Output" else "Actions"}
-            Text("Mappings are represented explicitly; this preview does not listen for hardware buttons.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Hardware input is inactive in this preview; tap a mapping to inspect its behavior.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -516,7 +516,7 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Home-screen widget",state.widgetLayout){state.cycleWidgetLayout()}
             ToggleRow("Wear transport",if(state.wearControlsEnabled)"ON" else "OFF"){state.wearControlsEnabled=!state.wearControlsEnabled}
             if(state.wearControlsEnabled) ActionRow("Wear secondary action",state.wearSecondaryAction){state.cycleWearSecondaryAction()}
-            Text("These are product-surface contracts only. The isolated shell does not register a tile, widget, notification service or Wear data layer.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("System surfaces are inactive in this preview. Use these controls to inspect how each surface behaves.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
