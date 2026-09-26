@@ -121,7 +121,7 @@ REQUIRED_ANCHORS = {
     "navigation/GenesisShell.kt": [
         "IndexRail(", "IndexStrip(", "ListeningSpine(", "AnimatedContent(", "reducedMotion", "miniPlayerExtras", "runPlayerAction(",
     ],
-    "screens/ListenScreen.kt": ["Choose from your library", "Deep cuts", "Rediscover", "Never heard", "Most played", "Unfinished", 'state.settingsExpanded="services"'],
+    "screens/ListenScreen.kt": ["CURRENT THREAD", "LIBRARY LENS", "TemporalTrackRow(", "showArtwork=false", "Deep cuts", "Rediscover", "Never heard", "Most played", "Unfinished", 'state.settingsExpanded="services"'],
     "screens/FindScreen.kt": ["SearchKind.FOLDERS", "folderFor(", "FOLDER MATCH", "fuzzyContains(", "withinOneEditOrTranspose("],
     "screens/SignalScreen.kt": ["Summary", "Audio", "Library", "History", "Logs", "TSUNAMI Replay", "Lyrics quality & repair queue", "Playback integrity"],
     "screens/OnboardingScreen.kt": ['state.settingsExpanded="services"', "Enter with the sample library", "Index a music folder"],
@@ -149,8 +149,8 @@ REQUIRED_ANCHORS = {
 
 PRIMARY_COPY_GUARDS = {
     "screens/ListenScreen.kt": [
-        "Resume first. Choose second.",
-        "The shell stays navigable without inventing recommendations.",
+        "Playback context first; deliberate choice follows it.",
+        "No music is indexed yet.",
     ],
     "screens/OnboardingScreen.kt": [
         "The prototype never asks for production permissions.",
@@ -369,9 +369,9 @@ def main() -> int:
         die("external playback surfaces lost their instrumentation contract")
     if "progressiveSettingsRoutesRoundTripToStableRoot" not in test_src:
         die("progressive settings routes lost their back-topology instrumentation contract")
-    for name in ("adverseFixtureStatesRecoverWithoutDestroyingContext","emptyQueueFixtureCannotPretendToPlay","libraryIndexModeRemovesArtworkDependencyStructurally"):
+    for name in ("adverseFixtureStatesRecoverWithoutDestroyingContext","emptyQueueFixtureCannotPretendToPlay","libraryIndexModeRemovesArtworkDependencyStructurally","listenTemporalLedgerTracksCurrentObjectWithoutArtworkDependency"):
         if name not in test_src:
-            die(f"adverse-state instrumentation contract missing: {name}")
+            die(f"adverse/state-identity instrumentation contract missing: {name}")
     print("EXTERNAL_PLAYBACK_SURFACES=PASS notification quick_settings widget wear")
     print("PROGRESSIVE_SETTINGS_TOPOLOGY=PASS route_depth returns_to_stable_root")
     print("ADVERSE_STATE_CONTRACT=PASS search provider downloads queue")
@@ -406,7 +406,7 @@ def main() -> int:
         "settings_actions": 100,
         "settings_toggles": 45,
         "authored_actions": 280,
-        "instrumentation_tests": 37,
+        "instrumentation_tests": 38,
     }
     collapsed = {name: (counts[name], minimum) for name, minimum in floors.items() if counts[name] < minimum}
     if collapsed:
