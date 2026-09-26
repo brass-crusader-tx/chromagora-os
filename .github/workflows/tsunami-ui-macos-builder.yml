@@ -1,0 +1,76 @@
+name: TSUNAMI UI Genesis macOS Builder
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - build/tsunami-ui-genesis-20260925
+    paths:
+      - ".github/workflows/tsunami-ui-macos-builder.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK 36
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Verify exact Genesis mirror
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, subprocess
+          root=pathlib.Path("tsunami-builder")
+          manifest=json.loads((root/"MIRROR-MANIFEST.json").read_text())
+          assert manifest["source_head"]=="46fd4b61915936187521a3e0c5f542505b315c48", manifest["source_head"]
+          bad=[]
+          for row in manifest["files"]+manifest["support_files"]:
+              p=root/row["path"]
+              actual=subprocess.check_output(["git","hash-object",str(p)],text=True).strip() if p.is_file() else "missing"
+              if actual!=row["git_blob_sha"]: bad.append((row["path"],actual,row["git_blob_sha"]))
+          assert not bad,bad
+          print("MIRROR_BINDING=PASS",manifest["source_head"],len(manifest["files"]),len(manifest["support_files"]))
+          PY
+
+      - name: Canonical source and APK build
+        working-directory: tsunami-builder
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python3 tools/ui_shell_static_check.py
+          python3 ui-shell/tools/source_verify.py
+          python3 ui-shell/tools/accessibility_verify.py
+          bash ui-shell/tools/build_host.sh
+          test -s dist/TSUNAMI-UI-Genesis-debug.apk
+          test -s dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
+          grep -q '^HOST_BUILD=PASS' build/reports/tsunami/ui-shell/host/build.txt
+          cat build/reports/tsunami/ui-shell/host/build.txt
+
+      - name: Upload exact-head APKs and evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: TSUNAMI-UI-Genesis-macos-46fd-v51
+          path: |
+            tsunami-builder/dist/TSUNAMI-UI-Genesis-debug.apk
+            tsunami-builder/dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
+            tsunami-builder/dist/TSUNAMI-Sans-v5.1/
+            tsunami-builder/build/reports/tsunami/ui-shell/host/
+            tsunami-builder/ui-shell/tools/proofs/
+            tsunami-builder/MIRROR-MANIFEST.json
+          if-no-files-found: error
