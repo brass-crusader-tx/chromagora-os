@@ -13,7 +13,7 @@ ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'app/src/main/res/font'
 PROOFS=Path(__file__).resolve().parent/'proofs'
 OUT.mkdir(parents=True,exist_ok=True); PROOFS.mkdir(parents=True,exist_ok=True)
-WEIGHTS=[('Light',300,42),('Regular',400,68),('Medium',500,86),('Semibold',600,102),('Bold',700,120)]
+WEIGHTS=[('Light',300,44),('Regular',400,70),('Medium',500,90),('Semibold',600,108),('Bold',700,128)]
 
 def R(x0,y0,x1,y1): return box(x0,y0,x1,y1)
 def E(cx,cy,rx,ry,res=64): return translate(scale(Point(0,0).buffer(1,resolution=res),rx,ry),cx,cy)
@@ -32,10 +32,11 @@ def bezier(p0,p1,p2,p3,n=28):
     return out
 
 def s_curve(w,h,t):
-    pts=bezier((w*.78,h*.88),(w*.52,h*1.02),(w*.18,h*.88),(w*.24,h*.63),n=18)
-    pts += bezier((w*.24,h*.63),(w*.28,h*.50),(w*.72,h*.50),(w*.76,h*.36),n=14)[1:]
-    pts += bezier((w*.76,h*.36),(w*.84,h*.10),(w*.49,-h*.02),(w*.20,h*.12),n=18)[1:]
-    return path(pts,t,cap=2)
+    pts=bezier((w*.78,h*.87),(w*.63,h*1.01),(w*.31,h*1.00),(w*.20,h*.80),n=18)
+    pts += bezier((w*.20,h*.80),(w*.08,h*.57),(w*.27,h*.49),(w*.50,h*.45),n=14)[1:]
+    pts += bezier((w*.50,h*.45),(w*.76,h*.41),(w*.88,h*.32),(w*.78,h*.14),n=14)[1:]
+    pts += bezier((w*.78,h*.14),(w*.64,-h*.01),(w*.31,-h*.01),(w*.18,h*.12),n=18)[1:]
+    return path(pts,t,cap=1)
 
 def Cshape(w,h,t):
     ov=OV_CAP if h>=CAP else OV_X
@@ -84,14 +85,16 @@ def caps(ch,t):
 def lower(ch,t):
     h=XH; w=540; m=54; tl=max(34,t*.95)
     o=lambda: ring(w/2,h/2,w*.39,h/2+OV_X,tl)
-    if ch=='a': return U(o(),R(w-m-tl,0,w-m,h*.60)),w
+    if ch=='a': return U(o(),R(w-m-tl,0,w-m,h)),w
     if ch=='b': return U(R(m,0,m+tl,ASC),translate(o(),xoff=18)),w
     if ch=='c': return o().difference(R(w*.66,h*.16,w+80,h*.84)),w
     if ch=='d': return U(R(w-m-tl,0,w-m,ASC),translate(o(),xoff=-18)),w
     if ch=='e':
-        aperture=max(.58,.66-(tl-40)/1000)
-        bowl=o().difference(R(w*aperture,h*.31,w+80,h*.71))
-        bar=R(w*.24,h*.47,w*.75,h*.47+tl)
+        # Preserve almost the entire circular bowl and open only the middle-right aperture.
+        # This keeps e unmistakably Latin at Android UI sizes instead of collapsing toward
+        # epsilon/theta while retaining the geometric single-storey family grammar.
+        bowl=o().difference(R(w*.68,h*.34,w+80,h*.68))
+        bar=R(m+12,h*.47,w*.78,h*.47+tl)
         return U(bowl,bar),w
     if ch=='f':
         top_y=ASC-82
@@ -101,9 +104,9 @@ def lower(ch,t):
         return U(stem,hook,cross),350
     if ch=='g':
         bowl=o()
-        stem=R(w-m-tl,-58,w-m,h*.46)
-        hook_pts=bezier((w-m-tl/2,-58),(w*.76,-170),(w*.41,-184),(w*.24,-88),n=20)
-        hook=path(hook_pts,tl,cap=2)
+        stem=R(w-m-tl,-44,w-m,h*.47)
+        hook_pts=bezier((w-m-tl/2,-44),(w*.78,-150),(w*.46,-175),(w*.28,-92),n=18)
+        hook=path(hook_pts,tl,cap=1)
         return U(bowl,stem,hook),w
     if ch=='h': return U(R(m,0,m+tl,ASC),arch_top((m+w-m)/2,h*.47,(w-2*m)/2,h*.47,tl),R(w-m-tl,0,w-m,h*.47)),w
     if ch=='i': return U(R(w/2-tl/2,0,w/2+tl/2,h),E(w/2,h+105,tl*.48,tl*.48)),280
@@ -118,14 +121,15 @@ def lower(ch,t):
     if ch=='p': return U(R(m,DESC,m+tl,h),translate(o(),xoff=18)),w
     if ch=='q': return U(R(w-m-tl,DESC,w-m,h),translate(o(),xoff=-18)),w
     if ch=='r':
-        shoulder_pts=bezier((m+tl/2,h*.48),(m+tl/2,h*.88),(m+145,h*.99),(m+245,h*.82),n=16)
-        return U(R(m,0,m+tl,h),path(shoulder_pts,tl,cap=2)),350
+        shoulder_pts=bezier((m+tl/2,h*.48),(m+tl/2,h*.84),(m+125,h*.98),(m+215,h*.84),n=16)
+        return U(R(m,0,m+tl,h),path(shoulder_pts,tl,cap=1)),340
     if ch=='s': return s_curve(w,h,tl),w
     if ch=='t':
-        top_y=XH+112
-        stem=R(w*.47,0,w*.47+tl,top_y)
-        cross=R(w*.24,h*.66,w*.72,h*.66+tl)
-        return U(stem,cross),350
+        x=w*.45; top_y=XH+122
+        stem=R(x,28,x+tl,top_y)
+        cross=R(w*.22,h*.66,w*.70,h*.66+tl)
+        foot=path(bezier((x+tl/2,28),(x+tl/2,3),(w*.58,-4),(w*.64,18),n=10),tl*.80,cap=1)
+        return U(stem,cross,foot),350
     if ch=='u': return U(R(m,h*.18,m+tl,h),R(w-m-tl,h*.18,w-m,h),clip(ring(w/2,h*.18,w*.37,h*.23,tl),m,-65,w-m,h*.22)),w
     if ch=='v': return U(line(m,h,w/2,0,tl),line(w-m,h,w/2,0,tl)),w
     if ch=='w': return U(line(m,h,w*.21,0,tl),line(w*.21,0,w*.50,h*.46,tl),line(w*.50,h*.46,w*.79,0,tl),line(w*.79,0,w-m,h,tl)),650
@@ -136,7 +140,7 @@ def lower(ch,t):
 
 def digit(ch,t):
     w=540; h=CAP; m=58; tl=t
-    if ch=='0': return U(ring(w/2,h/2,w*.34,h*.49,tl),line(w*.36,h*.18,w*.64,h*.82,max(18,tl*.25))),w
+    if ch=='0': return U(ring(w/2,h/2,w*.34,h*.49,tl),line(w*.38,h*.18,w*.62,h*.82,max(14,tl*.20))),w
     if ch=='1': return U(R(w/2-tl/2,0,w/2+tl/2,h),line(w/2-tl/2,h,w*.30,h*.83,tl),R(w*.28,0,w*.72,tl)),w
     if ch=='2':
         top=path(bezier((m,h*.72),(w*.18,h*.98),(w*.68,h*1.01),(w-m,h*.78),n=20),tl,cap=2)
@@ -238,15 +242,23 @@ def special(ch,t):
             R(shared,h-t,w-m,h), R(shared,h*.50-t/2,w-m-35,h*.50+t/2), R(shared,0,w-m,t)
         ),w
     if ch=='æ':
-        a,_=lower('a',t); e,_=lower('e',t); w=760
-        return U(scale(a,.76,1,origin=(0,0)),translate(scale(e,.76,1,origin=(0,0)),xoff=350)),w
+        # Two readable bowls with one controlled overlap; do not merely collide scaled a/e.
+        w=760; h=XH; tl=max(34,t*.95)
+        left=ring(195,h/2,150,h*.50,tl)
+        left=U(left,R(315-tl,0,315,h))
+        right=ring(535,h/2,165,h*.50,tl).difference(R(640,h*.17,w+60,h*.83))
+        right=U(right,R(385,h*.46,675,h*.46+tl*.88))
+        return U(left,right),w
     if ch=='Œ':
         w=820; h=CAP; tl=t
         o=ring(250,h/2,205,h*.49,tl)
         return U(o,R(420,0,420+tl,h),R(420,h-t,w-50,h),R(420,h*.50-t/2,w-80,h*.50+t/2),R(420,0,w-50,t)),w
     if ch=='œ':
-        o,_=lower('o',t); e,_=lower('e',t); w=760
-        return U(scale(o,.76,1,origin=(0,0)),translate(scale(e,.76,1,origin=(0,0)),xoff=350)),w
+        w=760; h=XH; tl=max(34,t*.95)
+        left=ring(195,h/2,150,h*.50,tl)
+        right=ring(535,h/2,165,h*.50,tl).difference(R(640,h*.17,w+60,h*.83))
+        right=U(right,R(385,h*.46,675,h*.46+tl*.88))
+        return U(left,right),w
     if ch=='Ø':
         o,w=caps('O',t); return U(o,line(w*.23,CAP*.05,w*.77,CAP*.95,max(26,t*.46))),w
     if ch=='ø':
@@ -299,14 +311,14 @@ def build(style,weight,t):
     seen=set()
     for ch in CHARS:
         if ch in seen: continue
-        seen.add(ch); name=f'u{ord(ch):04X}'; sh,w=shape(ch,t); side=max(24,int(34-(weight-300)*.010))
+        seen.add(ch); name=f'u{ord(ch):04X}'; sh,w=shape(ch,t); side=max(28,int(42-(weight-300)*.010))
         if sh is not None and not sh.is_empty:
             minx,miny,maxx,maxy=sh.bounds; sh=translate(sh,xoff=side-minx); adv=int(max(w,maxx-minx)+2*side)
         else: adv=w
         order.append(name); glyphs[name]=glyph(sh); metrics[name]=(adv,0); cmap[ord(ch)]=name
     fb=FontBuilder(UPM,isTTF=True); fb.font['head'].created=FONT_TIMESTAMP; fb.font['head'].modified=FONT_TIMESTAMP; fb.setupGlyphOrder(order); fb.setupCharacterMap(cmap); fb.setupGlyf(glyphs); fb.setupHorizontalMetrics(metrics); fb.setupHorizontalHeader(ascent=ASC,descent=DESC,lineGap=110)
     fb.setupOS2(sTypoAscender=ASC,sTypoDescender=DESC,sTypoLineGap=110,usWinAscent=940,usWinDescent=260,usWeightClass=weight,fsSelection=(1<<6 if weight==400 else 0),sxHeight=XH,sCapHeight=CAP,achVendID='TSNM')
-    fb.setupNameTable({'familyName':'TSUNAMI Sans','styleName':style,'uniqueFontIdentifier':f'TSUNAMI Sans {style} 4.7','fullName':f'TSUNAMI Sans {style}','psName':f'TSUNAMISans-{style}','version':'Version 4.700'}); fb.setupPost(); fb.setupMaxp()
+    fb.setupNameTable({'familyName':'TSUNAMI Sans','styleName':style,'uniqueFontIdentifier':f'TSUNAMI Sans {style} 5.1','fullName':f'TSUNAMI Sans {style}','psName':f'TSUNAMISans-{style}','version':'Version 5.100'}); fb.setupPost(); fb.setupMaxp()
     kern_pairs=[('A','V',-40),('A','W',-34),('A','Y',-42),('V','A',-40),('W','A',-30),('Y','A',-44),('T','A',-28),('T','o',-34),('T','e',-34),('T','a',-30),('T','y',-24),('F','o',-22),('F','a',-18),('L','T',-20),('L','Y',-28),('Y','o',-36),('Y','e',-36),('P','a',-18),('r','y',-12)]
     feature_lines=[]
     for left,right,value in kern_pairs:
@@ -319,7 +331,7 @@ def build(style,weight,t):
 def proof(fonts):
     W,H=1700,1510; im=Image.new('RGB',(W,H),'#F4F1EA'); d=ImageDraw.Draw(im)
     def F(wt,size): return ImageFont.truetype(str(fonts[wt]),size)
-    d.text((70,45),'TSUNAMI Sans — Genesis Proof v4.7',font=F('Semibold',54),fill='#111216')
+    d.text((70,45),'TSUNAMI Sans — Genesis Proof v5.1',font=F('Semibold',54),fill='#111216')
     d.text((70,118),'H O n o  ·  optical control glyphs',font=F('Regular',34),fill='#44464C')
     y=185
     samples=[('ABCDEFGHIJKLM','Regular',56),('NOPQRSTUVWXYZ','Regular',56),('abcdefghijklm','Regular',48),('nopqrstuvwxyz','Regular',48),('0123456789  01:42 / 04:19','Medium',46),('S s  G R  a e g r t k y  2 3 5 6 8','Regular',44),('I l 1   O 0   rn m   c e   v y','Regular',42),('S s  G C  R  a e g r t k y   & ? @   [] {}','Regular',36),('Æ æ  Œ œ  Ø ø  Ð ð  Þ þ  ß  Ñ ñ','Regular',34),('ÀÁÂÃÄÅ Ç ÈÉÊË Ï Ö Ü  àáâä ç éêë ï ö ü','Regular',36),('“Afterglow at the edge of the city”','Semibold',46),('Mira Sol · Refractions / Deluxe Edition','Medium',34),('FLAC 24-bit · 96 kHz   OFFLINE   QUEUED','Regular',28)]
@@ -331,7 +343,7 @@ def proof(fonts):
     im.save(PROOFS/'tsunami-sans-proof.png')
 
     ui=Image.new('RGB',(1280,1260),'#F4F1EA'); u=ImageDraw.Draw(ui)
-    u.text((64,42),'TSUNAMI Sans — UI-size proof',font=F('Semibold',38),fill='#111216')
+    u.text((64,42),'TSUNAMI Sans — UI-size proof v5.1',font=F('Semibold',38),fill='#111216')
     y=118
     ui_samples=[
         (12,'Medium','12 px metadata · FLAC 24-bit · 96 kHz · OFFLINE'),
