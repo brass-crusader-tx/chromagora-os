@@ -36,11 +36,10 @@ jobs:
       - name: Install Android SDK 36
         shell: pwsh
         run: |
-          sdkmanager --licenses < $null
           sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Verify exact private-source mirror
-        shell: pwsh
+        shell: bash
         run: |
           python - <<'PY'
           import json, pathlib, subprocess
@@ -60,7 +59,7 @@ jobs:
 
       - name: Static, accessibility and deterministic type gates
         working-directory: tsunami-builder
-        shell: pwsh
+        shell: bash
         run: |
           python -m pip install --disable-pip-version-check "fonttools==4.63.0" "shapely==2.1.2" "pillow==12.3.0"
           python tools/ui_shell_static_check.py
