@@ -52,7 +52,49 @@
         "sha256": "2dbb9f20451de4a88229375cdec4e0dec14ad3ff91bd8f75066b8396dfd5f138"
       }
     },
-    "reproducibility_cross_check": "Reverting only the lowercase-c aperture delta reproduced the preceding canonical v5.1 hashes exactly; refined outputs are manifest-bound."
+    "reproducibility_cross_check": "Reverting only the lowercase-c aperture delta reproduced the preceding canonical v5.1 hashes exactly; refined outputs are manifest-bound.",
+    "metadata_verification": {
+      "masters": 5,
+      "glyphs_per_master": 176,
+      "weight_classes": [
+        300,
+        400,
+        500,
+        600,
+        700
+      ],
+      "family": "TSUNAMI Sans",
+      "version": "Version 5.100",
+      "gpos_all_masters": true,
+      "required_ui_and_western_european_coverage": true
+    },
+    "control_pair_raster_distinctness": {
+      "rasterizer": "Pillow 12.3.0 / FreeType",
+      "sizes_px": [
+        18,
+        24,
+        34
+      ],
+      "pairs": [
+        "I/l",
+        "I/1",
+        "O/0",
+        "rn/m",
+        "c/e",
+        "v/y"
+      ],
+      "zero_difference_pairs": 0,
+      "note": "Every required ambiguous pair produced non-identical raster masks at every tested UI size; Android raster inspection remains separately required."
+    },
+    "visual_proof_review": {
+      "proof_files": [
+        "tsunami-sans-proof.png",
+        "tsunami-sans-ui-proof.png"
+      ],
+      "review_scope": "desktop proof only",
+      "result": "reviewed",
+      "android_claim": false
+    }
   },
   "isolation": {
     "compared_against_main": "2543cb39737557133a37d600050f9c4aa50a3fae",
@@ -106,5 +148,5 @@
     "portal_target": "/Users/ezra/Downloads/TSUNAMI/dist/TSUNAMI-UI-Shell-Rebrand-v1-debug.apk"
   },
   "completion_claim": false,
-  "audit_refreshed_at_utc": "2026-09-26T21:17:00Z"
+  "audit_refreshed_at_utc": "2026-09-26T21:18:00Z"
 }
