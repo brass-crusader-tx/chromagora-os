@@ -8,6 +8,7 @@ interaction placeholders, missing state fixtures, or source corruption.
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
 import re
 import sys
 
@@ -455,18 +456,29 @@ def main() -> int:
         die(f"interaction/test surface unexpectedly collapsed: {collapsed}; current={counts}")
 
     font_src = FONT_GEN.read_text(encoding="utf-8")
-    for anchor in ("TSUNAMI Sans", "WEIGHTS=[('Light',300", "'Bold',700", "addOpenTypeFeaturesFromString", "Version 5.100", "FONT_TIMESTAMP=3873139200"):
+    for anchor in ("TSUNAMI Sans", "WEIGHTS=[('Light',300", "'Bold',700", "addOpenTypeFeaturesFromString", "Version 5.200", "FONT_TIMESTAMP=3873139200"):
         if anchor not in font_src:
             die(f"font generator missing anchor: {anchor}")
-    font_manifest = UI.parent / "docs/TSUNAMI-SANS-v5.1-MANIFEST.json"
+    font_manifest = UI.parent / "docs/TSUNAMI-SANS-v5.2-MANIFEST.json"
     if not font_manifest.is_file():
-        die("canonical TSUNAMI Sans v5.1 manifest is missing")
+        die("canonical TSUNAMI Sans v5.2 manifest is missing")
     import json
     manifest = json.loads(font_manifest.read_text(encoding="utf-8"))
-    if manifest.get("family") != "TSUNAMI Sans" or manifest.get("version") != "5.100":
+    if manifest.get("family") != "TSUNAMI Sans" or manifest.get("version") != "5.200":
         die(f"font manifest identity drift: {manifest.get('family')!r} {manifest.get('version')!r}")
     if set(manifest.get("weights", {})) != {"Light","Regular","Medium","Semibold","Bold"}:
         die("font manifest must enumerate exactly five static masters")
+    font_bytes = FONT_GEN.read_bytes()
+    actual_font_blob = hashlib.sha1(
+        b"blob " + str(len(font_bytes)).encode("ascii") + b"\0" + font_bytes
+    ).hexdigest()
+    expected_font_blob = manifest.get("generator_blob_sha1")
+    if actual_font_blob != expected_font_blob:
+        die(
+            "font generator drifted from canonical manifest before binary generation: "
+            f"{actual_font_blob} != {expected_font_blob}"
+        )
+    print(f"FONT_SOURCE_MANIFEST_BINDING=PASS {actual_font_blob}")
 
     build_src = BUILD_GRADLE.read_text(encoding="utf-8")
     root_build_src = (UI / "build.gradle.kts").read_text(encoding="utf-8")
@@ -487,8 +499,8 @@ def main() -> int:
         die("host build must resolve Gradle through the checksum-verified bootstrap")
     root_gate=(UI.parent / "tools/ui_shell_gate.py").read_text(encoding="utf-8")
     for contract_name, contract_source in (("host build",host_build),("root gate",root_gate)):
-        if "TSUNAMI-SANS-v5.1-MANIFEST.json" not in contract_source:
-            die(f"{contract_name} must bind generated fonts to the canonical v5.1 manifest")
+        if "TSUNAMI-SANS-v5.2-MANIFEST.json" not in contract_source:
+            die(f"{contract_name} must bind generated fonts to the canonical v5.2 manifest")
         if "generator_blob_sha1" not in contract_source or "FONT_GENERATOR_BLOB=PASS" not in contract_source:
             die(f"{contract_name} must bind the exact font generator blob before accepting generated binaries")
     if "OK (39 tests)" not in host_build or "OK (39 tests)" not in root_gate:
