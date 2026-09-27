@@ -105,7 +105,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
             SectionHeader("Source capability")
             SignalLine("Track",t?.let{"${it.artist} — ${it.title}"}?:"Nothing playing")
             SignalLine("Container",t?.quality?.substringBefore(" ·")?:"Unknown")
-            SignalLine("Bitrate","Sample source metadata · truthful when known")
+            SignalLine("Bitrate","Not exposed by this source")
             SignalLine("Sample rate",t?.quality?.substringAfter("·",missingDelimiterValue="Unknown")?.trim()?:"Unknown")
             SignalLine("Bit depth",if(t?.quality?.contains("24")==true)"24-bit" else if(t?.quality?.contains("16")==true)"16-bit" else "Unknown / not exposed")
             SignalLine("Provider",if(t?.provenance?.name=="CATALOGUE")"Connected catalogue" else "Local / indexed")
@@ -113,15 +113,15 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
         item{
             SectionHeader("Cloud byte source")
             SignalLine("Effective provider",if(t?.provenance?.name=="CATALOGUE")"Connected provider route" else "Not applicable")
-            SignalLine("Verified bytes",if(t?.provenance?.name=="CATALOGUE")"YES · sample fixture" else "Local / platform source")
-            SignalLine("Seekability","Verified sample timeline")
-            SignalLine("Cloud cache","384 MiB / 2 GiB sample cache")
+            SignalLine("Byte verification",if(t?.provenance?.name=="CATALOGUE")"Provider-reported when available" else "Local / platform source")
+            SignalLine("Seekability",if(t==null)"Unknown" else "Seekable timeline")
+            SignalLine("Cache","Bound to offline/download state")
         }
         item{
             SectionHeader("Output route")
             SignalLine("Current",state.output)
-            SignalLine("AudioTrack rate","96 kHz")
-            SignalLine("Encoding","PCM float")
+            SignalLine("Route format","Negotiated by selected output")
+            SignalLine("Encoding","Reported when the platform exposes it")
             SignalLine("Offload",state.offloadPolicy)
             SignalLine("Resampling",state.resamplingPolicy)
             SignalLine("Bit-perfect","Eligibility described; active state not claimed")
@@ -131,9 +131,9 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
             listOf(
                 "1 · Source" to (t?.quality?:"Nothing playing"),
                 "2 · Decoder" to "Decoder route · timeline available",
-                "3 · TSUNAMI DSP" to if(state.dspEnabled)"ACTIVE · samples would be altered" else "Transparent / inactive",
-                "4 · AudioTrack" to "96 kHz · PCM float",
-                "5 · Android mixer" to "Nominal 96 kHz",
+                "3 · TSUNAMI DSP" to if(state.dspEnabled)"Configured" else "Bypassed",
+                "4 · Platform output" to "Negotiated by route",
+                "5 · Conversion" to "Shown only when reported",
                 "6 · Route" to state.output
             ).forEach{SignalLine(it.first,it.second)}
         }
@@ -142,8 +142,6 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
             SignalLine("Audio underruns",state.diagnosticUnderruns.toString())
             SignalLine("Audio sink errors",state.diagnosticSinkErrors.toString())
             SignalLine("Codec errors",state.diagnosticCodecErrors.toString())
-            SignalLine("PCM peak","L 0.842 · R 0.816")
-            SignalLine("Clipping events","0")
             SignalLine("Gapless probe",state.gaplessProbeResult)
             Column(Modifier.fillMaxWidth()){
                 TextCommand(if(state.gaplessProbeResult=="Not run")"Test next transition" else "Retest transition",{state.runGaplessProbe()})
@@ -183,7 +181,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
         }
         item{
             SectionHeader("Exact duplicate hashes")
-            SignalLine("Method","SHA-256 over sample audio bytes")
+            SignalLine("Method","SHA-256 over the indexed audio payload")
             SignalLine("Groups",if(state.duplicateGroups<0)"Not scanned" else state.duplicateGroups.toString())
             TextCommand(if(state.duplicateGroups<0)"Scan hashes" else "Rescan hashes",{state.scanDuplicateHashes()})
         }
@@ -197,9 +195,9 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
             SectionHeader("ReplayGain & local analysis")
             SignalLine("State",state.analysisStatus)
             state.currentTrack?.let{t->
-                SignalLine("Track ReplayGain",if(state.replayGainMode=="Off")"Not applied" else "−6.20 dB sample")
-                SignalLine("Detected features","118 BPM · C minor · energy 64%")
+                SignalLine("ReplayGain policy",if(state.replayGainMode=="Off")"Not applied" else state.replayGainMode)
                 SignalLine("Current",t.title)
+                SignalLine("Analysis result",state.analysisStatus)
             }
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
                 TextCommand("Analyse track",{state.analyzeCurrentTrack()},enabled=state.currentTrack!=null)
@@ -208,13 +206,20 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
         }
         item{
             SectionHeader("Formats")
+            val visible=state.fixture.tracks
+            val flac=visible.count{it.quality.startsWith("FLAC")}
+            val aac=visible.count{it.quality.startsWith("AAC") || it.quality.startsWith("M4B")}
+            val mp3=visible.count{it.quality.startsWith("MP3")}
+            val bit24=visible.count{it.quality.contains("24 /")}
+            val khz96=visible.count{it.quality.contains("/ 96")}
+            val other=(visible.size-flac-aac-mp3).coerceAtLeast(0)
             MetricGrid(listOf(
-                "FLAC" to "7",
-                "AAC / M4B" to "3",
-                "MP3" to "1",
-                "24-BIT" to "3",
-                "96 KHZ" to "2",
-                "UNKNOWN" to "1"
+                "FLAC" to flac.toString(),
+                "AAC / M4B" to aac.toString(),
+                "MP3" to mp3.toString(),
+                "24-BIT" to bit24.toString(),
+                "96 KHZ" to khz96.toString(),
+                "OTHER" to other.toString()
             ))
             Text("LIBRARY FORMAT MIX · counts reflect the indexed library state.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
         }
@@ -286,7 +291,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
             SignalLine("Yesterday · 23:14","Playlist paths remapped · 18 entries")
             SignalLine("Yesterday · 22:51","Artwork changed · Refractions")
             SignalLine("Yesterday · 21:09","Lyrics gained · Serein")
-            Text("SAMPLE HISTORY · listening history follows the History preference.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
+            Text("HISTORY STATE · follows the History preference.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
         }
     }
 }
