@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "ed182b683ba604dbf9c4351f19a69561d4478c55",
+  "source_head": "aee2dfcdfb5fd45a00be85c1a530aff4f0af43bb",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror is byte-identical to private Genesis head ed182b683ba604dbf9c4351f19a69561d4478c55; TSUNAMI Sans legibility refinement and quantitative mark-fidelity evidence are included.",
+  "note": "Build-critical mirror is byte-identical to private Genesis head aee2dfcdfb5fd45a00be85c1a530aff4f0af43bb; TSUNAMI Sans spacing/control-glyph refinement and quantified mark-fidelity evidence are included.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -186,8 +186,8 @@
     },
     {
       "path": "ui-shell/tools/generate_tsunami_sans.py",
-      "git_blob_sha": "ea17b0e4e51e40a6ac9a0a8845ac83b53c620ae2",
-      "bytes": 24582
+      "git_blob_sha": "ddc3e5e3f4ec0bd3581c712bf0af90c59b8b6b87",
+      "bytes": 24661
     },
     {
       "path": "ui-shell/tools/jvm_state_gate.sh",
@@ -304,13 +304,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "ed182b683ba604dbf9c4351f19a69561d4478c55"
+    "source_head": "aee2dfcdfb5fd45a00be85c1a530aff4f0af43bb"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-26T23:46:00Z",
-    "private_head": "ed182b683ba604dbf9c4351f19a69561d4478c55",
-    "reason": "exact-head rebuild after font legibility and quantified mark-fidelity evidence",
-    "sequence": 27
+    "requested_at_utc": "2026-09-27T00:31:00Z",
+    "private_head": "aee2dfcdfb5fd45a00be85c1a530aff4f0af43bb",
+    "reason": "exact-head rebuild after TSUNAMI Sans spacing/control-glyph refinement",
+    "sequence": 28
   },
-  "generated_at_utc": "2026-09-26T23:46:00Z"
+  "generated_at_utc": "2026-09-27T00:31:00Z"
 }
