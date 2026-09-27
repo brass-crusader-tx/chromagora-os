@@ -1,13 +1,13 @@
 # TSUNAMI UI Genesis JitPack trigger
 
-Private Genesis source head: `58b370c284c648ee59b91fcbb600b7e390374a37`.
+Private Genesis source head: `f48036d68bc79b060e38a871c6f7c7f46a62ac30`.
 
-This immutable build transport commit is bound by `tsunami-builder/MIRROR-MANIFEST.json`. The public mirror is Git-blob-identical to all 58 build/support files in the private Genesis head.
+Exact byte-identical public build snapshot: `30987d3abbce9bc49668b7fd0ef406db54eae096`.
 
-Rebuild request: sequence 38 · 2026-09-27T02:45:00Z.
+- [Trigger POM](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/30987d3abb/chromagora-os-30987d3abb.pom)
+- [Build API](https://jitpack.io/api/builds/com.github.brass-crusader-tx/chromagora-os/30987d3abb)
+- [App APK](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/30987d3abb/chromagora-os-30987d3abb.apk)
+- [AndroidTest APK](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/30987d3abb/chromagora-os-30987d3abb-androidTest.apk)
+- [Build log](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/30987d3abb/build.log)
 
-Current executable contract: 39 Compose interaction tests and a canonical 46-state capture matrix, including queue, lyrics/source/language tools, listening INFO, responsive sizes, no-artwork, monochrome, accessibility, longform and failure/recovery states.
-
-- APK: `https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/<VERSION>/chromagora-os-<VERSION>.apk`
-- AndroidTest APK: `https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/<VERSION>/chromagora-os-<VERSION>-androidTest.apk`
-- Build log: `https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/<VERSION>/build.log`
+The manifest contract for the 58 build/support files is exact against the private head. This page exists solely to provide immutable, followable build-trigger links while GitHub Actions startup remains unavailable.
