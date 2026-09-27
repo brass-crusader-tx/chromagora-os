@@ -159,7 +159,7 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Quick actions & sessions",state.activeSession?.let{"SESSION · $it"}?:"No active session"){state.settingsExpanded="quick-actions"}
             ActionRow("Backup & portability",if(state.autoBackupEnabled)"AUTO · every ${state.backupIntervalHours}h" else "MANUAL"){state.settingsExpanded="backup"}
             ActionRow("Diagnostics",if(state.diagnosticsFault)"ATTENTION" else "HEALTHY"){state.primary=PrimarySpace.SIGNAL;onClose()}
-            ActionRow("About","TSUNAMI UI Genesis"){state.banner="TSUNAMI UI Genesis"}
+            ActionRow("About","TSUNAMI"){state.banner="TSUNAMI"}
             ActionRow("Permissions","NONE REQUESTED"){state.banner="This shell requests no Android permissions"}
         }
     }
