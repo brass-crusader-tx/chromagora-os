@@ -21,3 +21,5 @@ jobs:
           set -eux
           uname -a
           echo "TSUNAMI_RUNNER_SMOKE=PASS"
+
+# allocation probe 2026-09-27 exact-source 68a75807
