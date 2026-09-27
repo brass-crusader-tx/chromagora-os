@@ -307,10 +307,10 @@
     "source_head": "79fd0eda8b8b673b8309654c20460d90da9860a3"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-27T05:40:00Z",
+    "requested_at_utc": "2026-09-27T05:34:00Z",
     "private_head": "79fd0eda8b8b673b8309654c20460d90da9860a3",
-    "reason": "exact-head rebuild after physical-device display restoration and test-package cleanup hardening",
-    "sequence": 46
+    "reason": "exact-head rebuild after instrumentation package cleanup and gate binding",
+    "sequence": 47
   },
-  "generated_at_utc": "2026-09-27T05:40:00Z"
+  "generated_at_utc": "2026-09-27T05:34:00Z"
 }
