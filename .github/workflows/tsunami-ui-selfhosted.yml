@@ -168,3 +168,5 @@ jobs:
             tsunami-builder/ui-shell/tools/proofs/
             tsunami-builder/MIRROR-MANIFEST.json
           if-no-files-found: warn
+
+# exact-current acceptance trigger source=1e65095a651394be923a7aa875cfc3b83a8254f6
