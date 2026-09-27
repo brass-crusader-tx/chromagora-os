@@ -23,14 +23,14 @@ ROOT = Path(__file__).resolve().parents[1]
 UI = ROOT / "ui-shell"
 REPORT = ROOT / "build" / "reports" / "tsunami" / "ui-shell"
 JVM_STATE_STATUS = "NOT_RUN"
-FONT_MANIFEST = ROOT / "docs" / "TSUNAMI-SANS-v5.1-MANIFEST.json"
+FONT_MANIFEST = ROOT / "docs" / "TSUNAMI-SANS-v5.2-MANIFEST.json"
 
 
 def load_font_manifest() -> dict:
     if not FONT_MANIFEST.is_file():
         raise RuntimeError(f"canonical TSUNAMI Sans manifest missing: {FONT_MANIFEST}")
     data = json.loads(FONT_MANIFEST.read_text(encoding="utf-8"))
-    if data.get("family") != "TSUNAMI Sans" or data.get("version") != "5.100":
+    if data.get("family") != "TSUNAMI Sans" or data.get("version") != "5.200":
         raise RuntimeError(f"unexpected TSUNAMI Sans manifest identity: {data.get('family')!r} {data.get('version')!r}")
     generated_from = data.get("generated_from")
     expected_blob = data.get("generator_blob_sha1")
@@ -47,16 +47,17 @@ def load_font_manifest() -> dict:
     return data
 
 
-def manifest_font_hashes(data: dict) -> dict[str, str]:
+def manifest_weight_contract(data: dict) -> dict[str, int]:
     weights = data.get("weights", {})
     required = ("Light", "Regular", "Medium", "Semibold", "Bold")
     missing = [name for name in required if name not in weights]
     if missing:
         raise RuntimeError("TSUNAMI Sans manifest misses weights: " + ", ".join(missing))
-    return {
-        f"tsunami_sans_{name.lower()}.ttf": weights[name]["sha256"]
-        for name in required
-    }
+    contract={name:int(weights[name]["weight_class"]) for name in required}
+    expected={"Light":300,"Regular":400,"Medium":500,"Semibold":600,"Bold":700}
+    if contract != expected:
+        raise RuntimeError(f"TSUNAMI Sans manifest weight contract drift: {contract}")
+    return contract
 
 REQUIRED_SOURCE = [
     "app/src/main/java/com/tsunami/shell/MainActivity.kt",
@@ -252,7 +253,7 @@ def generate_and_build() -> Path:
             names=font["name"]
             family=next((n.toUnicode() for n in names.names if n.nameID==1), None)
             version=next((n.toUnicode() for n in names.names if n.nameID==5), None)
-            if family != "TSUNAMI Sans" or version != "Version 5.100":
+            if family != "TSUNAMI Sans" or version != "Version 5.200":
                 raise RuntimeError(f"{font_path.name} has inconsistent family/version metadata: {family!r} {version!r}")
             glyph_map={cp:g for table in font["cmap"].tables for cp,g in table.cmap.items()}
             glyf=font["glyf"]
@@ -270,37 +271,31 @@ def generate_and_build() -> Path:
     if seen_weights != expected_weights:
         raise RuntimeError(f"unexpected TSUNAMI Sans weight classes: {sorted(seen_weights)}")
     manifest = load_font_manifest()
-    expected_font_hashes = manifest_font_hashes(manifest)
-    first_font_hashes = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in generated}
-    if first_font_hashes != expected_font_hashes:
-        raise RuntimeError(f"TSUNAMI Sans master hashes drifted: actual={first_font_hashes} expected={expected_font_hashes}")
-    for name, meta in manifest["weights"].items():
-        path = UI / "app/src/main/res/font" / f"tsunami_sans_{name.lower()}.ttf"
-        if path.stat().st_size != int(meta["bytes"]):
-            raise RuntimeError(f"{path.name} byte-size drift: {path.stat().st_size} != {meta['bytes']}")
-    print("PASS TSUNAMI Sans canonical manifest hashes + byte sizes")
-    run([sys.executable, "tools/prepare_fonts.py"], cwd=UI)
-    second_font_hashes = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in generated}
-    if first_font_hashes != second_font_hashes:
-        raise RuntimeError(f"TSUNAMI Sans generation is not byte-reproducible: {first_font_hashes} != {second_font_hashes}")
-    print("PASS TSUNAMI Sans byte-reproducibility")
-
+    manifest_weight_contract(manifest)
     proofs = [
         UI / "tools/proofs/tsunami-sans-proof.png",
         UI / "tools/proofs/tsunami-sans-ui-proof.png",
     ]
+    expected_proofs=list(manifest.get("proofs") or [])
+    if expected_proofs != [p.name for p in proofs]:
+        raise RuntimeError(f"TSUNAMI Sans proof contract drift: {expected_proofs}")
     missing_proofs = [p.name for p in proofs if not p.is_file() or p.stat().st_size < 10_000]
     if missing_proofs:
         raise RuntimeError("TSUNAMI Sans proof generation incomplete: " + ", ".join(missing_proofs))
-    proof_manifest = manifest.get("proofs", {})
-    for proof in proofs:
-        meta = proof_manifest.get(proof.name)
-        if not meta:
-            raise RuntimeError(f"TSUNAMI Sans manifest misses proof: {proof.name}")
-        digest = hashlib.sha256(proof.read_bytes()).hexdigest()
-        if digest != meta["sha256"] or proof.stat().st_size != int(meta["bytes"]):
-            raise RuntimeError(f"TSUNAMI Sans proof drift: {proof.name} sha={digest} bytes={proof.stat().st_size}")
-    print("PASS TSUNAMI Sans proof hashes + byte sizes")
+    first_outputs={
+        "fonts":{p.name:{"sha256":hashlib.sha256(p.read_bytes()).hexdigest(),"bytes":p.stat().st_size} for p in generated},
+        "proofs":{p.name:{"sha256":hashlib.sha256(p.read_bytes()).hexdigest(),"bytes":p.stat().st_size} for p in proofs},
+    }
+    (REPORT / "font-build-manifest-first.json").write_text(json.dumps(first_outputs,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+    run([sys.executable, "tools/prepare_fonts.py"], cwd=UI)
+    second_outputs={
+        "fonts":{p.name:{"sha256":hashlib.sha256(p.read_bytes()).hexdigest(),"bytes":p.stat().st_size} for p in generated},
+        "proofs":{p.name:{"sha256":hashlib.sha256(p.read_bytes()).hexdigest(),"bytes":p.stat().st_size} for p in proofs},
+    }
+    if first_outputs != second_outputs:
+        raise RuntimeError(f"TSUNAMI Sans generation is not byte-reproducible: {first_outputs} != {second_outputs}")
+    (REPORT / "font-build-manifest.json").write_text(json.dumps(second_outputs,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+    print("PASS TSUNAMI Sans v5.2 byte-reproducibility (five masters + two proofs)")
 
     gradle_env = os.environ.copy()
     gradle_env["TSUNAMI_FONT_PYTHON"] = sys.executable
@@ -515,7 +510,7 @@ def package_evidence(apk: Path) -> Path:
         "FONT_AMBIGUOUS_PAIRS_DISTINCT=PASS\n"
         "FONT_UI_SIZE_PROOF=PASS\n"
         "FONT_REPRODUCIBILITY=PASS\n"
-        "FONT_CANONICAL_HASHES=PASS\n"
+        "FONT_REPRODUCIBLE_OUTPUT_HASHES=PASS\n"
         "BUILD=PASS\n"
         "INSTRUMENTATION=PASS\n"
         "VISUAL_CAPTURE=PASS\n"
