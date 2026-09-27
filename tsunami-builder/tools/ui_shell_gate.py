@@ -464,7 +464,7 @@ def verify_on_emulator(apk: Path) -> None:
             f"SDK={subprocess.run([adb, '-s', serial, 'shell', 'getprop', 'ro.build.version.sdk'], text=True, capture_output=True).stdout.strip()}\n",
             encoding="utf-8",
         )
-        print(f"PASS instrumentation=38 visual states={len(base)} serial={serial}")
+        print(f"PASS instrumentation=39 visual states={len(base)} serial={serial}")
     finally:
         if proc is not None:
             proc.terminate()
