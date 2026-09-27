@@ -297,23 +297,55 @@ import kotlin.math.sin
         Text("Language controls describe the lyric layer; they never change track metadata or audio.",style=Type.body.copy(color=p.ink2))
         Spacer(Modifier.height(18.dp))
         Rule()
-        Row(Modifier.fillMaxWidth().heightIn(min=64.dp).clickable{state.cycleLyricsLanguage()}.padding(vertical=10.dp),verticalAlignment=Alignment.CenterVertically){
-            Text("Primary text",style=Type.row.copy(color=p.ink),modifier=Modifier.weight(1f))
+        var primaryFocused by remember{ mutableStateOf(false) }
+        Row(
+            Modifier.fillMaxWidth().heightIn(min=64.dp)
+                .onFocusChanged{primaryFocused=it.isFocused}
+                .clickable{state.cycleLyricsLanguage()}
+                .background(if(primaryFocused)p.groundAlt else androidx.compose.ui.graphics.Color.Transparent)
+                .padding(vertical=10.dp),
+            verticalAlignment=Alignment.CenterVertically
+        ){
+            Text("Primary text",style=Type.row.copy(color=p.ink,fontWeight=if(primaryFocused)FontWeight.SemiBold else FontWeight.Normal),modifier=Modifier.weight(1f))
             Text(state.lyricsLanguage,style=Type.meta.copy(color=p.selected))
         }
         Rule()
-        Row(Modifier.fillMaxWidth().heightIn(min=64.dp).clickable{state.cycleLyricsTranslation()}.padding(vertical=10.dp),verticalAlignment=Alignment.CenterVertically){
-            Text("Translation",style=Type.row.copy(color=p.ink),modifier=Modifier.weight(1f))
+        var translationFocused by remember{ mutableStateOf(false) }
+        Row(
+            Modifier.fillMaxWidth().heightIn(min=64.dp)
+                .onFocusChanged{translationFocused=it.isFocused}
+                .clickable{state.cycleLyricsTranslation()}
+                .background(if(translationFocused)p.groundAlt else androidx.compose.ui.graphics.Color.Transparent)
+                .padding(vertical=10.dp),
+            verticalAlignment=Alignment.CenterVertically
+        ){
+            Text("Translation",style=Type.row.copy(color=p.ink,fontWeight=if(translationFocused)FontWeight.SemiBold else FontWeight.Normal),modifier=Modifier.weight(1f))
             Text(state.lyricsTranslation,style=Type.meta.copy(color=p.selected))
         }
         Rule()
-        Row(Modifier.fillMaxWidth().heightIn(min=64.dp).clickable{state.lyricsWordTiming=!state.lyricsWordTiming}.padding(vertical=10.dp),verticalAlignment=Alignment.CenterVertically){
-            Text("Timing granularity",style=Type.row.copy(color=p.ink),modifier=Modifier.weight(1f))
+        var timingFocused by remember{ mutableStateOf(false) }
+        Row(
+            Modifier.fillMaxWidth().heightIn(min=64.dp)
+                .onFocusChanged{timingFocused=it.isFocused}
+                .clickable{state.lyricsWordTiming=!state.lyricsWordTiming}
+                .background(if(timingFocused)p.groundAlt else androidx.compose.ui.graphics.Color.Transparent)
+                .padding(vertical=10.dp),
+            verticalAlignment=Alignment.CenterVertically
+        ){
+            Text("Timing granularity",style=Type.row.copy(color=p.ink,fontWeight=if(timingFocused)FontWeight.SemiBold else FontWeight.Normal),modifier=Modifier.weight(1f))
             Text(if(state.lyricsWordTiming)"Word" else "Line",style=Type.meta.copy(color=p.selected))
         }
         Rule()
-        Row(Modifier.fillMaxWidth().heightIn(min=64.dp).clickable{state.cycleLyricsDelay()}.padding(vertical=10.dp),verticalAlignment=Alignment.CenterVertically){
-            Text("Global delay",style=Type.row.copy(color=p.ink),modifier=Modifier.weight(1f))
+        var delayFocused by remember{ mutableStateOf(false) }
+        Row(
+            Modifier.fillMaxWidth().heightIn(min=64.dp)
+                .onFocusChanged{delayFocused=it.isFocused}
+                .clickable{state.cycleLyricsDelay()}
+                .background(if(delayFocused)p.groundAlt else androidx.compose.ui.graphics.Color.Transparent)
+                .padding(vertical=10.dp),
+            verticalAlignment=Alignment.CenterVertically
+        ){
+            Text("Global delay",style=Type.row.copy(color=p.ink,fontWeight=if(delayFocused)FontWeight.SemiBold else FontWeight.Normal),modifier=Modifier.weight(1f))
             Text("${state.lyricsGlobalDelayMs} ms",style=Type.numeric.copy(color=p.selected))
         }
         Rule()
