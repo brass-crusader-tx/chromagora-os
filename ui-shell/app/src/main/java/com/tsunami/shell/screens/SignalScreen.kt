@@ -49,7 +49,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
 
 @Composable private fun ColumnScope.SummarySignal(state:ShellState){
     val p=LocalTsunamiPalette.current
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=28.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("signal-summary-list"),contentPadding=PaddingValues(bottom=28.dp)){
         item{
             SectionHeader("Now playing")
             val t=state.currentTrack
@@ -301,14 +301,14 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
 
 @Composable private fun ColumnScope.LogsSignal(state:ShellState){
     val p=LocalTsunamiPalette.current
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=28.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("signal-logs-list"),contentPadding=PaddingValues(bottom=28.dp)){
         item{
             SectionHeader("Diagnostics")
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
                 TextCommand("Copy summary",{state.banner="Diagnostic summary copied"})
                 TextCommand("Export bundle",{state.exportDiagnostics()})
                 TextCommand("Clear log",{state.clearDiagnosticLog()},enabled=state.diagnosticLog.isNotEmpty())
-                TextCommand(if(state.diagnosticsFault)"Retry" else "Simulate fault",{
+                TextCommand(if(state.diagnosticsFault)"Retry" else "Test recovery",{
                     if(state.diagnosticsFault){
                         state.diagnosticsFault=false
                         state.sourceError=false
@@ -318,7 +318,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
                         state.diagnosticsFault=true
                         state.diagnosticUnderruns=3
                         state.diagnosticLog.add("15:10:02 · underrun cluster detected")
-                        state.banner="Diagnostic fault injected"
+                        state.banner="Recovery test active"
                     }
                 },state.diagnosticsFault)
             }
