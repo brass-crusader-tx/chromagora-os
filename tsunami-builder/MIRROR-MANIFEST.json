@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "8ac95d125b94f9cf3229504adaa38044f7a4ee45",
+  "source_head": "aaa5df22344403fdd527a298e93cbfb0822d9abb",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror is byte-identical to private Genesis head 8ac95d125b94f9cf3229504adaa38044f7a4ee45; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
+  "note": "Build-critical mirror is byte-identical to private Genesis head aaa5df22344403fdd527a298e93cbfb0822d9abb; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -21,8 +21,8 @@
     },
     {
       "path": "ui-shell/app/src/androidTest/java/com/tsunami/shell/GenesisInteractionTest.kt",
-      "git_blob_sha": "a22edd933ace6fbe8d48d6e287925791ce678356",
-      "bytes": 34309
+      "git_blob_sha": "655aa0f5bccdf086bf0778bd85668d53ff20e9d8",
+      "bytes": 34796
     },
     {
       "path": "ui-shell/app/src/main/AndroidManifest.xml",
@@ -86,8 +86,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/SignalScreen.kt",
-      "git_blob_sha": "1ded64dd8fb31831b3f819a2276176a5139323d7",
-      "bytes": 18681
+      "git_blob_sha": "8f4d34933d24f0338f237f79c42e3f143db4a0de",
+      "bytes": 20579
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/state/ShellState.kt",
@@ -206,8 +206,8 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "e17086bf752dbd0185c6522d20b16662a33cb53c",
-      "bytes": 32724
+      "git_blob_sha": "c5f74d777b178d0316b993638992714bdc09e1b1",
+      "bytes": 33568
     },
     {
       "path": "ui-shell/tools/visual_sanity_verify.py",
@@ -304,13 +304,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "8ac95d125b94f9cf3229504adaa38044f7a4ee45"
+    "source_head": "aaa5df22344403fdd527a298e93cbfb0822d9abb"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-27T04:15:30Z",
-    "private_head": "8ac95d125b94f9cf3229504adaa38044f7a4ee45",
-    "reason": "exact-head rebuild after source-contract alignment for starter onboarding and recovery logs",
-    "sequence": 43
+    "requested_at_utc": "2026-09-27T05:15:00Z",
+    "private_head": "aaa5df22344403fdd527a298e93cbfb0822d9abb",
+    "reason": "exact-head rebuild after Signal playback/history privacy and quality-field truthfulness pass",
+    "sequence": 44
   },
-  "generated_at_utc": "2026-09-27T04:15:30Z"
+  "generated_at_utc": "2026-09-27T05:15:00Z"
 }
