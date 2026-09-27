@@ -98,6 +98,7 @@ def main()->int:
             '.onFocusChanged{actionFocused=it.isFocused}',
             '.onFocusChanged{downloadFocused=it.isFocused}',
             '.background(if(downloadFocused&&!unavailable)p.groundAlt else Color.Transparent)',
+            '.clearAndSetSemantics{}',
         ),
         "screens/FindScreen.kt":(
             'contentDescription="$label. ${if(enabled)detail else "Unavailable while offline"}"',
