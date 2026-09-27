@@ -75,6 +75,26 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Your listening line").assertExists()
     }
 
+    @Test fun listeningInfoAndLyricsToolsAreReachableAndStateful() {
+        compose.onNodeWithContentDescription("Open listening environment").performClick()
+        compose.onNodeWithText("Info").performClick()
+        compose.onNodeWithText("TRACK OBJECT").assertExists()
+        compose.onNodeWithText("FLAC · 24 / 96").assertExists()
+        compose.onNodeWithText("Analyse").performClick()
+        compose.onNodeWithText("Track analysis complete").assertExists()
+        compose.onNodeWithText("Lyrics").performClick()
+        compose.onNodeWithText("Sources").performClick()
+        compose.onNodeWithText("RESOLUTION ORDER").assertExists()
+        compose.onNodeWithContentDescription("Move lyric source up").performClick()
+        compose.onNodeWithText("Lyrics priority updated").assertExists()
+        compose.onNodeWithText("Language").performClick()
+        compose.onNodeWithText("Primary text").assertExists()
+        compose.onNodeWithText("English").performClick()
+        compose.onNodeWithText("Original").assertExists()
+        compose.onNodeWithText("Translation").performClick()
+        compose.onNodeWithText("English").assertExists()
+    }
+
     @Test fun libraryIndexModeRemovesArtworkDependencyStructurally() {
         compose.onNodeWithText("Library", useUnmergedTree = true).performClick()
         compose.onAllNodesWithContentDescription("Artwork for Afterglow at the Edge of the City").onFirst().assertExists()

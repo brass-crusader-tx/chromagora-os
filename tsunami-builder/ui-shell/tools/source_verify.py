@@ -129,7 +129,7 @@ REQUIRED_ANCHORS = {
     "screens/OnboardingScreen.kt": ['state.settingsExpanded="services"', "Enter with the sample library", "Index a music folder"],
     "screens/ExpandedListening.kt": [
         "PlayerMode.QUEUE", "PlayerMode.LYRICS", "PlayerMode.OUTPUT", "PlayerMode.VISUAL", "PlayerMode.OUTPUT to \"Output\"", "LongformType.AUDIOBOOK", "LongformType.PODCAST", "\"Back 30 sec\"", "\"Mark played\"",
-        "TimeRuler(", "Bookmark", "invokeObjectAction(", "val contextualActions=state.quickActions.distinct()", 'label="listening-mode"', "state.reducedMotion",
+        "TimeRuler(", "Bookmark", "invokeObjectAction(", "InfoPane(", "LyricsSourcesPane(", "LyricsLanguagePane(", "val contextualActions=state.quickActions.distinct()", 'label="listening-mode"', "state.reducedMotion",
     ],
     "screens/LibraryScreen.kt": [
         "LibraryLens.TRACKS", "LibraryLens.ALBUMS", "LibraryLens.ARTISTS",
@@ -355,7 +355,7 @@ def main() -> int:
     notification_actions=literal_state_list("notificationActions")
     quick_settings_actions=literal_state_list("quickSettingsActions")
     stable_transport={"Previous","Play/Pause","Next","Shuffle","Repeat"}
-    listening_modes={"Queue","Lyrics","Output","Visual"}
+    listening_modes={"Queue","Lyrics","Output","Visual","Info"}
     if stable_transport & set(full_actions):
         die(f"full-player object actions overlap stable transport: {sorted(stable_transport & set(full_actions))}")
     if listening_modes & set(full_actions):
@@ -413,7 +413,7 @@ def main() -> int:
         "settings_actions": 100,
         "settings_toggles": 45,
         "authored_actions": 280,
-        "instrumentation_tests": 38,
+        "instrumentation_tests": 39,
     }
     collapsed = {name: (counts[name], minimum) for name, minimum in floors.items() if counts[name] < minimum}
     if collapsed:
@@ -454,7 +454,7 @@ def main() -> int:
     for contract_name, contract_source in (("host build",host_build),("root gate",root_gate)):
         if "TSUNAMI-SANS-v5.1-MANIFEST.json" not in contract_source:
             die(f"{contract_name} must bind generated fonts to the canonical v5.1 manifest")
-    if "OK (38 tests)" not in host_build or "OK (38 tests)" not in root_gate:
+    if "OK (39 tests)" not in host_build or "OK (39 tests)" not in root_gate:
         die("Android acceptance paths must require the full 38-test instrumentation suite")
     for anchor in (
         'JDK 17 or newer',

@@ -96,7 +96,7 @@ REQUIRED_SCENARIOS = {
     "downloads-active", "downloads-error", "library-index",
 }
 
-REQUIRED_PLAYER_MODES = {"queue", "lyrics", "output", "visual"}
+REQUIRED_PLAYER_MODES = {"queue", "lyrics", "output", "visual", "info"}
 
 
 class CheckError(RuntimeError):
@@ -465,7 +465,7 @@ def main() -> int:
 
     host_build = read(UI / "tools/build_host.sh")
     root_gate = read(ROOT / "tools/ui_shell_gate.py")
-    if "OK (38 tests)" not in host_build or "OK (38 tests)" not in root_gate:
+    if "OK (39 tests)" not in host_build or "OK (39 tests)" not in root_gate:
         fail("Android acceptance paths must require all 38 instrumentation tests")
 
     tests = read(TEST)

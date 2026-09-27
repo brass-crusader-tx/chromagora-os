@@ -124,7 +124,7 @@ import kotlin.math.sin
 
 @Composable private fun ModeSelector(state:ShellState){
     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
-        listOf(PlayerMode.QUEUE to "Queue",PlayerMode.LYRICS to "Lyrics",PlayerMode.OUTPUT to "Output",PlayerMode.VISUAL to "Visual").forEach{(m,label)->TextCommand(label,{state.playerMode=m},state.playerMode==m)}
+        listOf(PlayerMode.QUEUE to "Queue",PlayerMode.LYRICS to "Lyrics",PlayerMode.OUTPUT to "Output",PlayerMode.VISUAL to "Visual",PlayerMode.INFO to "Info").forEach{(m,label)->TextCommand(label,{state.playerMode=m},state.playerMode==m)}
         TextCommand(if(state.shuffle)"Shuffle on" else "Shuffle",{state.shuffle=!state.shuffle},state.shuffle)
         TextCommand("Repeat ${state.repeat.name.lowercase()}",{state.cycleRepeat()},state.repeat!=RepeatMode.OFF)
     }
@@ -141,7 +141,7 @@ import kotlin.math.sin
                 targetState=state.playerMode,
                 modifier=Modifier.fillMaxWidth().weight(1f),
                 transitionSpec={
-                    val order=listOf(PlayerMode.QUEUE,PlayerMode.LYRICS,PlayerMode.OUTPUT,PlayerMode.VISUAL)
+                    val order=listOf(PlayerMode.QUEUE,PlayerMode.LYRICS,PlayerMode.OUTPUT,PlayerMode.VISUAL,PlayerMode.INFO)
                     val direction=if(order.indexOf(targetState)>=order.indexOf(initialState))1 else -1
                     (slideInHorizontally(tween(150)){direction*(it/6)}+fadeIn(tween(100))) togetherWith
                         (slideOutHorizontally(tween(130)){-direction*(it/6)}+fadeOut(tween(90)))
@@ -158,6 +158,7 @@ import kotlin.math.sin
         PlayerMode.LYRICS -> LyricsPane(state,modifier)
         PlayerMode.OUTPUT -> OutputPane(state,modifier)
         PlayerMode.VISUAL -> VisualPane(state,modifier)
+        PlayerMode.INFO -> InfoPane(state,modifier)
     }
 }
 
@@ -183,6 +184,25 @@ import kotlin.math.sin
 }
 
 @Composable private fun LyricsPane(state:ShellState,modifier:Modifier){
+    val p=LocalTsunamiPalette.current
+    Column(modifier){
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+            listOf(
+                LyricsPanel.LINES to "Lines",
+                LyricsPanel.SOURCES to "Sources",
+                LyricsPanel.LANGUAGE to "Language",
+            ).forEach{(panel,label)->TextCommand(label,{state.lyricsPanel=panel},state.lyricsPanel==panel)}
+        }
+        Rule()
+        when(state.lyricsPanel){
+            LyricsPanel.SOURCES -> LyricsSourcesPane(state,Modifier.fillMaxWidth().weight(1f))
+            LyricsPanel.LANGUAGE -> LyricsLanguagePane(state,Modifier.fillMaxWidth().weight(1f))
+            LyricsPanel.LINES -> LyricsLinesPane(state,Modifier.fillMaxWidth().weight(1f))
+        }
+    }
+}
+
+@Composable private fun LyricsLinesPane(state:ShellState,modifier:Modifier){
     val p=LocalTsunamiPalette.current
     if(state.fixture.missingLyrics){
         Column(modifier.padding(vertical=24.dp)){
@@ -231,6 +251,75 @@ import kotlin.math.sin
         }
     }
 }
+
+@Composable private fun LyricsSourcesPane(state:ShellState,modifier:Modifier){
+    val p=LocalTsunamiPalette.current
+    Column(modifier){
+        Row(Modifier.fillMaxWidth().heightIn(min=48.dp),verticalAlignment=Alignment.CenterVertically){
+            Text("RESOLUTION ORDER",style=Type.micro.copy(color=p.ink3),modifier=Modifier.weight(1f))
+            Text(if(state.lyricsAutoFetch)"AUTO FETCH" else "MANUAL",style=Type.micro.copy(color=if(state.lyricsAutoFetch)p.selected else p.ink3))
+        }
+        Rule()
+        LazyColumn(Modifier.fillMaxWidth().weight(1f)){
+            itemsIndexed(state.lyricSourceOrder,key={_,source->source}){index,source->
+                Row(Modifier.fillMaxWidth().heightIn(min=62.dp).padding(vertical=8.dp),verticalAlignment=Alignment.CenterVertically){
+                    Text((index+1).toString().padStart(2,'0'),style=Type.numeric.copy(color=p.ink3),modifier=Modifier.width(34.dp))
+                    Column(Modifier.weight(1f)){
+                        Text(source,style=Type.row.copy(color=p.ink))
+                        Text(
+                            when(source){
+                                "Embedded" -> "File metadata · immediate"
+                                "LRC sidecar" -> "Local timed text · exact-track first"
+                                "LRCLIB" -> "Connected lookup · mock"
+                                else -> "Local alignment fallback · mock"
+                            },
+                            style=Type.meta.copy(color=p.ink3)
+                        )
+                    }
+                    if(index>0)HitIcon(Glyph.UP,"Move lyric source up",{state.moveLyricSource(index,-1)})
+                    if(index<state.lyricSourceOrder.lastIndex)HitIcon(Glyph.DOWN,"Move lyric source down",{state.moveLyricSource(index,1)})
+                }
+                Rule()
+            }
+        }
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+            TextCommand(if(state.lyricsAutoFetch)"Auto fetch on" else "Auto fetch off",{state.lyricsAutoFetch=!state.lyricsAutoFetch},state.lyricsAutoFetch)
+            TextCommand(if(state.missingLyricsFallback)"Fallback on" else "Fallback off",{state.missingLyricsFallback=!state.missingLyricsFallback},state.missingLyricsFallback)
+        }
+    }
+}
+
+@Composable private fun LyricsLanguagePane(state:ShellState,modifier:Modifier){
+    val p=LocalTsunamiPalette.current
+    Column(modifier.padding(vertical=16.dp)){
+        Text("Presentation language",style=Type.title.copy(color=p.ink))
+        Spacer(Modifier.height(6.dp))
+        Text("Language controls describe the lyric layer; they never change track metadata or audio.",style=Type.body.copy(color=p.ink2))
+        Spacer(Modifier.height(18.dp))
+        Rule()
+        Row(Modifier.fillMaxWidth().heightIn(min=64.dp).clickable{state.cycleLyricsLanguage()}.padding(vertical=10.dp),verticalAlignment=Alignment.CenterVertically){
+            Text("Primary text",style=Type.row.copy(color=p.ink),modifier=Modifier.weight(1f))
+            Text(state.lyricsLanguage,style=Type.meta.copy(color=p.selected))
+        }
+        Rule()
+        Row(Modifier.fillMaxWidth().heightIn(min=64.dp).clickable{state.cycleLyricsTranslation()}.padding(vertical=10.dp),verticalAlignment=Alignment.CenterVertically){
+            Text("Translation",style=Type.row.copy(color=p.ink),modifier=Modifier.weight(1f))
+            Text(state.lyricsTranslation,style=Type.meta.copy(color=p.selected))
+        }
+        Rule()
+        Row(Modifier.fillMaxWidth().heightIn(min=64.dp).clickable{state.lyricsWordTiming=!state.lyricsWordTiming}.padding(vertical=10.dp),verticalAlignment=Alignment.CenterVertically){
+            Text("Timing granularity",style=Type.row.copy(color=p.ink),modifier=Modifier.weight(1f))
+            Text(if(state.lyricsWordTiming)"Word" else "Line",style=Type.meta.copy(color=p.selected))
+        }
+        Rule()
+        Row(Modifier.fillMaxWidth().heightIn(min=64.dp).clickable{state.cycleLyricsDelay()}.padding(vertical=10.dp),verticalAlignment=Alignment.CenterVertically){
+            Text("Global delay",style=Type.row.copy(color=p.ink),modifier=Modifier.weight(1f))
+            Text("${state.lyricsGlobalDelayMs} ms",style=Type.numeric.copy(color=p.selected))
+        }
+        Rule()
+    }
+}
+
 @Composable private fun OutputPane(state:ShellState,modifier:Modifier){
     val p=LocalTsunamiPalette.current
     Column(modifier){
@@ -306,6 +395,56 @@ import kotlin.math.sin
         Spacer(Modifier.height(12.dp))
         Text("SIMULATED VISUAL · no live signal capture",style=Type.micro.copy(color=p.ink3))
     }
+}
+
+@Composable private fun InfoPane(state:ShellState,modifier:Modifier){
+    val p=LocalTsunamiPalette.current
+    val t=state.currentTrack ?: return
+    LazyColumn(modifier,contentPadding=PaddingValues(vertical=14.dp)){
+        item{
+            Text("TRACK OBJECT",style=Type.micro.copy(color=p.ink3))
+            Spacer(Modifier.height(8.dp))
+            Text(t.title,style=Type.title.copy(color=p.ink),maxLines=3,overflow=TextOverflow.Ellipsis)
+            Spacer(Modifier.height(3.dp))
+            Text("${t.artist} · ${t.album}",style=Type.body.copy(color=p.ink2),maxLines=2,overflow=TextOverflow.Ellipsis)
+            Spacer(Modifier.height(14.dp))
+            Rule()
+        }
+        item{InfoRow("Year",t.year.toString())}
+        item{InfoRow("Duration",formatTime(t.durationMs))}
+        item{InfoRow("Source",t.provenance.name)}
+        item{InfoRow("Quality",t.quality)}
+        item{InfoRow("Availability",if(t.available)"Available" else "Unavailable")}
+        item{InfoRow("Offline",if(state.downloads[t.id]==DownloadState.DOWNLOADED)"Stored locally" else "Not stored")}
+        item{InfoRow("Output",state.output)}
+        item{InfoRow("Playback","${state.playbackSpeed}× · ReplayGain ${state.replayGainMode} · DSP ${if(state.dspEnabled)"on" else "bypass"}")}
+        if(t.longform){
+            item{InfoRow("Resume",formatTime(state.resumePositions[t.id] ?: state.positionMs))}
+            item{InfoRow("Chapter",t.chapter ?: "—")}
+            item{InfoRow("Bookmark",state.bookmarks[t.id]?.let(::formatTime) ?: "None")}
+        }
+        item{
+            Spacer(Modifier.height(10.dp))
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
+                TextCommand("Analyse",{state.analyzeCurrentTrack()})
+                TextCommand("Share ${formatTime(state.positionMs)}",{state.shareTimestamp()})
+                TextCommand(if(t.id in state.favourites)"Favourite" else "Favourite",{state.toggleFavourite(t.id)},t.id in state.favourites)
+            }
+        }
+        item{
+            Spacer(Modifier.height(12.dp))
+            Text("Mock object metadata only · no production database or signal telemetry",style=Type.micro.copy(color=p.ink3))
+        }
+    }
+}
+
+@Composable private fun InfoRow(label:String,value:String){
+    val p=LocalTsunamiPalette.current
+    Row(Modifier.fillMaxWidth().heightIn(min=54.dp).padding(vertical=8.dp),verticalAlignment=Alignment.CenterVertically){
+        Text(label,style=Type.meta.copy(color=p.ink3),modifier=Modifier.width(104.dp))
+        Text(value,style=Type.body.copy(color=p.ink),modifier=Modifier.weight(1f),maxLines=3,overflow=TextOverflow.Ellipsis)
+    }
+    Rule()
 }
 
 @Composable private fun CompactTransport(state:ShellState,t:Track){

@@ -8,6 +8,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     var primary by mutableStateOf(initialScreen)
     var expandedPlayer by mutableStateOf(false)
     var playerMode by mutableStateOf(PlayerMode.QUEUE)
+    var lyricsPanel by mutableStateOf(LyricsPanel.LINES)
     var theme by mutableStateOf(initialTheme)
     var reducedMotion by mutableStateOf(false)
     var highContrast by mutableStateOf(false)
@@ -75,6 +76,8 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     var lyricsArtworkBackdrop by mutableStateOf(false)
     var missingLyricsFallback by mutableStateOf(true)
     var lyricsAutoFetch by mutableStateOf(true)
+    var lyricsLanguage by mutableStateOf("English")
+    var lyricsTranslation by mutableStateOf("Off")
     var showArtworkInPlayer by mutableStateOf(true)
     var compactPlayerMetadata by mutableStateOf(false)
     var squareArtwork by mutableStateOf(true)
@@ -379,6 +382,8 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     fun cycleVisualizerMode(){ visualizerMode=when(visualizerMode){"Spectrum"->"Line";"Line"->"Field";else->"Spectrum"} }
     fun cycleVisualizerSensitivity(){ visualizerSensitivity=when(visualizerSensitivity){1f->1.5f;1.5f->2f;else->1f} }
     fun cycleLyricsDelay(){ lyricsGlobalDelayMs=when(lyricsGlobalDelayMs){0->250;250->820;820->-250;else->0}; banner="Lyrics delay · ${lyricsGlobalDelayMs} ms" }
+    fun cycleLyricsLanguage(){ lyricsLanguage=when(lyricsLanguage){"English"->"Original";"Original"->"Romanized";else->"English"}; banner="Lyrics language · $lyricsLanguage" }
+    fun cycleLyricsTranslation(){ lyricsTranslation=when(lyricsTranslation){"Off"->"English";"English"->"Bilingual";else->"Off"}; banner="Lyrics translation · $lyricsTranslation" }
     fun cycleExcludedFolders(){ excludedFolderCount=(excludedFolderCount+1)%4; banner="Excluded folders · $excludedFolderCount" }
     fun cycleExcludedExtensions(){ excludedExtensions=when(excludedExtensions){"m4a.tmp, part"->"part, temp, opus.preview";"part, temp, opus.preview"->"none";else->"m4a.tmp, part"} }
     fun cycleExcludedGenres(){ excludedGenres=when(excludedGenres){"none"->"Audiobook, Spoken";"Audiobook, Spoken"->"Christmas, Holiday";else->"none"};banner="Excluded genres · $excludedGenres" }

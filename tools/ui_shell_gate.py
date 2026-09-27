@@ -433,9 +433,9 @@ def verify_on_emulator(apk: Path) -> None:
         ], text=True, capture_output=True)
         test_text = (cp.stdout or "") + (cp.stderr or "")
         (REPORT / "instrumentation.txt").write_text(test_text, encoding="utf-8")
-        if cp.returncode != 0 or "OK (38 tests)" not in test_text:
+        if cp.returncode != 0 or "OK (39 tests)" not in test_text:
             print(test_text[-12_000:])
-            raise RuntimeError("UI Genesis instrumentation did not report OK (38 tests)")
+            raise RuntimeError("UI Genesis instrumentation did not report OK (39 tests)")
 
         env = os.environ.copy()
         env["ANDROID_SERIAL"] = serial
