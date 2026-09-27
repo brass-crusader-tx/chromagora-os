@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "43ace196781cd22b564466e64b5ade2d87304aed",
+  "source_head": "2fc88b9ce3ae50050ac9126eae176cc6e3a388e9",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror is byte-identical to private Genesis head 43ace196781cd22b564466e64b5ade2d87304aed; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
+  "note": "Build-critical mirror is byte-identical to private Genesis head 2fc88b9ce3ae50050ac9126eae176cc6e3a388e9; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -21,8 +21,8 @@
     },
     {
       "path": "ui-shell/app/src/androidTest/java/com/tsunami/shell/GenesisInteractionTest.kt",
-      "git_blob_sha": "655aa0f5bccdf086bf0778bd85668d53ff20e9d8",
-      "bytes": 34796
+      "git_blob_sha": "e063d99bc1ca9b04b9187fa84854ce1c97377f13",
+      "bytes": 34979
     },
     {
       "path": "ui-shell/app/src/main/AndroidManifest.xml",
@@ -81,8 +81,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/SettingsScreen.kt",
-      "git_blob_sha": "28a9f0c90c593532425bfa8f8f6c5f9ad186eefe",
-      "bytes": 46277
+      "git_blob_sha": "4ff9955e3bb073e6d1460ac318d80c8426c61224",
+      "bytes": 46255
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/SignalScreen.kt",
@@ -206,8 +206,8 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "face76cc5691d3945e1179136ca1fe2b9bb98d04",
-      "bytes": 34657
+      "git_blob_sha": "5da464bf7cc5d2383e58761578647acc63ab85b0",
+      "bytes": 34678
     },
     {
       "path": "ui-shell/tools/visual_sanity_verify.py",
