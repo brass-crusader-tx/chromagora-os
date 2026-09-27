@@ -281,7 +281,7 @@ private val nav=listOf(PrimarySpace.LISTEN to "Listen",PrimarySpace.LIBRARY to "
                     ConfirmationKind.CLEAR_HISTORY -> {
                         Text("Clear listening history?",style=Type.title.copy(color=p.ink))
                         Spacer(Modifier.height(6.dp))
-                        Text("This removes the preview listening record and Replay summary. Library ownership, playlists and playback position are unchanged.",style=Type.body.copy(color=p.ink2))
+                        Text("This removes listening history and the Replay summary. Library ownership, playlists and playback position are unchanged.",style=Type.body.copy(color=p.ink2))
                     }
                 }
                 Spacer(Modifier.height(14.dp))
