@@ -27,7 +27,7 @@ import kotlin.math.sin
     val p=LocalTsunamiPalette.current; val t=state.currentTrack
     if(t==null){
         Column(Modifier.fillMaxSize().background(p.ground).statusBarsPadding().navigationBarsPadding()){
-            Row(Modifier.fillMaxWidth().height(64.dp).padding(horizontal=12.dp),verticalAlignment=Alignment.CenterVertically){
+            Row(Modifier.fillMaxWidth().heightIn(min=64.dp).padding(horizontal=12.dp),verticalAlignment=Alignment.CenterVertically){
                 HitIcon(Glyph.BACK,"Back",onBack)
                 Spacer(Modifier.width(6.dp))
                 Text("LISTENING",style=Type.micro.copy(color=p.ink3,fontWeight=FontWeight.SemiBold))
@@ -48,7 +48,7 @@ import kotlin.math.sin
     }
     val progress=(state.positionMs.toFloat()/t.durationMs.coerceAtLeast(1L)).coerceIn(0f,1f)
     Column(Modifier.fillMaxSize().background(p.ground).statusBarsPadding().navigationBarsPadding()){
-        Row(Modifier.fillMaxWidth().height(64.dp).padding(horizontal=12.dp),verticalAlignment=Alignment.CenterVertically){HitIcon(Glyph.BACK,"Back",onBack);Spacer(Modifier.width(6.dp));Text("LISTENING",style=Type.micro.copy(color=p.ink3,fontWeight=FontWeight.SemiBold));Spacer(Modifier.weight(1f));Text(state.output,style=Type.meta.copy(color=p.ink2));HitIcon(Glyph.OUTPUT,"Output",{state.playerMode=PlayerMode.OUTPUT},selected=state.playerMode==PlayerMode.OUTPUT)};Rule()
+        Row(Modifier.fillMaxWidth().heightIn(min=64.dp).padding(horizontal=12.dp),verticalAlignment=Alignment.CenterVertically){HitIcon(Glyph.BACK,"Back",onBack);Spacer(Modifier.width(6.dp));Text("LISTENING",style=Type.micro.copy(color=p.ink3,fontWeight=FontWeight.SemiBold));Spacer(Modifier.weight(1f));Text(state.output,style=Type.meta.copy(color=p.ink2));HitIcon(Glyph.OUTPUT,"Output",{state.playerMode=PlayerMode.OUTPUT},selected=state.playerMode==PlayerMode.OUTPUT)};Rule()
         if(wide){Row(Modifier.weight(1f).padding(28.dp)){ListeningCore(state,t,progress,Modifier.weight(1f));Spacer(Modifier.width(32.dp));Box(Modifier.width(1.dp).fillMaxHeight().background(p.rule));Spacer(Modifier.width(32.dp));ListeningModePane(state,Modifier.weight(.9f))}}
         else{Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).testTag("expanded-listening-scroll").padding(horizontal=20.dp)){ListeningCore(state,t,progress,Modifier.fillMaxWidth());Spacer(Modifier.height(20.dp));Rule();ListeningModePane(state,Modifier.fillMaxWidth().height(360.dp))}}
         CompactTransport(state,t)
