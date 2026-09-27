@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "54f8d41d8b76464b093388d006d06d123061d160",
+  "source_head": "8ac95d125b94f9cf3229504adaa38044f7a4ee45",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror is byte-identical to private Genesis head 54f8d41d8b76464b093388d006d06d123061d160; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
+  "note": "Build-critical mirror is byte-identical to private Genesis head 8ac95d125b94f9cf3229504adaa38044f7a4ee45; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -206,8 +206,8 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "2c84d2f2ad101f33cf5bab1175a9083d3985e4a1",
-      "bytes": 32673
+      "git_blob_sha": "e17086bf752dbd0185c6522d20b16662a33cb53c",
+      "bytes": 32724
     },
     {
       "path": "ui-shell/tools/visual_sanity_verify.py",
@@ -304,13 +304,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "54f8d41d8b76464b093388d006d06d123061d160"
+    "source_head": "8ac95d125b94f9cf3229504adaa38044f7a4ee45"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-27T04:22:00Z",
-    "private_head": "54f8d41d8b76464b093388d006d06d123061d160",
-    "reason": "exact-head rebuild after removing duplicate onboarding settings overlay",
-    "sequence": 42
+    "requested_at_utc": "2026-09-27T04:30:00Z",
+    "private_head": "8ac95d125b94f9cf3229504adaa38044f7a4ee45",
+    "reason": "exact-head rebuild after source-contract anchor repair",
+    "sequence": 43
   },
-  "generated_at_utc": "2026-09-27T04:22:00Z"
+  "generated_at_utc": "2026-09-27T04:30:00Z"
 }
