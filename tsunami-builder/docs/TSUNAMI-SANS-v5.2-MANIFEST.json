@@ -49,7 +49,7 @@
       "c/e",
       "v/y"
     ],
-    "reproducibility": "two consecutive generator executions must produce identical SHA-256 and byte counts for all five TTF masters and both proof PNGs"
+    "reproducibility": "two consecutive generator executions must produce byte-identical TTF masters and proof PNG outputs, with identical SHA-256 and byte counts"
   },
   "toolchain": {
     "fonttools": "4.63.0",
