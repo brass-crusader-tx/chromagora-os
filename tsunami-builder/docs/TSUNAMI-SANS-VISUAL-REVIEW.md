@@ -1,5 +1,13 @@
 # TSUNAMI Sans — visual review log
 
+## 2026-09-27 · v5.2 reference-proportion source pass
+
+The active Genesis source now identifies **TSUNAMI Sans v5.2 / Version 5.200**. The generator Git blob is **`c99945106bf51e643641bd35b6d6a52a99ed1004`** and the executable manifest is `docs/TSUNAMI-SANS-v5.2-MANIFEST.json`. This pass widens the principal circular and lowercase proportions toward the supplied reference while retaining the established 500-unit x-height, 710-unit cap height, five explicit weight classes, Western-European repertoire, GPOS kerning, deterministic head timestamp and ambiguity controls.
+
+The acceptance contract has deliberately changed from stale pre-recorded output hashes to a stricter source-bound reproduction test: the exact manifest-bound generator must run **twice** on the build host and all five TTF masters plus both proof PNGs must be byte-identical between passes. The first-pass and accepted second-pass SHA-256/byte manifests are emitted as build evidence. This prevents an older v5.1 hash table from falsely rejecting the current v5.2 source while still making non-deterministic generation a hard failure.
+
+No v5.2 Android raster acceptance is claimed in this section. Fresh proof generation, Android assembly, device rendering, the large-font/no-artwork/monochrome/squint states and direct human visual inspection remain mandatory before the type family is accepted for the shell.
+
 ## 2026-09-26 · v5.1 exact-source legibility refinement
 
 The active Genesis branch remains **TSUNAMI Sans v5.1 / Version 5.100**, but the outlines have received one deliberately narrow refinement after a fresh independent regeneration and full-resolution visual inspection. The exact generator reconstructed from the repository before editing was verified as Git blob `43ae1290ae3063a717cddb0272080dc0c27d3b7f`; the refined generator committed to the branch is Git blob **`ea17b0e4e51e40a6ac9a0a8845ac83b53c620ae2`**.
