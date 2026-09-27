@@ -222,3 +222,30 @@ Results:
 The current acceptance scripts require exactly **38** instrumentation tests and **45** base visual captures. The visual contract spans compact/landscape/medium/expanded layouts, 40 / 4,008 / 40,008 library sizes, 150% / 200% font scale, no-artwork states, audiobook/podcast semantics, queue/lyrics/output/visual modes, disconnected/transient provider states, failed/active downloads, empty/failed search, queue exhaustion, buffering/unavailable/partial states, and the artwork-free Library Index.
 
 These checks establish source coherence only. They deliberately do **not** certify Android compilation, APK installability, device rendering, TSUNAMI Sans Android raster quality, the human de-tackification review, or crash-free execution.
+
+
+## Current listening-info / lyric-tools reconciliation — 2026-09-26 21:2x EDT
+
+A fresh authenticated source audit was executed against pre-documentation executable head `cb25ffa6c63a7ac956ffdd4b95bf61f186d3ae2b` after completing the newly introduced `PlayerMode.INFO` and `LyricsPanel` model surfaces rather than leaving them as orphan enum values.
+
+Concrete source results:
+
+- Kotlin source/test files scanned: **15**;
+- delimiter / string / comment lexical failures: **0**;
+- declared `ShellState` members: **357**;
+- distinct UI/test `state.*` references: **318**;
+- unresolved substantive state references: **0**;
+- Compose instrumentation tests: **39**, with **0 duplicate test names**;
+- Settings destination assignments / rendered routes / title routes: **20 / 20 / 20**, with **0 missing and 0 orphan routes**;
+- canonical capture rows: **46 / 46 unique**;
+- visual-sanity expected states: **46 / 46 unique**;
+- capture/verifier set differences: **0** in either direction;
+- Android manifest permissions: **0**;
+- TODO/FIXME/XXX markers in shell Kotlin source: **0**;
+- production runtime/build paths changed versus `main`: **0** under `app/`, `wear/`, `control-plane/`, root `build.gradle.kts`, or root `settings.gradle.kts`.
+
+The regression fixed in this reconciliation was concrete: `MockModels.kt` had acquired `PlayerMode.INFO` and `LyricsPanel { LINES, SOURCES, LANGUAGE }` while Expanded Listening still only rendered Queue/Lyrics/Output/Visual. The shell now renders an explicit **Info** listening mode, deterministic ADB launch supports `mode=info`, and Lyrics contains separate **Lines / Sources / Language** subspaces. Source priority is reorderable; auto-fetch/fallback, primary language, translation presentation, timing granularity and global delay are stateful. The Info mode exposes track-object truth—identity, year, duration, source, quality, availability, offline state, output, processing policy, and longform resume/chapter/bookmark—without displacing the stable transport.
+
+The dedicated regression `listeningInfoAndLyricsToolsAreReachableAndStateful` raises the interaction suite to **39 tests**. State `46-player-info` raises the deterministic visual matrix to **46** and is required to remain distinct from Queue/Lyrics/Output/Visual by the image-level verifier. Root/static/source/host/self-hosted gates have been reconciled to those exact cardinalities.
+
+This is source-contract evidence only. It does **not** substitute for current-head Android app + AndroidTest APK assembly, installation, **39/39** instrumentation execution, all **46** physical/emulated captures, Android TSUNAMI Sans v5.1 raster inspection, crash/logcat scanning, derived monochrome/squint evidence, or the mandatory human de-tackification/artwork-independent/non-streaming-clone review.
