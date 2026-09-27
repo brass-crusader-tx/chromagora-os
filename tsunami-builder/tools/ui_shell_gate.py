@@ -450,8 +450,8 @@ def verify_on_emulator(apk: Path) -> None:
             p for p in verification.glob("*.png")
             if "-mono" not in p.stem and "-squint" not in p.stem and p.stem != "contact-sheet"
         ]
-        if len(base) != 45:
-            raise RuntimeError(f"visual verification set must contain exactly 45 base states, found {len(base)}")
+        if len(base) != 46:
+            raise RuntimeError(f"visual verification set must contain exactly 46 base states, found {len(base)}")
         if not (verification / "contact-sheet.png").is_file():
             raise RuntimeError("visual verification contact sheet missing")
         logcat = (verification / "logcat-tail.txt").read_text(encoding="utf-8", errors="replace")
