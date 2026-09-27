@@ -466,7 +466,7 @@ def main() -> int:
     host_build = read(UI / "tools/build_host.sh")
     root_gate = read(ROOT / "tools/ui_shell_gate.py")
     if "OK (39 tests)" not in host_build or "OK (39 tests)" not in root_gate:
-        fail("Android acceptance paths must require all 38 instrumentation tests")
+        fail("Android acceptance paths must require all 39 instrumentation tests")
 
     tests = read(TEST)
     expected_test_contracts = (
@@ -484,6 +484,7 @@ def main() -> int:
         "libraryRootMutationPropagatesIntoFolderLens",
         "albumObjectPlayUsesTrackFromThatAlbum",
         "progressiveSettingsRoutesRoundTripToStableRoot",
+        "listeningInfoAndLyricsToolsAreReachableAndStateful",
     )
     for name in expected_test_contracts:
         if f"fun {name}(" not in tests:
