@@ -190,7 +190,7 @@ enum class Glyph { PLAY, PAUSE, NEXT, PREVIOUS, STAR, DOWNLOAD, SEARCH, SETTINGS
             Box(Modifier.width(if(selected||focused)3.dp else 1.dp).height(if(compact)24.dp else 32.dp).background(if(selected||focused)p.selected else Color.Transparent))
             Spacer(Modifier.width(if(selected)7.dp else 0.dp))
             if(showArtwork){
-                Artwork(track,Modifier.size(if(compact)42.dp else 52.dp).semantics{contentDescription="Artwork for ${track.title}"},forceMissing)
+                Artwork(track,Modifier.size(if(compact)42.dp else 52.dp).clearAndSetSemantics{},forceMissing)
                 Spacer(Modifier.width(12.dp))
             }else{
                 Spacer(Modifier.width(10.dp))
