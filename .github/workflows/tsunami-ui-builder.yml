@@ -80,4 +80,4 @@ jobs:
 
 # current-head mirror contract is manifest-bound; file counts may grow as isolated verification tooling grows
 
-# exact-source retry probe 2026-09-26 private=63d7b1f201b7873a65058150bde364375ab80bd8
+# exact-source retry probe 2026-09-26T20:24-04:00 private=ed182b683ba604dbf9c4351f19a69561d4478c55
