@@ -160,6 +160,12 @@ PRIMARY_COPY_GUARDS = {
     ],
     "screens/SignalScreen.kt": [
         "Technical information appears only where it changes understanding, trust, or recovery.",
+        "384 MiB / 2 GiB",
+        "Nominal 96 kHz",
+        "L 0.842 · R 0.816",
+        "−6.20 dB sample",
+        "118 BPM · C minor · energy 64%",
+        "sample audio bytes",
     ],
     "screens/ExpandedListening.kt": [
         "TSUNAMI does not fabricate a karaoke layer.",
