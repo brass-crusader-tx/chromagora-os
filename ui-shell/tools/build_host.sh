@@ -143,6 +143,10 @@ assert weights=={300,400,500,600,700}, weights
 import hashlib, json
 manifest=json.loads(Path('../docs/TSUNAMI-SANS-v5.1-MANIFEST.json').read_text(encoding='utf-8'))
 assert manifest['family']=='TSUNAMI Sans' and manifest['version']=='5.100', manifest
+generator=Path('tools/generate_tsunami_sans.py')
+payload=generator.read_bytes()
+actual_blob=hashlib.sha1(b"blob "+str(len(payload)).encode('ascii')+b"\0"+payload).hexdigest()
+assert actual_blob==manifest.get('generator_blob_sha1'), (actual_blob,manifest.get('generator_blob_sha1'))
 expected={
     f"tsunami_sans_{name.lower()}.ttf": manifest['weights'][name]['sha256']
     for name in ('Light','Regular','Medium','Semibold','Bold')
@@ -158,6 +162,7 @@ for proof_name,meta in manifest['proofs'].items():
     assert hashlib.sha256(p.read_bytes()).hexdigest()==meta['sha256'], (p,meta['sha256'])
     assert p.stat().st_size==int(meta['bytes']), (p,p.stat().st_size,meta['bytes'])
 print("FONT_GENERATION=PASS")
+print("FONT_GENERATOR_BLOB=PASS",actual_blob)
 print("FONT_CANONICAL_MANIFEST=PASS")
 PY
 
@@ -320,14 +325,14 @@ if [[ "$MODE" == "--install" || "$MODE" == "--verify-device" ]]; then
     cp -R build/verification "$REPORT/visual"
     cp -R tools/proofs "$REPORT/font-proofs"
     cp "$REPO_ROOT/docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md" "$REPORT/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md"
-    test "$(find "$REPORT/visual" -maxdepth 1 -name '[0-9][0-9]-*.png' ! -name '*-mono.png' ! -name '*-squint.png' | wc -l | tr -d ' ')" = "45"
+    test "$(find "$REPORT/visual" -maxdepth 1 -name '[0-9][0-9]-*.png' ! -name '*-mono.png' ! -name '*-squint.png' | wc -l | tr -d ' ')" = "46"
     test -s "$REPORT/visual/contact-sheet.png"
     if grep -q 'FATAL EXCEPTION' "$REPORT/visual/logcat-tail.txt" && grep -q 'Process: com.tsunami.shell' "$REPORT/visual/logcat-tail.txt"; then
       echo "ERROR: shell crash signature found in device logcat." >&2
       exit 4
     fi
     {
-      echo "VISUAL_CAPTURE=PASS states=45"
+      echo "VISUAL_CAPTURE=PASS states=46"
       echo "VISUAL_SANITY=PASS"
       echo "MONOCHROME_REVIEW_DERIVATION=PASS"
       echo "SQUINT_REVIEW_DERIVATION=PASS"
