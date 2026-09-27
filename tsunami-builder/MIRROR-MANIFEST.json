@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "719029c134fb54802dac715945bf04c9035abf8b",
+  "source_head": "89c3cc16fc93b80980389bc61bb98a1c40c24fb8",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror is byte-identical to private Genesis head 719029c134fb54802dac715945bf04c9035abf8b; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
+  "note": "Build-critical mirror is byte-identical to private Genesis head 89c3cc16fc93b80980389bc61bb98a1c40c24fb8; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -253,8 +253,8 @@
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-BUILD-BLOCKER.md",
-      "git_blob_sha": "54353eeed5d1ead250bff557de81e3984695b1ea",
-      "bytes": 15822
+      "git_blob_sha": "79d810d483e853e58d6790e1fd92f7b859edd4cd",
+      "bytes": 18614
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-COVERAGE.md",
@@ -304,13 +304,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "719029c134fb54802dac715945bf04c9035abf8b"
+    "source_head": "89c3cc16fc93b80980389bc61bb98a1c40c24fb8"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-27T05:43:00Z",
-    "private_head": "719029c134fb54802dac715945bf04c9035abf8b",
-    "reason": "exact-head rebuild after redundant-artwork accessibility refinement",
-    "sequence": 49
+    "requested_at_utc": "2026-09-27T06:15:21Z",
+    "private_head": "89c3cc16fc93b80980389bc61bb98a1c40c24fb8",
+    "reason": "exact-head rebuild after build-evidence reconciliation",
+    "sequence": 50
   },
-  "generated_at_utc": "2026-09-27T05:43:00Z"
+  "generated_at_utc": "2026-09-27T06:15:21Z"
 }
