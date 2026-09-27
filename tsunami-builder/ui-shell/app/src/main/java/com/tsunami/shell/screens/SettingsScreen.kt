@@ -25,7 +25,7 @@ import com.tsunami.shell.theme.*
     val goBack={ val parent=settingsParentPage(page);if(parent==null)onClose() else state.settingsExpanded=parent }
     Box(Modifier.fillMaxSize().background(p.ground)){
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().padding(horizontal=20.dp)){
-            Row(Modifier.fillMaxWidth().height(58.dp),verticalAlignment=Alignment.CenterVertically){
+            Row(Modifier.fillMaxWidth().heightIn(min=58.dp),verticalAlignment=Alignment.CenterVertically){
                 HitIcon(Glyph.BACK,"Back",goBack)
                 Spacer(Modifier.width(4.dp))
                 Text(settingsTitle(page),style=Type.title.copy(color=p.ink))
