@@ -304,13 +304,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "43ace196781cd22b564466e64b5ade2d87304aed"
+    "source_head": "1bda14b0a1b1f48a9243433c5bd7d668198cab11"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-27T06:16:30Z",
-    "private_head": "43ace196781cd22b564466e64b5ade2d87304aed",
-    "reason": "exact-head rebuild after 39-test acceptance-contract reconciliation",
-    "sequence": 51
+    "requested_at_utc": "2026-09-27T07:37:00Z",
+    "private_head": "1bda14b0a1b1f48a9243433c5bd7d668198cab11",
+    "reason": "exact-head rebuild after TSUNAMI Sans v5.2 manifest/gate reconciliation",
+    "sequence": 52
   },
-  "generated_at_utc": "2026-09-27T06:16:30Z"
+  "generated_at_utc": "2026-09-27T07:37:00Z"
 }
