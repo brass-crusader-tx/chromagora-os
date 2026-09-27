@@ -585,7 +585,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
         val retained=importAudits[s.name]!=null
         services[index]=s.copy(
             connected=connected,
-            detail=if(connected)"Connected · preview library ready" else if(retained)"Disconnected · imported library kept" else "Not connected"
+            detail=if(connected)"Connected · library ready" else if(retained)"Disconnected · imported library kept" else "Not connected"
         )
         banner=if(connected)"Connected ${s.name}" else if(retained)"Disconnected ${s.name} · imported library kept" else "Disconnected ${s.name}"
     }
