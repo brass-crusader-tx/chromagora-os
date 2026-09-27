@@ -423,6 +423,9 @@ class GenesisInteractionTest {
             compose.onNodeWithContentDescription("Back").performClick()
             compose.onNodeWithText("Settings").assertExists()
         }
+        scrollListTo("settings-root-list", "About")
+        compose.onNodeWithText("TSUNAMI").assertExists()
+        compose.onNodeWithText("TSUNAMI UI Genesis").assertDoesNotExist()
     }
 
     @Test fun providerImportAuditPreservesLibraryAcrossDisconnect() {
