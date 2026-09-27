@@ -1,7 +1,14 @@
 # TSUNAMI UI Genesis — verification ledger
 
-Current verification date: 2026-09-26
+Current verification date: 2026-09-27
 
+## Exact-current-head type-contract repair — 2026-09-27 03:32 EDT
+
+A current-head audit found a concrete source-side blocker that was independent of the already documented GitHub runner-startup failure: the active TSUNAMI Sans generator had advanced to **Version 5.200** / Git blob **`c99945106bf51e643641bd35b6d6a52a99ed1004`**, while the canonical host/root/source gates still required the older Version 5.100 manifest and v5.1 output hashes. Any executor that actually reached the font gate would therefore have rejected the current source before Gradle.
+
+That drift has now been repaired on the Genesis branch. Current head **`d5ffa6411a26cb5e21a6be4eb26f8624b763e142`** introduces `docs/TSUNAMI-SANS-v5.2-MANIFEST.json`, binds it to the exact current generator blob, updates the host/root/static/Codespace/JitPack/self-hosted paths to v5.2, and changes canonical acceptance from stale historical output hashes to **two consecutive byte-identical generations** of all five TTF masters plus both proof PNGs. The gates still require family/version metadata, weight classes 300/400/500/600/700, x-height/cap-height/vendor metadata, required UI + Western-European glyph coverage, control-pair distinction and GPOS kerning before Android compilation.
+
+This repair is source-contract evidence, not a font-rendering or APK PASS. A build-capable host must still execute the new two-pass generator contract, record fresh v5.2 hashes/byte counts, assemble the app/Test APK pair, run the full 39-test instrumentation suite, capture all 46 deterministic states and complete Android raster + human visual review.
 
 ## Exact-current-head source reconciliation — 2026-09-26 22:4x EDT
 
