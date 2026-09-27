@@ -1,0 +1,17 @@
+{
+  "artifact": "TSUNAMI UI Genesis exact-head mirror audit",
+  "date": "2026-09-27",
+  "private_repository": "brass-crusader-tx/TSUNAMI",
+  "private_branch": "genesis/ui-shell-20260923",
+  "private_head": "2fc88b9ce3ae50050ac9126eae176cc6e3a388e9",
+  "public_repository": "brass-crusader-tx/chromagora-os",
+  "immutable_public_commit": "3d4989faeeb10a4074d8bd741bf112a5aa8d56da",
+  "manifest_path": "tsunami-builder/MIRROR-MANIFEST.json",
+  "contract_rows": 58,
+  "private_rows_checked": 58,
+  "public_rows_checked": 58,
+  "git_blob_sha_mismatches": 0,
+  "byte_size_mismatches": 0,
+  "status": "EXACT_MIRROR_PASS",
+  "note": "This audit proves source transport identity only; it is not Android build, instrumentation, device, or visual acceptance evidence."
+}
