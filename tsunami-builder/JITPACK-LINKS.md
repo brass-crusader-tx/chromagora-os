@@ -1,11 +1,12 @@
 # TSUNAMI UI Genesis JitPack transport probe
 
-Immutable mirror commit: `8cfba2e1b128f0f9997d3f4e10404903a0b07b57`
+Immutable mirror commit: `0d72dca7a65122a8c0738104df6417e0957a197c`
 
-- [POM](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/8cfba2e1b1/chromagora-os-8cfba2e1b1.pom)
-- [UI Genesis APK](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/8cfba2e1b1/chromagora-os-8cfba2e1b1.apk)
-- [AndroidTest APK](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/8cfba2e1b1/chromagora-os-8cfba2e1b1-androidTest.apk)
+Private Genesis source head: `43ace196781cd22b564466e64b5ade2d87304aed`
 
-These links correspond to the exact-source mirror whose manifest is bound to private Genesis source `59a3bec71e468d8442cd1df2160bff0d418b87ea`.
+- [POM](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/0d72dca7a6/chromagora-os-0d72dca7a6.pom)
+- [UI Genesis APK](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/0d72dca7a6/chromagora-os-0d72dca7a6.apk)
+- [AndroidTest APK](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/0d72dca7a6/chromagora-os-0d72dca7a6-androidTest.apk)
+- [Build log](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/0d72dca7a6/build.log)
 
-The mirror commit itself is immutable. A later documentation-only branch commit may move the branch tip without changing the build-critical source contract; the resolver revalidates the manifest and Git blob IDs before accepting artifacts.
+The nested mirror was re-audited against all **58/58** contract rows: private blob SHA, public blob SHA and byte count match with **0 mismatches**. No artifact from another commit is admissible as current-head evidence.
