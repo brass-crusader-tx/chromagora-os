@@ -467,6 +467,10 @@ def main() -> int:
     root_gate = read(ROOT / "tools/ui_shell_gate.py")
     if "OK (39 tests)" not in host_build or "OK (39 tests)" not in root_gate:
         fail("Android acceptance paths must require all 39 instrumentation tests")
+    codespace_build = read(ROOT / "tools/ui_shell_codespace_build.py")
+    selfhosted = read(ROOT / ".github/workflows/ui-shell-genesis-selfhosted.yml")
+    if "OK (39 tests)" not in codespace_build or "OK (39 tests)" not in selfhosted:
+        fail("Codespace/self-hosted acceptance paths must require all 39 instrumentation tests")
 
     tests = read(TEST)
     expected_test_contracts = (
