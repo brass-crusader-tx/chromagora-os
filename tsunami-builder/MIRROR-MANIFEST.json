@@ -307,10 +307,10 @@
     "source_head": "8ac95d125b94f9cf3229504adaa38044f7a4ee45"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-27T04:30:00Z",
+    "requested_at_utc": "2026-09-27T04:15:30Z",
     "private_head": "8ac95d125b94f9cf3229504adaa38044f7a4ee45",
-    "reason": "exact-head rebuild after source-contract anchor repair",
+    "reason": "exact-head rebuild after source-contract alignment for starter onboarding and recovery logs",
     "sequence": 43
   },
-  "generated_at_utc": "2026-09-27T04:30:00Z"
+  "generated_at_utc": "2026-09-27T04:15:30Z"
 }
