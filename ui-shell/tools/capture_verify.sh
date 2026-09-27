@@ -57,6 +57,7 @@ capture 09-player-dark-queue player default dark queue
 capture 10-player-lyrics player default light lyrics
 capture 11-player-output player default light output
 capture 12-player-visual player default light visual
+capture 46-player-info player default light info
 capture 13-listen-empty listen empty light
 capture 14-listen-loading listen loading light
 capture 15-library-40 library small-list light
@@ -114,5 +115,5 @@ sleep 2
 adb logcat -d -t 1200 > "$OUT/logcat-tail.txt" || true
 for f in "$OUT"/*.png; do test "$(wc -c < "$f")" -gt 10000 || { echo "capture too small: $f"; exit 1; }; done
 BASE_COUNT="$(find "$OUT" -maxdepth 1 -name '[0-9][0-9]-*.png' ! -name '*-mono.png' ! -name '*-squint.png' | wc -l | tr -d ' ')"
-[[ "$BASE_COUNT" == "45" ]] || { echo "expected exactly 45 base captures, found $BASE_COUNT" >&2; exit 1; }
+[[ "$BASE_COUNT" == "46" ]] || { echo "expected exactly 46 base captures, found $BASE_COUNT" >&2; exit 1; }
 printf 'captures=%s\n' "$BASE_COUNT" | tee "$OUT/capture-summary.txt"
