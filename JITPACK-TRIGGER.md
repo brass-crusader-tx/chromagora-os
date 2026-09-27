@@ -1,15 +1,17 @@
 # TSUNAMI UI Genesis JitPack trigger
 
-Private Genesis source head: `89c3cc16fc93b80980389bc61bb98a1c40c24fb8`.
+Private Genesis source head: `43ace196781cd22b564466e64b5ade2d87304aed`.
 
-Exact byte-identical public build snapshot: `566c7f64629623b1dec3c912e82bd88fcf573660`.
+Exact byte-identical public build snapshot: `0d72dca7a65122a8c0738104df6417e0957a197c`.
 
-The nested `tsunami-builder/` tree at this immutable commit was freshly checked against all **58/58** rows in `tsunami-builder/MIRROR-MANIFEST.json`: every private blob SHA, public mirror blob SHA, and byte count matched. JitPack executes that nested tree, so this commit is the current immutable non-GitHub-Actions build target.
+A fresh connector-side audit compared all **58/58** rows in `tsunami-builder/MIRROR-MANIFEST.json` against both the private Genesis tree at `43ace196781cd22b564466e64b5ade2d87304aed` and the nested public mirror at `0d72dca7a65122a8c0738104df6417e0957a197c`: **0 Git blob SHA mismatches** and **0 byte-size mismatches**. The manifest's `source_head` equals the private head exactly.
 
-- [Trigger POM](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/566c7f6462/chromagora-os-566c7f6462.pom)
-- [Build API](https://jitpack.io/api/builds/com.github.brass-crusader-tx/chromagora-os/566c7f6462)
-- [App APK](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/566c7f6462/chromagora-os-566c7f6462.apk)
-- [AndroidTest APK](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/566c7f6462/chromagora-os-566c7f6462-androidTest.apk)
-- [Build log](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/566c7f6462/build.log)
+JitPack executes the nested `tsunami-builder/` tree at this immutable public commit, so this is the current non-GitHub-Actions construction target.
 
-The target is immutable and source-bound to private Genesis head `89c3cc16fc93b80980389bc61bb98a1c40c24fb8`; later branch commits may move only retry/documentation pointers without changing this target.
+- [Trigger POM](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/0d72dca7a6/chromagora-os-0d72dca7a6.pom)
+- [Build API](https://jitpack.io/api/builds/com.github.brass-crusader-tx/chromagora-os/0d72dca7a6)
+- [App APK](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/0d72dca7a6/chromagora-os-0d72dca7a6.apk)
+- [AndroidTest APK](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/0d72dca7a6/chromagora-os-0d72dca7a6-androidTest.apk)
+- [Build log](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/0d72dca7a6/build.log)
+
+The target is immutable and source-bound to private Genesis head `43ace196781cd22b564466e64b5ade2d87304aed`. A later documentation-only branch commit may move the mirror branch pointer; acceptance still binds the produced APK pair to this immutable commit and to the manifest's private source head.
