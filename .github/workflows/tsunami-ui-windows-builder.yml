@@ -76,7 +76,7 @@ jobs:
           import hashlib,json,pathlib
           from fontTools.ttLib import TTFont
           root=pathlib.Path(".")
-          manifest=json.loads((root/"docs/TSUNAMI-SANS-v5.1-MANIFEST.json").read_text())
+          manifest=json.loads((root/"docs/TSUNAMI-SANS-v5.2-MANIFEST.json").read_text())
           fonts=sorted((root/"ui-shell/app/src/main/res/font").glob("tsunami_sans_*.ttf"))
           assert len(fonts)==5
           weights=set()
@@ -86,7 +86,7 @@ jobs:
                   weights.add(int(f["OS/2"].usWeightClass))
                   family=next(n.toUnicode() for n in f["name"].names if n.nameID==1)
                   version=next(n.toUnicode() for n in f["name"].names if n.nameID==5)
-                  assert family=="TSUNAMI Sans" and version=="Version 5.100"
+                  assert family=="TSUNAMI Sans" and version=="Version 5.200"
                   assert "GPOS" in f
               finally:
                   f.close()
@@ -95,7 +95,7 @@ jobs:
               p=root/"ui-shell/app/src/main/res/font"/f"tsunami_sans_{name.lower()}.ttf"
               assert p.stat().st_size==int(meta["bytes"])
               assert hashlib.sha256(p.read_bytes()).hexdigest()==meta["sha256"]
-          print("FONT_CANONICAL_MANIFEST=PASS")
+          print("FONT_CANONICAL_V52_MANIFEST=PASS")
           PY
 
       - name: Compile isolated UI shell APK pair
