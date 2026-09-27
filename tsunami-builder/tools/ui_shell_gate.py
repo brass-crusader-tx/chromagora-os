@@ -32,6 +32,18 @@ def load_font_manifest() -> dict:
     data = json.loads(FONT_MANIFEST.read_text(encoding="utf-8"))
     if data.get("family") != "TSUNAMI Sans" or data.get("version") != "5.100":
         raise RuntimeError(f"unexpected TSUNAMI Sans manifest identity: {data.get('family')!r} {data.get('version')!r}")
+    generated_from = data.get("generated_from")
+    expected_blob = data.get("generator_blob_sha1")
+    if not isinstance(generated_from, str) or not generated_from or not isinstance(expected_blob, str):
+        raise RuntimeError("TSUNAMI Sans manifest must bind its generator path and Git blob SHA-1")
+    generator = ROOT / generated_from
+    if not generator.is_file():
+        raise RuntimeError(f"manifest-bound TSUNAMI Sans generator missing: {generator}")
+    payload = generator.read_bytes()
+    actual_blob = hashlib.sha1(b"blob " + str(len(payload)).encode("ascii") + b"\0" + payload).hexdigest()
+    if actual_blob != expected_blob:
+        raise RuntimeError(f"TSUNAMI Sans generator blob drift: expected {expected_blob}, got {actual_blob}")
+    print(f"FONT_GENERATOR_BLOB=PASS {actual_blob}")
     return data
 
 

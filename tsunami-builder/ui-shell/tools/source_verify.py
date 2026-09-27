@@ -468,6 +468,8 @@ def main() -> int:
     for contract_name, contract_source in (("host build",host_build),("root gate",root_gate)):
         if "TSUNAMI-SANS-v5.1-MANIFEST.json" not in contract_source:
             die(f"{contract_name} must bind generated fonts to the canonical v5.1 manifest")
+        if "generator_blob_sha1" not in contract_source or "FONT_GENERATOR_BLOB=PASS" not in contract_source:
+            die(f"{contract_name} must bind the exact font generator blob before accepting generated binaries")
     if "OK (39 tests)" not in host_build or "OK (39 tests)" not in root_gate:
         die("Android acceptance paths must require the full 39-test instrumentation suite")
     for anchor in (
