@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "5c8f0450c52f187c545825445e93d3d6d221fade",
+  "source_head": "1bda14b0a1b1f48a9243433c5bd7d668198cab11",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror is byte-identical to private Genesis head 5c8f0450c52f187c545825445e93d3d6d221fade; static source verification rejects TSUNAMI Sans generator drift before binary generation.",
+  "note": "Build-critical public mirror is byte-identical to private Genesis head 1bda14b0a1b1f48a9243433c5bd7d668198cab11; canonical TSUNAMI Sans v5.2 is bound by generator Git blob and two-pass reproducibility contract.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -151,8 +151,8 @@
     },
     {
       "path": "ui-shell/README.md",
-      "git_blob_sha": "b643451162bf9c09f8fc0a1f4d1b58a8394609e1",
-      "bytes": 8134
+      "git_blob_sha": "330767b99290d32f16ab996e28222bf81dd9826f",
+      "bytes": 8226
     },
     {
       "path": "ui-shell/settings.gradle.kts",
@@ -186,7 +186,7 @@
     },
     {
       "path": "ui-shell/tools/generate_tsunami_sans.py",
-      "git_blob_sha": "ea17b0e4e51e40a6ac9a0a8845ac83b53c620ae2",
+      "git_blob_sha": "c99945106bf51e643641bd35b6d6a52a99ed1004",
       "bytes": 24582
     },
     {
@@ -242,14 +242,14 @@
       "bytes": 716
     },
     {
-      "path": "docs/TSUNAMI-SANS-v5.1-MANIFEST.json",
-      "git_blob_sha": "a70d6ebd4a50273210ad914714802ba55e7341b4",
-      "bytes": 2308
+      "path": "docs/TSUNAMI-SANS-v5.2-MANIFEST.json",
+      "git_blob_sha": "5c431ac29af01fb402105d5be47f82d876c2c0e3",
+      "bytes": 1503
     },
     {
       "path": "docs/TSUNAMI-SANS-VISUAL-REVIEW.md",
-      "git_blob_sha": "531ea27ba00bf8f74d71802372f5722ba9734207",
-      "bytes": 6720
+      "git_blob_sha": "878db1128bfdd248982b33320c4b9f64a5d4128e",
+      "bytes": 8106
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-BUILD-BLOCKER.md",
@@ -263,8 +263,8 @@
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-RESEARCH.md",
-      "git_blob_sha": "5708606e4fc3ac9b214b864e157106ea1618b595",
-      "bytes": 26137
+      "git_blob_sha": "8756923cff8ce1a85a65b93f4cf83a1c44fd93ce",
+      "bytes": 26252
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-STATIC-AUDIT.md",
@@ -273,8 +273,8 @@
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VERIFICATION.md",
-      "git_blob_sha": "926a07a40e93c172046b0cc7fbcb07f0e5991942",
-      "bytes": 74747
+      "git_blob_sha": "36d4937e42ebea521247a2a1c3b684a037867549",
+      "bytes": 76353
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md",
@@ -292,14 +292,14 @@
       "bytes": 26984
     },
     {
-      "path": "tools/ui_shell_static_check.py",
-      "git_blob_sha": "0d7ec8198602dd5adc27e16701e1cf3140c92132",
-      "bytes": 21428
-    },
-    {
       "path": "tools/ui_shell_jitpack_fetch.py",
       "git_blob_sha": "f6f18edb924a51287f2e5e0189ec12bd9725c516",
       "bytes": 12642
+    },
+    {
+      "path": "tools/ui_shell_static_check.py",
+      "git_blob_sha": "0d7ec8198602dd5adc27e16701e1cf3140c92132",
+      "bytes": 21428
     }
   ],
   "self_hosted_probe": {
