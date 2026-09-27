@@ -309,7 +309,7 @@ def main() -> int:
         present = [phrase for phrase in forbidden_phrases if phrase in src]
         if present:
             die(f"{rel} regressed to portfolio/prototype microcopy on a primary surface: {present}")
-    product_copy_forbidden=("demo ","prototype status","backend-free","experiential prototype")
+    product_copy_forbidden=("demo ","prototype status","backend-free","experiential prototype","mock ","simulated ","preview only","this preview","sample state","no production")
     product_copy_hits={}
     for path in sorted((SRC / "screens").glob("*.kt")):
         src=path.read_text(encoding="utf-8").lower()
