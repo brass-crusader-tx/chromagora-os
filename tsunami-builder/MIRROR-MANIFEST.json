@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "6da0360089dc3d5644589da1c4e401ba8a0de263",
+  "source_head": "1e65095a651394be923a7aa875cfc3b83a8254f6",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Exact public mirror of private Genesis head 6da0360089dc3d5644589da1c4e401ba8a0de263; v5.2 is the sole font manifest and static verification rejects retired v5.1 coexistence or generator drift.",
+  "note": "Exact public mirror of private Genesis head 1e65095a651394be923a7aa875cfc3b83a8254f6; v5.2 source identity, weights, proof set and two-pass byte reproducibility are statically gated before Android construction.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -206,8 +206,8 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "63c0b8a38f82cd50601ee244b4bb3744402151e7",
-      "bytes": 35426
+      "git_blob_sha": "26330da96dab35ea6a8944722a97b3b66af3f316",
+      "bytes": 36196
     },
     {
       "path": "ui-shell/tools/visual_sanity_verify.py",
