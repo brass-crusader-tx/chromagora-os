@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "1e65095a651394be923a7aa875cfc3b83a8254f6",
+  "source_head": "8b90291b03c7851d5b713268ff2a300f66c7d773",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Exact public mirror of private Genesis head 1e65095a651394be923a7aa875cfc3b83a8254f6; v5.2 source identity, weights, proof set and two-pass byte reproducibility are statically gated before Android construction.",
+  "note": "Exact public mirror of private Genesis head 8b90291b03c7851d5b713268ff2a300f66c7d773; v5.2 reproducibility contract explicitly requires byte-identical outputs, with source identity, weights, proof set and two-pass reproducibility statically gated before Android construction.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -243,8 +243,8 @@
     },
     {
       "path": "docs/TSUNAMI-SANS-v5.2-MANIFEST.json",
-      "git_blob_sha": "5c431ac29af01fb402105d5be47f82d876c2c0e3",
-      "bytes": 1503
+      "git_blob_sha": "d39dba6b3d724bec2c655ef0f0ed8fd2002395fc",
+      "bytes": 1513
     },
     {
       "path": "docs/TSUNAMI-SANS-VISUAL-REVIEW.md",
