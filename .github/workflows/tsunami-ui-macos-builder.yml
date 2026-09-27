@@ -72,11 +72,11 @@ jobs:
       - name: Upload exact-head APKs and evidence
         uses: actions/upload-artifact@v4
         with:
-          name: TSUNAMI-UI-Genesis-macos-46fd-v51
+          name: TSUNAMI-UI-Genesis-macos-46fd-v52
           path: |
             tsunami-builder/dist/TSUNAMI-UI-Genesis-debug.apk
             tsunami-builder/dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
-            tsunami-builder/dist/TSUNAMI-Sans-v5.1/
+            tsunami-builder/dist/TSUNAMI-Sans-v5.2/
             tsunami-builder/build/reports/tsunami/ui-shell/host/
             tsunami-builder/ui-shell/tools/proofs/
             tsunami-builder/MIRROR-MANIFEST.json
