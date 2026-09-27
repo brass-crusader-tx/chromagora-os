@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "2fc88b9ce3ae50050ac9126eae176cc6e3a388e9",
+  "source_head": "68a758079fec8fa4d7ae88c1ea009e18c2681659",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror is byte-identical to private Genesis head 2fc88b9ce3ae50050ac9126eae176cc6e3a388e9; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
+  "note": "Build-critical mirror is byte-identical to private Genesis head 68a758079fec8fa4d7ae88c1ea009e18c2681659; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -186,7 +186,7 @@
     },
     {
       "path": "ui-shell/tools/generate_tsunami_sans.py",
-      "git_blob_sha": "ea17b0e4e51e40a6ac9a0a8845ac83b53c620ae2",
+      "git_blob_sha": "c99945106bf51e643641bd35b6d6a52a99ed1004",
       "bytes": 24582
     },
     {
