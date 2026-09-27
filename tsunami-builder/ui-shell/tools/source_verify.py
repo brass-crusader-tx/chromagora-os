@@ -178,6 +178,7 @@ PRIMARY_COPY_GUARDS = {
     "screens/ExpandedListening.kt": [
         "TSUNAMI does not fabricate a karaoke layer.",
         "Generated from deterministic mock state",
+        "AudioTrack · 96 kHz",
     ],
 }
 
