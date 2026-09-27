@@ -253,8 +253,8 @@ def build(serial: str | None, capture_matrix: bool, instrument: bool) -> dict:
                     "com.tsunami.shell.test/androidx.test.runner.AndroidJUnitRunner",
                 ], capture=True)
                 evidence["instrumentation_output"] = instrumentation.stdout.strip()
-                if "OK (" not in instrumentation.stdout:
-                    raise BuildError("physical-device instrumentation did not report OK")
+                if "OK (39 tests)" not in instrumentation.stdout:
+                    raise BuildError("physical-device instrumentation did not report OK (39 tests)")
                 evidence["instrumentation"] = "PASS"
                 instrumentation_path = OUT / "TSUNAMI-UI-Genesis-instrumentation.txt"
                 instrumentation_path.write_text(instrumentation.stdout, encoding="utf-8")
