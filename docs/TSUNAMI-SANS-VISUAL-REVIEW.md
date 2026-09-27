@@ -1,41 +1,32 @@
 # TSUNAMI Sans — visual review log
 
-## 2026-09-26 · v5.1 current source
+## 2026-09-26 · v5.1 exact-source legibility refinement
 
-The checked-in generator is now **TSUNAMI Sans v5.1**. This pass is a construction revision, not a metadata bump. The exact branch generator was reconstructed byte-for-byte from Git blob `40647ffaebca8de8e8b24baddd4346cfb79166e2`, executed twice with FontTools 4.63.0 / Shapely 2.1.2 / Pillow 12.3.0, and both executions emitted byte-identical masters and proofs. The resulting proof sheets were inspected directly before the canonical manifest was advanced.
+The active Genesis branch remains **TSUNAMI Sans v5.1 / Version 5.100**, but the outlines have received one deliberately narrow refinement after a fresh independent regeneration and full-resolution visual inspection. The exact generator reconstructed from the repository before editing was verified as Git blob `43ae1290ae3063a717cddb0272080dc0c27d3b7f`; the refined generator committed to the branch is Git blob **`ea17b0e4e51e40a6ac9a0a8845ac83b53c620ae2`**.
 
-The v5.1 revision specifically addresses the remaining UI-scale weaknesses in the prior proof: `S/s` uses a smoother asymmetric double-curve rather than two near-circular lobes; lowercase `e` retains more bowl while carrying a full-weight horizontal bar; `g` has a simpler descender hook; `r` has a shorter shoulder; `t` regains a restrained geometric foot so its baseline silhouette does not collapse into `l`; zero retains a subtler diagonal distinction from capital O; and side bearings are slightly widened to recover word rhythm as workhorse weights become firmer.
+The new pass addresses three remaining workhorse-glyph problems visible in the current UI-size specimen rather than changing the family wholesale:
 
-Current canonical generator facts:
+- lowercase **f** now has a restrained geometric shoulder and flat baseline instead of the hook that could read as a dagger at small UI sizes;
+- lowercase **r** has a smaller, more open shoulder, removing the decorative flourish while preserving differentiation from `n`;
+- lowercase **t** loses its curved foot entirely and becomes a plain stem/crossbar construction, restoring the terminal philosophy already stated by the design brief.
 
-- family: **TSUNAMI Sans**
-- version metadata: **Version 5.100**
-- masters: Light 300 / Regular 400 / Medium 500 / Semibold 600 / Bold 700
-- construction stem targets: 44 / 70 / 90 / 108 / 128
-- cap height / x-height: 710 / 500 with explicit overshoot
-- fixed OpenType timestamp for deterministic binaries
-- 176 glyphs per master with Western-European and operational-symbol coverage
-- GPOS kerning
-- ambiguity checks for I/l/1, O/0, rn/m, c/e and v/y
-- Android/build gates regenerate the family and reject metadata, coverage, kerning, hash, byte-size or proof drift
-
-### Canonical v5.1 master hashes
+The family/version contract, 176-glyph coverage, ambiguity controls, deterministic timestamps, five explicit weight masters, GPOS kerning, Western-European coverage, and restrained `0` diagonal remain unchanged. The canonical manifest—not duplicated prose—is the executable source of truth. A byte-for-byte local execution of the refined generator using the pinned toolchain produced:
 
 | Master | Weight | Bytes | SHA-256 |
 |---|---:|---:|---|
-| Light | 300 | 103600 | `43980be643894110df96e021df0ed18d71317e0877a8e5d4efd9d190c3a4979a` |
-| Regular | 400 | 106172 | `995c2ee2799203e4a30ce1f2b2cb300b6f5838595f02765aa8890ff7f4adc0f9` |
-| Medium | 500 | 107168 | `75e5b6b9703ef5395b534256cd494e2fa59b2e25f824ebee7dbd8af5a8cd5ac6` |
-| Semibold | 600 | 107784 | `a5f2f2ce832a436daf9f984b97df90f181bea4bf6b6d47001edd4df9b8a561b6` |
-| Bold | 700 | 107200 | `1fd9d193b12672d17267dea686eca88e2e490c2c949d74bf9f75a04c463b3f67` |
+| Light | 300 | 103448 | `cc9c5b0ee976bfdb16bf870f81d797b843de25ab9189ec82ee52f424f86815c5` |
+| Regular | 400 | 106004 | `bf9ad008744b4ca49cf3c8c0241d5e7ba951c0817592d951313f4555c80dd741` |
+| Medium | 500 | 107008 | `10e1797a3dae517c14403474b881311fe48e9c15fb100bc54a33ed417430b9b6` |
+| Semibold | 600 | 107588 | `48ce7ce31ddc7094afe5a71c8524c4e40d67304c9f6f5062f7fd57fbd7dd1820` |
+| Bold | 700 | 106940 | `fb92d22131ccbf2ff95e3a482e52f9d6c2fe3de6aea41f1d2b73d29fd90f7d12` |
 
-The proof artifacts are likewise pinned:
-- `tsunami-sans-proof.png` — 164201 bytes, SHA-256 `99b9cd461eaeb1518afb4eaa63e8e9913c052d07de99dfa6527ed61e686cb789`
-- `tsunami-sans-ui-proof.png` — 74390 bytes, SHA-256 `31ebdae4e3fe5228e070c43af148bb9cf6a2cdce76ca759ac511eccd10d91c4c`
+Fresh proof records:
+- `tsunami-sans-proof.png` — 162883 bytes, SHA-256 `3ab66015adfa5b5531016d957b30b029dfd5b0510ffd588acf00f6e04c940d86`
+- `tsunami-sans-ui-proof.png` — 74005 bytes, SHA-256 `9c39c4b60f74749279f514eeeb8af4b29d038c07ec6a6ecf00f39530b7a1e2d2`
 
-The canonical contract is now `docs/TSUNAMI-SANS-v5.1-MANIFEST.json`. `tools/ui_shell_gate.py`, `ui-shell/tools/source_verify.py`, and `ui-shell/tools/build_host.sh` bind to that single manifest rather than duplicating hash tables.
+FontTools reopened every generated master: weight classes remain **300 / 400 / 500 / 600 / 700**, each master contains **176 glyphs**, and every master retains GPOS. Direct visual inspection of the regenerated full specimen and 12–34 px UI specimen confirms that the three edited glyphs now sit more quietly inside running text; the family is less calligraphically idiosyncratic without sacrificing its geometric identity.
 
-The desktop/Pillow proof is materially useful because it exposes construction and UI-scale raster defects; it is not the final renderer. **Final type acceptance still requires v5.1 to render in the exact-current-head Android shell and survive the mandatory device screenshots, large-font states, no-artwork state, monochrome review and human visual pass.**
+**Acceptance boundary:** desktop/Pillow proofing is necessary but not sufficient. Final type acceptance still requires the exact-current-head Android shell to render v5.1 in the mandatory device screenshot matrix, including large-font, no-artwork, monochrome and squint states. No prose or manifest record substitutes for that Android raster pass.
 
 ## 2026-09-25 · v4.5 historical proof pass
 The v4.4 generator was executed independently from the Android build graph and both emitted specimens were inspected at full resolution. That pass removed the early malformed forms, but a second inspection at UI scale still exposed three weaknesses: Regular/Medium were too anaemic for small Android labels, the lowercase `e` aperture remained too occluded, and `t` retained a gratuitous foot that read as calligraphic rather than geometric.
