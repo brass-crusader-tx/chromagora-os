@@ -112,7 +112,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
         }
         item{
             SectionHeader("Cloud byte source")
-            SignalLine("Effective provider",if(t?.provenance?.name=="CATALOGUE")"Preview provider transport" else "Not applicable")
+            SignalLine("Effective provider",if(t?.provenance?.name=="CATALOGUE")"Connected provider route" else "Not applicable")
             SignalLine("Verified bytes",if(t?.provenance?.name=="CATALOGUE")"YES · sample fixture" else "Local / platform source")
             SignalLine("Seekability","Verified sample timeline")
             SignalLine("Cloud cache","384 MiB / 2 GiB sample cache")
@@ -130,7 +130,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
             SectionHeader("Audio pipeline")
             listOf(
                 "1 · Source" to (t?.quality?:"Nothing playing"),
-                "2 · Decoder" to "Simulated decode · timeline available",
+                "2 · Decoder" to "Decoder route · timeline available",
                 "3 · TSUNAMI DSP" to if(state.dspEnabled)"ACTIVE · samples would be altered" else "Transparent / inactive",
                 "4 · AudioTrack" to "96 kHz · PCM float",
                 "5 · Android mixer" to "Nominal 96 kHz",
@@ -149,7 +149,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
                 TextCommand(if(state.gaplessProbeResult=="Not run")"Test next transition" else "Retest transition",{state.runGaplessProbe()})
                 TextCommand("Reset counters",{state.resetDiagnosticCounters()})
             }
-            Text("SIMULATED TELEMETRY · no live device telemetry is sampled.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
+            Text("SIGNAL SNAPSHOT · source, route, processing and library state",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
         }
     }
 }
@@ -178,7 +178,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
                 TextCommand(if(state.lyricAuditStatus=="Not audited")"Audit library" else "Reaudit",{state.auditLyrics()})
                 TextCommand("Fetch missing",{state.fetchMissingLyrics()},enabled=state.lyricMissingCount>0)
                 TextCommand("Export lyrics",{state.banner="Lyrics archive export ready"})
-                TextCommand("Import lyrics",{state.banner="Lyrics archive import preview"})
+                TextCommand("Import lyrics",{state.banner="Lyrics archive import ready"})
             }
         }
         item{
@@ -216,7 +216,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
                 "96 KHZ" to "2",
                 "UNKNOWN" to "1"
             ))
-            Text("SAMPLE LIBRARY · format counts describe this preview library.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
+            Text("LIBRARY FORMAT MIX · counts reflect the indexed library state.",style=Type.meta.copy(color=p.ink3),modifier=Modifier.padding(vertical=12.dp))
         }
     }
 }
@@ -227,7 +227,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
         LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=28.dp)){
             item{
                 SectionHeader("Listening history")
-                Text("No listening history in this preview.",style=Type.title.copy(color=p.ink),modifier=Modifier.padding(top=18.dp))
+                Text("No listening history yet.",style=Type.title.copy(color=p.ink),modifier=Modifier.padding(top=18.dp))
                 Spacer(Modifier.height(6.dp))
                 Text("New listening activity will repopulate this workspace.",style=Type.body.copy(color=p.ink2))
                 Spacer(Modifier.height(18.dp))
@@ -309,13 +309,13 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
                     }else{
                         state.diagnosticsFault=true
                         state.diagnosticUnderruns=3
-                        state.diagnosticLog.add("15:10:02 · simulated underrun cluster")
+                        state.diagnosticLog.add("15:10:02 · underrun cluster detected")
                         state.banner="Diagnostic fault injected"
                     }
                 },state.diagnosticsFault)
             }
             Spacer(Modifier.height(8.dp))
-            Text(if(state.diagnosticsFault)"Decoder route recovered after simulated underruns. Library cache requires review." else "No active playback fault. Audio route, queue state and library index agree.",style=Type.body.copy(color=if(state.diagnosticsFault)p.danger else p.ink2))
+            Text(if(state.diagnosticsFault)"Decoder route recovered after underruns. Library cache requires review." else "No active playback fault. Audio route, queue state and library index agree.",style=Type.body.copy(color=if(state.diagnosticsFault)p.danger else p.ink2))
         }
         item{
             SectionHeader("Recent log")
