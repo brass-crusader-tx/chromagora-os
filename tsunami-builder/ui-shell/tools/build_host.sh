@@ -134,46 +134,67 @@ for p in fonts:
         family=next(n.toUnicode() for n in f['name'].names if n.nameID==1)
         version=next(n.toUnicode() for n in f['name'].names if n.nameID==5)
         assert family=='TSUNAMI Sans', (p,family)
-        assert version=='Version 5.100', (p,version)
+        assert version=='Version 5.200', (p,version)
         weights.add(int(f['OS/2'].usWeightClass))
         assert 'GPOS' in f, f"{p}: missing GPOS"
     finally:
         f.close()
 assert weights=={300,400,500,600,700}, weights
 import hashlib, json
-manifest=json.loads(Path('../docs/TSUNAMI-SANS-v5.1-MANIFEST.json').read_text(encoding='utf-8'))
-assert manifest['family']=='TSUNAMI Sans' and manifest['version']=='5.100', manifest
+manifest=json.loads(Path('../docs/TSUNAMI-SANS-v5.2-MANIFEST.json').read_text(encoding='utf-8'))
+assert manifest['family']=='TSUNAMI Sans' and manifest['version']=='5.200', manifest
 generator=Path('tools/generate_tsunami_sans.py')
 payload=generator.read_bytes()
 actual_blob=hashlib.sha1(b"blob "+str(len(payload)).encode('ascii')+b"\0"+payload).hexdigest()
 assert actual_blob==manifest.get('generator_blob_sha1'), (actual_blob,manifest.get('generator_blob_sha1'))
-expected={
-    f"tsunami_sans_{name.lower()}.ttf": manifest['weights'][name]['sha256']
-    for name in ('Light','Regular','Medium','Semibold','Bold')
+expected_weights={name:int(meta['weight_class']) for name,meta in manifest['weights'].items()}
+assert expected_weights=={'Light':300,'Regular':400,'Medium':500,'Semibold':600,'Bold':700}, expected_weights
+proof_names=list(manifest.get('proofs') or [])
+assert proof_names==['tsunami-sans-proof.png','tsunami-sans-ui-proof.png'], proof_names
+first={
+    'fonts':{p.name:{'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size} for p in fonts},
+    'proofs':{}
 }
-actual={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in fonts}
-assert actual==expected, (actual, expected)
-for name,meta in manifest['weights'].items():
-    p=Path('app/src/main/res/font')/f"tsunami_sans_{name.lower()}.ttf"
-    assert p.stat().st_size==int(meta['bytes']), (p,p.stat().st_size,meta['bytes'])
-for proof_name,meta in manifest['proofs'].items():
+for proof_name in proof_names:
     p=Path('tools/proofs')/proof_name
-    assert p.is_file(), p
-    assert hashlib.sha256(p.read_bytes()).hexdigest()==meta['sha256'], (p,meta['sha256'])
-    assert p.stat().st_size==int(meta['bytes']), (p,p.stat().st_size,meta['bytes'])
-print("FONT_GENERATION=PASS")
+    assert p.is_file() and p.stat().st_size>10_000, p
+    first['proofs'][proof_name]={'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size}
+Path('../build/reports/tsunami/ui-shell/host/font-build-manifest-first.json').write_text(json.dumps(first,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+print("FONT_GENERATION_FIRST_PASS=PASS")
 print("FONT_GENERATOR_BLOB=PASS",actual_blob)
 print("FONT_CANONICAL_MANIFEST=PASS")
 PY
 
-FONT_DIST="$DIST/TSUNAMI-Sans-v5.1"
+# A second fresh generation is the canonical v5.2 reproducibility check. The
+# manifest binds source identity and optical/weight requirements; generated
+# binary hashes must reproduce byte-for-byte rather than being hand-updated.
+"$PYTHON_BIN" tools/prepare_fonts.py
+"$PYTHON_BIN" - <<'PY'
+from pathlib import Path
+import hashlib,json
+report=Path('../build/reports/tsunami/ui-shell/host')
+first=json.loads((report/'font-build-manifest-first.json').read_text(encoding='utf-8'))
+fonts=sorted(Path('app/src/main/res/font').glob('tsunami_sans_*.ttf'))
+second={
+  'fonts':{p.name:{'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size} for p in fonts},
+  'proofs':{}
+}
+for name in ('tsunami-sans-proof.png','tsunami-sans-ui-proof.png'):
+    p=Path('tools/proofs')/name
+    second['proofs'][name]={'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size}
+assert second==first,(first,second)
+(report/'font-build-manifest.json').write_text(json.dumps(second,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+print("FONT_REPRODUCIBILITY=PASS")
+PY
+
+FONT_DIST="$DIST/TSUNAMI-Sans-v5.2"
 rm -rf "$FONT_DIST"
 mkdir -p "$FONT_DIST"
 cp app/src/main/res/font/tsunami_sans_*.ttf "$FONT_DIST/"
 cp tools/proofs/tsunami-sans-proof.png tools/proofs/tsunami-sans-ui-proof.png "$FONT_DIST/"
 cp "$REPO_ROOT/brand/tsunami-mark.svg" "$REPO_ROOT/brand/tsunami-mark-inverse.svg" "$FONT_DIST/"
 {
-  echo "TSUNAMI Sans v5.1"
+  echo "TSUNAMI Sans v5.2"
   echo "Generated from ui-shell/tools/generate_tsunami_sans.py"
   echo "Family: TSUNAMI Sans"
   echo "Weights: 300 400 500 600 700"
