@@ -139,6 +139,26 @@ def main()->int:
         if missing:
             raise SystemExit(f"ACCESSIBILITY_VERIFY_FAIL {rel} missing semantic anchors {missing}")
 
+    scalable_chrome={
+        "navigation/GenesisShell.kt":(".heightIn(min=58.dp)",),
+        "screens/ExpandedListening.kt":(".heightIn(min=64.dp)",),
+        "screens/SettingsScreen.kt":(".heightIn(min=58.dp)",),
+    }
+    forbidden_fixed_chrome={
+        "navigation/GenesisShell.kt":(".height(58.dp)",),
+        "screens/ExpandedListening.kt":(".height(64.dp)",),
+        "screens/SettingsScreen.kt":(".height(58.dp)",),
+    }
+    for rel,anchors in scalable_chrome.items():
+        body=(SRC/rel).read_text(encoding="utf-8")
+        missing=[item for item in anchors if item not in body]
+        if missing:
+            raise SystemExit(f"ACCESSIBILITY_VERIFY_FAIL {rel} missing scalable chrome anchors {missing}")
+        bad=[item for item in forbidden_fixed_chrome.get(rel,()) if item in body]
+        if bad:
+            raise SystemExit(f"ACCESSIBILITY_VERIFY_FAIL {rel} reintroduced fixed text-bearing chrome {bad}")
+    print("ACCESSIBILITY_LARGE_FONT_CHROME=PASS navigation listening settings use minimum heights")
+
     # Every direct authored clickable surface must expose a visible focus state.
     # Shared primitives already satisfy this through onFocusChanged; this scan
     # prevents ad-hoc clickable rows from silently reintroducing keyboard-only
