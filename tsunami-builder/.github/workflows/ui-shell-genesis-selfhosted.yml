@@ -85,7 +85,7 @@ jobs:
           grep -q '^VISUAL_CAPTURE=PASS states=46' build/reports/tsunami/ui-shell/host/build.txt
           grep -q '^VISUAL_SANITY=PASS' build/reports/tsunami/ui-shell/host/build.txt
           grep -q '^CRASH_SCAN=PASS' build/reports/tsunami/ui-shell/host/build.txt
-          grep -q 'OK (' build/reports/tsunami/ui-shell/host/instrumentation.txt
+          grep -Fq 'OK (39 tests)' build/reports/tsunami/ui-shell/host/instrumentation.txt
           test -s build/reports/tsunami/ui-shell/host/visual/contact-sheet.png
 
       - name: Summarize executable acceptance boundary
