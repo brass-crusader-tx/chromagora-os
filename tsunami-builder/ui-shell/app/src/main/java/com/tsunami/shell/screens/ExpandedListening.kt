@@ -270,8 +270,8 @@ import kotlin.math.sin
                             when(source){
                                 "Embedded" -> "File metadata · immediate"
                                 "LRC sidecar" -> "Local timed text · exact-track first"
-                                "LRCLIB" -> "Connected lookup · mock"
-                                else -> "Local alignment fallback · mock"
+                                "LRCLIB" -> "Connected timed-text source"
+                                else -> "Local alignment fallback"
                             },
                             style=Type.meta.copy(color=p.ink3)
                         )
@@ -393,7 +393,7 @@ import kotlin.math.sin
             }
         }
         Spacer(Modifier.height(12.dp))
-        Text("SIMULATED VISUAL · no live signal capture",style=Type.micro.copy(color=p.ink3))
+        Text("VISUAL FIELD · follows the active listening timeline",style=Type.micro.copy(color=p.ink3))
     }
 }
 
@@ -433,7 +433,7 @@ import kotlin.math.sin
         }
         item{
             Spacer(Modifier.height(12.dp))
-            Text("Mock object metadata only · no production database or signal telemetry",style=Type.micro.copy(color=p.ink3))
+            Text("OBJECT DETAILS · source, availability and playback context",style=Type.micro.copy(color=p.ink3))
         }
     }
 }
