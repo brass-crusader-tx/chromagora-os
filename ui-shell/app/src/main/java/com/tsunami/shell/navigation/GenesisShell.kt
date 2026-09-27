@@ -155,7 +155,7 @@ private val nav=listOf(PrimarySpace.LISTEN to "Listen",PrimarySpace.LIBRARY to "
                 val active=state.primary==space
                 var focused by remember(space){ mutableStateOf(false) }
                 Column(
-                    Modifier.weight(1f).height(58.dp)
+                    Modifier.weight(1f).heightIn(min=58.dp)
                         .semantics{role=Role.Tab;contentDescription=label;if(active)stateDescription="Selected"}
                         .onFocusChanged{focused=it.isFocused}
                         .clickable{state.primary=space}
@@ -169,7 +169,7 @@ private val nav=listOf(PrimarySpace.LISTEN to "Listen",PrimarySpace.LIBRARY to "
             }
             var settingsFocused by remember{ mutableStateOf(false) }
             Box(
-                Modifier.width(54.dp).height(58.dp)
+                Modifier.width(54.dp).heightIn(min=58.dp)
                     .semantics{contentDescription="Settings";role=Role.Button}
                     .onFocusChanged{settingsFocused=it.isFocused}
                     .clickable{state.settingsExpanded="root"}
