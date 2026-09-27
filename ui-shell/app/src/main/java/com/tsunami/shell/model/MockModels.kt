@@ -1,7 +1,8 @@
 package com.tsunami.shell.model
 
 enum class PrimarySpace { LISTEN, LIBRARY, FIND, SIGNAL }
-enum class PlayerMode { QUEUE, LYRICS, OUTPUT, VISUAL }
+enum class PlayerMode { QUEUE, LYRICS, OUTPUT, VISUAL, INFO }
+enum class LyricsPanel { LINES, SOURCES, LANGUAGE }
 enum class LibraryLens { TRACKS, ALBUMS, ARTISTS, PLAYLISTS, FOLDERS, LONGFORM, RADIO }
 enum class Provenance { OWNED, CATALOGUE, CONNECTED }
 enum class DownloadState { REMOTE, DOWNLOADING, DOWNLOADED }
