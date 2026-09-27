@@ -323,7 +323,7 @@ import kotlin.math.sin
 @Composable private fun OutputPane(state:ShellState,modifier:Modifier){
     val p=LocalTsunamiPalette.current
     Column(modifier){
-        listOf("This device" to "AudioTrack · 96 kHz", "Sony WH-1000X" to "Bluetooth · connected", "Living room" to "Cast · available").forEach{(name,detail)->
+        listOf("This device" to "AudioTrack · system route", "Sony WH-1000X" to "Bluetooth · connected", "Living room" to "Cast · available").forEach{(name,detail)->
             val active=state.output==name
             var focused by remember(name){ mutableStateOf(false) }
             Row(
