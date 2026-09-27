@@ -16,7 +16,8 @@ derivatives. Review the contact sheet first, then the full-resolution images.
   compositions change topology rather than merely widening margins.
 - `09-player-dark-queue`, `10-player-lyrics`, `11-player-output`, `12-player-visual`, `46-player-info`: Expanded
   Listening remains one coherent environment across modes.
-- `46-player-info`: track/object truth, playback-route facts and longform resume metadata remain a secondary listening mode rather than colonizing the transport surface.\n- `06-player-longform` and `36-player-podcast`: the same listening architecture adapts semantically—chapter/bookmark affordances for audiobooks, skip/played-state affordances for podcasts—without becoming two unrelated players.
+- `46-player-info`: track/object truth, playback-route facts and longform resume metadata remain a secondary listening mode rather than colonizing the transport surface.
+- `06-player-longform` and `36-player-podcast`: the same listening architecture adapts semantically—chapter/bookmark affordances for audiobooks, skip/played-state affordances for podcasts—without becoming two unrelated players.
 - `31-settings-controls` and `37-settings-external-controls`: in-app gesture/headset customization and off-app notification/Quick Settings/widget/Wear contracts remain distinct progressive settings depths rather than a single overloaded control dashboard.
 - `30-settings-audio`, `31-settings-controls`, `32-settings-backup`, `35-settings-services`: progressive settings retain
   the same typographic/rule grammar instead of falling back to stock settings rows.
@@ -47,7 +48,7 @@ label/state and location without consulting the research rationale.
 
 ### Type and accessibility
 
-- Compare `18-library-font-150` and `19-library-font-200` for clipping, overlap and lost commands.
+- Compare `18-library-font-150` and `19-library-font-200` for clipping, overlap and lost commands. Primary chrome uses minimum rather than fixed row heights so the 200% case must be allowed to grow vertically rather than crop navigation or settings labels.
 - Inspect `20-listen-accessibility` for 56 dp controls, high-contrast state and hierarchy without color
   dependence.
 - Compare the Android captures with `tsunami-sans-proof.png` and `tsunami-sans-ui-proof.png`.
