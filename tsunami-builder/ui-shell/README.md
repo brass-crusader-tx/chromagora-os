@@ -11,7 +11,7 @@ A backend-free Android experiential prototype for the TSUNAMI product genesis. T
 - `components/` reusable authored primitives; no stock Material component surface defines the visual language
 - `navigation/` responsive Index + Listening Spine architecture
 - `screens/` listening, library, find, signal, settings and expanded listening environments
-- `tools/generate_tsunami_sans.py` procedural TSUNAMI Sans v5.1 source/generator: five weight-specific geometric masters with explicit screen-legibility control glyphs
+- `tools/generate_tsunami_sans.py` procedural TSUNAMI Sans v5.2 source/generator: five weight-specific geometric masters with explicit screen-legibility control glyphs
 - `tools/source_verify.py` static architecture/back-end isolation/interaction contract
 - `tools/accessibility_verify.py` WCAG text-contrast and 48/56dp authored-control target gate
 - `tools/build_host.sh` reproducible host build entry point; optionally installs the isolated package
@@ -29,7 +29,7 @@ python3 -m pip install 'fonttools==4.63.0' 'shapely==2.1.2' 'pillow==12.3.0'
 bash tools/build_host.sh
 ```
 
-The host entry point runs the static source contract, regenerates and validates all five TSUNAMI Sans masters, assembles both the debug APK and instrumentation APK, records hashes, and copies the results to the repository `dist/` directory. On a development machine with an authorized device:
+The host entry point runs the static source contract, regenerates all five TSUNAMI Sans v5.2 masters twice, verifies byte-identical outputs and both proof specimens, then validates the generated family, assembles both the debug APK and instrumentation APK, records hashes, and copies the results to the repository `dist/` directory. On a development machine with an authorized device:
 
 ```bash
 bash tools/build_host.sh --install <adb-serial>
