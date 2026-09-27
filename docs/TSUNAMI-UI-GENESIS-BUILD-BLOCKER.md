@@ -211,3 +211,32 @@ The immutable JitPack fallback was also hardened after identifying a real transp
 This changes only the build transport. It does not relax the source binding: the private current HEAD, the mirror manifest `source_head`, all 58 Git blob IDs/byte sizes, and the JitPack-resolved commit must still agree before an APK can be accepted.
 
 The Android acceptance boundary therefore remains explicit rather than inferred: exact-head app APK + AndroidTest APK, binary manifest/permission gate, the full Compose interaction suite, the deterministic visual-state matrix, Android-raster TSUNAMI Sans review, crash/logcat scan, and final artifact hashes are still required.
+
+
+## Experiment 13 — 2026-09-27 exact-head mirror audit and three-OS allocation control
+
+At private Genesis head `719029c134fb54802dac715945bf04c9035abf8b`, the independent public build mirror was refreshed and re-audited rather than assuming that the branch pointer was still representative. The immutable public snapshot selected for external construction is `6883fc065e4175a108ba0b118c4e5e2e7542f93a`.
+
+A fresh connector-side tree audit compared every row in `tsunami-builder/MIRROR-MANIFEST.json` against **both** repositories: the private path at the private head and the corresponding `tsunami-builder/<path>` blob at the immutable public commit. The manifest contains **58** build-critical/support entries. Results:
+
+- manifest `source_head`: `719029c134fb54802dac715945bf04c9035abf8b`;
+- private tree entries checked: 58/58;
+- immutable public mirror entries checked: 58/58;
+- Git blob SHA mismatches: **0**;
+- byte-size mismatches: **0**.
+
+Thus the external build snapshot is byte-contract-equivalent to the current private Genesis source for the complete declared build surface; a successful external APK from that immutable commit is admissible as current-head build evidence.
+
+GitHub-hosted execution was then checked across three independent runner images on the public mirror's current pointer `38b1398f2135b4547bfc299106fe64f40182bdf7`:
+
+- Ubuntu run `36298053647`, job `108560465702`, label `ubuntu-22.04`;
+- macOS run `36298053648`, job `108560465848`, label `macos-15`;
+- Windows run `36298053657`, job `108560465677`, label `windows-2025`.
+
+All three jobs completed within seconds with **empty step lists**, `runner_id: 0`, and no runner name. No workflow artifact was emitted. This is pre-step allocation evidence across three operating-system pools; it is not an Android/Kotlin/Gradle failure.
+
+The public self-hosted run `36298053644` exposes job `108560466746` with label `self-hosted`, but remains queued with `runner_id: 0` until a matching runner comes online.
+
+As a fourth, non-Actions construction path, the exact immutable JitPack target was explicitly triggered at version `6883fc065e`. The public PR build probe now identifies the exact private source head, immutable mirror commit, app APK route and AndroidTest APK route. The JitPack path remains subject to the same acceptance rules: no artifact is accepted unless it resolves the immutable mirror commit and survives APK structure/hash checks plus the downstream device/instrumentation/visual gate.
+
+The remaining boundary is therefore narrow and empirical: obtain the current-head APK pair from an execution environment that actually starts, then install/run the 39-test instrumentation suite and 46-state physical/emulated visual acceptance matrix. No source-side PASS is substituted for that evidence.
