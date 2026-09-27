@@ -32,6 +32,18 @@ def load_font_manifest() -> dict:
     data = json.loads(FONT_MANIFEST.read_text(encoding="utf-8"))
     if data.get("family") != "TSUNAMI Sans" or data.get("version") != "5.100":
         raise RuntimeError(f"unexpected TSUNAMI Sans manifest identity: {data.get('family')!r} {data.get('version')!r}")
+    generated_from = data.get("generated_from")
+    expected_blob = data.get("generator_blob_sha1")
+    if not isinstance(generated_from, str) or not generated_from or not isinstance(expected_blob, str):
+        raise RuntimeError("TSUNAMI Sans manifest must bind its generator path and Git blob SHA-1")
+    generator = ROOT / generated_from
+    if not generator.is_file():
+        raise RuntimeError(f"manifest-bound TSUNAMI Sans generator missing: {generator}")
+    payload = generator.read_bytes()
+    actual_blob = hashlib.sha1(b"blob " + str(len(payload)).encode("ascii") + b"\0" + payload).hexdigest()
+    if actual_blob != expected_blob:
+        raise RuntimeError(f"TSUNAMI Sans generator blob drift: expected {expected_blob}, got {actual_blob}")
+    print(f"FONT_GENERATOR_BLOB=PASS {actual_blob}")
     return data
 
 
@@ -450,8 +462,8 @@ def verify_on_emulator(apk: Path) -> None:
             p for p in verification.glob("*.png")
             if "-mono" not in p.stem and "-squint" not in p.stem and p.stem != "contact-sheet"
         ]
-        if len(base) != 45:
-            raise RuntimeError(f"visual verification set must contain exactly 45 base states, found {len(base)}")
+        if len(base) != 46:
+            raise RuntimeError(f"visual verification set must contain exactly 46 base states, found {len(base)}")
         if not (verification / "contact-sheet.png").is_file():
             raise RuntimeError("visual verification contact sheet missing")
         logcat = (verification / "logcat-tail.txt").read_text(encoding="utf-8", errors="replace")
@@ -464,7 +476,7 @@ def verify_on_emulator(apk: Path) -> None:
             f"SDK={subprocess.run([adb, '-s', serial, 'shell', 'getprop', 'ro.build.version.sdk'], text=True, capture_output=True).stdout.strip()}\n",
             encoding="utf-8",
         )
-        print(f"PASS instrumentation=38 visual states={len(base)} serial={serial}")
+        print(f"PASS instrumentation=39 visual states={len(base)} serial={serial}")
     finally:
         if proc is not None:
             proc.terminate()
