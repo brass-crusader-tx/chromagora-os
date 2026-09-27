@@ -39,11 +39,15 @@ jobs:
           import json, pathlib, subprocess
           root=pathlib.Path("tsunami-builder")
           manifest=json.loads((root/"MIRROR-MANIFEST.json").read_text())
+          assert isinstance(manifest.get("source_head"),str) and len(manifest["source_head"])==40
+          assert manifest["ui_shell_file_count"]==len(manifest["files"])
+          assert manifest["support_file_count"]==len(manifest["support_files"])
           bad=[]
           for row in manifest["files"]+manifest["support_files"]:
               p=root/row["path"]
               actual=subprocess.check_output(["git","hash-object",str(p)],text=True).strip() if p.is_file() else "missing"
-              if actual!=row["git_blob_sha"]: bad.append((row["path"],actual,row["git_blob_sha"]))
+              if actual!=row["git_blob_sha"] or (p.is_file() and p.stat().st_size!=int(row["bytes"])):
+                  bad.append((row["path"],actual,row["git_blob_sha"],p.stat().st_size if p.is_file() else None,row["bytes"]))
           assert not bad,bad
           print("MIRROR_BINDING=PASS",manifest["source_head"],len(manifest["files"]),len(manifest["support_files"]))
           PY
@@ -56,7 +60,9 @@ jobs:
           python3 tools/ui_shell_static_check.py
           python3 ui-shell/tools/source_verify.py
           python3 ui-shell/tools/accessibility_verify.py
-          if command -v kotlinc >/dev/null; then bash ui-shell/tools/jvm_state_gate.sh; fi
+          if command -v kotlinc >/dev/null; then
+            bash ui-shell/tools/jvm_state_gate.sh
+          fi
 
       - name: Canonical host build
         working-directory: tsunami-builder
@@ -66,6 +72,8 @@ jobs:
           bash ui-shell/tools/build_host.sh
           test -s dist/TSUNAMI-UI-Genesis-debug.apk
           test -s dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
+          grep -q '^HOST_BUILD=PASS' build/reports/tsunami/ui-shell/host/build.txt
+          grep -q '^FONT_REPRODUCIBILITY=PASS' build/reports/tsunami/ui-shell/host/build.txt
           cat build/reports/tsunami/ui-shell/host/build.txt
 
       - name: Motorola full acceptance
@@ -75,7 +83,7 @@ jobs:
           set -euxo pipefail
           SERIAL=ZY22L2PTS5
           command -v adb >/dev/null
-          adb -s "$SERIAL" get-state | grep -q device
+          adb -s "$SERIAL" get-state | grep -qx device
           before_font="$(adb -s "$SERIAL" shell settings get system font_scale | tr -d '\r')"
           before_size="$(adb -s "$SERIAL" shell wm size | tr -d '\r')"
           before_density="$(adb -s "$SERIAL" shell wm density | tr -d '\r')"
@@ -89,7 +97,8 @@ jobs:
           test "$(adb -s "$SERIAL" shell settings get system font_scale | tr -d '\r')" = "$before_font"
           test "$(adb -s "$SERIAL" shell wm size | tr -d '\r')" = "$before_size"
           test "$(adb -s "$SERIAL" shell wm density | tr -d '\r')" = "$before_density"
-          ! adb -s "$SERIAL" shell pm list packages | grep -q '^package:com.tsunami.shell.test
+          ! adb -s "$SERIAL" shell pm list packages | grep -qx 'package:com.tsunami.shell.test'
+          echo "MOTOROLA_ACCEPTANCE=PASS serial=$SERIAL"
 
       - name: Publish exact-source shell preview to Chromagora Dev Portal
         working-directory: tsunami-builder
@@ -100,10 +109,7 @@ jobs:
           PORTAL_ROOT="/Users/ezra/Downloads/TSUNAMI"
           TARGET="$PORTAL_ROOT/dist/TSUNAMI-UI-Shell-Rebrand-v1-debug.apk"
           META="$TARGET.json"
-          if [[ ! -s "$SRC" ]]; then
-            echo "PORTAL_PUBLISH=SKIP apk_missing"
-            exit 0
-          fi
+          test -s "$SRC"
           if [[ ! -d "$PORTAL_ROOT/dist" ]]; then
             echo "PORTAL_PUBLISH=SKIP primary_checkout_not_mounted"
             exit 0
@@ -119,13 +125,9 @@ jobs:
           mv -f "$tmp" "$TARGET"
           sha="$(shasum -a 256 "$TARGET" | awk '{print $1}')"
           bytes="$(stat -f%z "$TARGET")"
-          device_verified=false
-          if grep -q '^DEVICE_VERIFY=PASS' build/reports/tsunami/ui-shell/host/build.txt 2>/dev/null; then
-            device_verified=true
-          fi
-          python3 - "$META" "$TARGET" "$sha" "$bytes" "$source_head" "$GITHUB_SHA" "$device_verified" <<'PY'
+          python3 - "$META" "$TARGET" "$sha" "$bytes" "$source_head" "$GITHUB_SHA" <<'PY'
           import datetime,json,pathlib,sys
-          meta,target,sha,bytes_,source_head,mirror_commit,device_verified=sys.argv[1:]
+          meta,target,sha,bytes_,source_head,mirror_commit=sys.argv[1:]
           payload={
             "artifact":"TSUNAMI UI Genesis",
             "package":"com.tsunami.shell",
@@ -137,7 +139,7 @@ jobs:
             "public_mirror_commit":mirror_commit,
             "build_backend":"chromagora-os-self-hosted",
             "backend_free":True,
-            "device_verified":device_verified.lower()=="true",
+            "device_verified":True,
             "published_at_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),
           }
           pathlib.Path(meta).write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8")
@@ -166,84 +168,3 @@ jobs:
             tsunami-builder/ui-shell/tools/proofs/
             tsunami-builder/MIRROR-MANIFEST.json
           if-no-files-found: warn
-
-# current-head retry 2026-09-26T20:xx-04:00 source=ed182b683ba604dbf9c4351f19a69561d4478c55 type=v5.1 exact-private
-
-
-      - name: Publish exact-source shell preview to Chromagora Dev Portal
-        working-directory: tsunami-builder
-        shell: bash
-        run: |
-          set -euo pipefail
-          SRC="$PWD/dist/TSUNAMI-UI-Genesis-debug.apk"
-          PORTAL_ROOT="/Users/ezra/Downloads/TSUNAMI"
-          TARGET="$PORTAL_ROOT/dist/TSUNAMI-UI-Shell-Rebrand-v1-debug.apk"
-          META="$TARGET.json"
-          if [[ ! -s "$SRC" ]]; then
-            echo "PORTAL_PUBLISH=SKIP apk_missing"
-            exit 0
-          fi
-          if [[ ! -d "$PORTAL_ROOT/dist" ]]; then
-            echo "PORTAL_PUBLISH=SKIP primary_checkout_not_mounted"
-            exit 0
-          fi
-          source_head="$(python3 - <<'PY'
-          import json
-          print(json.load(open("MIRROR-MANIFEST.json"))["source_head"])
-          PY
-          )"
-          tmp="${TARGET}.tmp.${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
-          cp "$SRC" "$tmp"
-          chmod 0644 "$tmp"
-          mv -f "$tmp" "$TARGET"
-          sha="$(shasum -a 256 "$TARGET" | awk '{print $1}')"
-          bytes="$(stat -f%z "$TARGET")"
-          device_verified=false
-          if grep -q '^DEVICE_VERIFY=PASS' build/reports/tsunami/ui-shell/host/build.txt 2>/dev/null; then
-            device_verified=true
-          fi
-          python3 - "$META" "$TARGET" "$sha" "$bytes" "$source_head" "$GITHUB_SHA" "$device_verified" <<'PY'
-          import datetime,json,pathlib,sys
-          meta,target,sha,bytes_,source_head,mirror_commit,device_verified=sys.argv[1:]
-          payload={
-            "artifact":"TSUNAMI UI Genesis",
-            "package":"com.tsunami.shell",
-            "portal_path":target,
-            "bytes":int(bytes_),
-            "sha256":sha,
-            "source_head":source_head,
-            "source_branch":"genesis/ui-shell-20260923",
-            "public_mirror_commit":mirror_commit,
-            "build_backend":"chromagora-os-self-hosted",
-            "backend_free":True,
-            "device_verified":device_verified.lower()=="true",
-            "published_at_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),
-          }
-          pathlib.Path(meta).write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8")
-          print(json.dumps(payload,sort_keys=True))
-          PY
-          if curl -fsSL --max-time 30 "https://dev.mintiful.dev/download/tsunami-ui-shell-rebrand-v1-apk" -o /tmp/tsunami-ui-portal.apk; then
-            live_sha="$(shasum -a 256 /tmp/tsunami-ui-portal.apk | awk '{print $1}')"
-            live_bytes="$(stat -f%z /tmp/tsunami-ui-portal.apk)"
-            [[ "$live_sha" == "$sha" && "$live_bytes" == "$bytes" ]]
-            echo "PORTAL_ROUTE_CHECK=PASS sha256=$live_sha bytes=$live_bytes"
-          else
-            echo "PORTAL_ROUTE_CHECK=SKIP route_unreachable_from_runner"
-          fi
-          echo "PORTAL_PUBLISH=PASS source_head=$source_head sha256=$sha bytes=$bytes target=$TARGET"
-
-      - name: Upload evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: TSUNAMI-UI-Genesis-public-selfhosted
-          path: |
-            tsunami-builder/dist/TSUNAMI-UI-Genesis-debug.apk
-            tsunami-builder/dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
-            tsunami-builder/dist/TSUNAMI-Sans-v5.2/
-            tsunami-builder/build/reports/tsunami/ui-shell/host/
-            tsunami-builder/ui-shell/tools/proofs/
-            tsunami-builder/MIRROR-MANIFEST.json
-          if-no-files-found: warn
-
-# current-head retry 2026-09-26T20:xx-04:00 source=ed182b683ba604dbf9c4351f19a69561d4478c55 type=v5.1 exact-private
