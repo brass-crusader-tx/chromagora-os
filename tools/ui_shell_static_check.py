@@ -11,6 +11,7 @@ import re
 import shlex
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -168,7 +169,13 @@ def main() -> int:
         cp = subprocess.run([bash, "-n", str(tool)], text=True, capture_output=True)
         if cp.returncode:
             fail(f"shell tooling syntax error in {tool.relative_to(ROOT)}: {(cp.stderr or cp.stdout).strip()}")
-    print(f"TOOL_SYNTAX=PASS python={len(PYTHON_TOOLS)} shell={len(SHELL_TOOLS)}")
+    resolver = subprocess.run(
+        [sys.executable, str(JITPACK_BUILD), "--self-test"],
+        cwd=ROOT, text=True, capture_output=True,
+    )
+    if resolver.returncode or "JITPACK_RESOLVER_SELF_TEST=PASS" not in resolver.stdout:
+        fail("JitPack resolver self-test failed: " + ((resolver.stdout or "")+(resolver.stderr or ""))[-3000:])
+    print(f"TOOL_SYNTAX=PASS python={len(PYTHON_TOOLS)} shell={len(SHELL_TOOLS)} jitpack_resolver=PASS")
 
     manifest = read(MANIFEST)
     for permission in FORBIDDEN_PERMISSIONS:
@@ -370,11 +377,13 @@ def main() -> int:
         'PUBLIC_BRANCH="build/tsunami-ui-genesis-20260925"',
         'MIRROR_MANIFEST_PATH="tsunami-builder/MIRROR-MANIFEST.json"',
         'resolve_mirror_head()',
+        'manifest_source != source_head',
         'verify_source_contract(manifest)',
         'trigger_and_wait(mirror_sha,timeout_s)',
         'TSUNAMI-UI-Genesis-debug.apk',
         'TSUNAMI-UI-Genesis-debug-androidTest.apk',
         '"source_contract_match":True',
+        '"exact_source_head_match":True',
         '"mirror_commit":mirror_sha',
         'validate_apk(tmp)',
     ):
@@ -431,6 +440,8 @@ def main() -> int:
         'JITPACK_MANIFEST="$DIST/jitpack-build.json"',
         'CODESPACE_MANIFEST_BINDING=PASS',
         'JITPACK_MANIFEST_BINDING=PASS',
+        'payload.get("exact_source_head_match") is True',
+        'payload.get("mirror_manifest_source_head")==expected_head',
         'TSUNAMI_FORCE_JITPACK_BUILD',
         'tools/ui_shell_jitpack_fetch.py',
         'payload.get("source_dirty") is False',
