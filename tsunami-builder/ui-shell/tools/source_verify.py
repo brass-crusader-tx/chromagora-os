@@ -525,6 +525,7 @@ def main() -> int:
         'remote_source_verify',
         'remote_accessibility_verify',
         'if len(base_captures) != 46:',
+        'OK (39 tests)',
         '--untracked-files=all',
     ):
         if anchor not in codespace_build:
@@ -602,6 +603,7 @@ def main() -> int:
         'VISUAL_SANITY=PASS',
         'CRASH_SCAN=PASS',
         'instrumentation.txt',
+        'OK (39 tests)',
         'contact-sheet.png',
     ):
         if anchor not in selfhosted:
