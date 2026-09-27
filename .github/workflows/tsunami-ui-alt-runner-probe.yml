@@ -1,0 +1,27 @@
+name: TSUNAMI UI Genesis Alternate Runner Probe
+
+on:
+  push:
+    branches:
+      - build/tsunami-ui-genesis-alt-runner-20260927
+    paths:
+      - ".github/workflows/tsunami-ui-alt-runner-probe.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  arm:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    steps:
+      - run: |
+          uname -a
+          echo ALT_ARM_RUNNER=PASS
+  slim:
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    steps:
+      - run: |
+          uname -a
+          echo ALT_SLIM_RUNNER=PASS
