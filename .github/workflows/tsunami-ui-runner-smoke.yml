@@ -1,0 +1,23 @@
+name: TSUNAMI UI Genesis runner smoke
+
+on:
+  push:
+    branches:
+      - build/tsunami-ui-genesis-20260925
+    paths:
+      - ".github/workflows/tsunami-ui-runner-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Runner alive
+        run: |
+          set -eux
+          uname -a
+          echo "TSUNAMI_RUNNER_SMOKE=PASS"
