@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "8b90291b03c7851d5b713268ff2a300f66c7d773",
+  "source_head": "898fdbecd8cdb6684362d6870e7f0f7f07ffa6bf",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Exact public mirror of private Genesis head 8b90291b03c7851d5b713268ff2a300f66c7d773; v5.2 reproducibility contract explicitly requires byte-identical outputs, with source identity, weights, proof set and two-pass reproducibility statically gated before Android construction.",
+  "note": "Exact public mirror of private Genesis head 898fdbecd8cdb6684362d6870e7f0f7f07ffa6bf; includes explicit byte-identical v5.2 font reproducibility and visible focus states for all direct lyrics-language controls.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -56,8 +56,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/ExpandedListening.kt",
-      "git_blob_sha": "74814f8dd6325ada4208572225a64336c4569844",
-      "bytes": 31884
+      "git_blob_sha": "b00af8ade922f3fbe0b96321611d8d95727e3179",
+      "bytes": 33396
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/FindScreen.kt",
