@@ -307,10 +307,10 @@
     "source_head": "77c3a0d1f6f04a2b9840dcc47cdb69068c4e4498"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-27T01:29:03Z",
+    "requested_at_utc": "2026-09-27T01:34:00Z",
     "private_head": "77c3a0d1f6f04a2b9840dcc47cdb69068c4e4498",
-    "reason": "exact-head rebuild after listening info + lyrics tools + 39-test/46-state reconciliation",
+    "reason": "exact-head reconciliation for 39-test 46-state Genesis source",
     "sequence": 33
   },
-  "generated_at_utc": "2026-09-27T01:29:03Z"
+  "generated_at_utc": "2026-09-27T01:34:00Z"
 }

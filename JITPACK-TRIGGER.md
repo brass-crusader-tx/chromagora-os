@@ -1,12 +1,12 @@
 # TSUNAMI UI Genesis JitPack trigger
 
-Private Genesis source head: `bb4a4d3b7aac9209a0715cdc68e95621cccab6f5`.
+Private Genesis source head: `77c3a0d1f6f04a2b9840dcc47cdb69068c4e4498`.
 
-This commit is an immutable build-transport trigger for the byte-identical public mirror. `tsunami-builder/MIRROR-MANIFEST.json` binds every build-critical blob consumed by `jitpack.yml`.
+This immutable build transport commit is bound by `tsunami-builder/MIRROR-MANIFEST.json`. The public mirror is Git-blob-identical to all 58 build/support files in the private Genesis head.
 
-Rebuild request: sequence 32 · 2026-09-27T01:28:00Z.
+Rebuild request: sequence 33 · 2026-09-27T01:34:00Z.
 
-The exact mirror now includes the completed listening INFO environment, lyrics sources/language tools, deterministic INFO launch mapping, and the canonical 39-test executable contract.
+Current executable contract: 39 Compose interaction tests and a canonical 46-state capture matrix, including queue, lyrics/source/language tools, listening INFO, responsive sizes, no-artwork, monochrome, accessibility, longform and failure/recovery states.
 
 - APK: `https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/<VERSION>/chromagora-os-<VERSION>.apk`
 - AndroidTest APK: `https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/<VERSION>/chromagora-os-<VERSION>-androidTest.apk`
