@@ -702,3 +702,30 @@ Concrete results:
 - Self-hosted run `36260963689`, job `108456555760`, is currently queued awaiting the registered executor. No build/device pass is inferred from that queued state.
 
 The acceptance boundary is unchanged: current-head app APK + AndroidTest APK assembly, isolated-package installation, all 38 Compose instrumentation tests, the exact 45-state visual matrix, Android TSUNAMI Sans v5.1 raster inspection, crash/logcat scan, monochrome/squint/artwork-independent review, and final artifact hashes must execute before completion can be certified.
+
+
+## Current listening-info / lyric-tools reconciliation — 2026-09-26 21:2x EDT
+
+A fresh authenticated source audit was executed against pre-documentation executable head `cb25ffa6c63a7ac956ffdd4b95bf61f186d3ae2b` after completing the newly introduced `PlayerMode.INFO` and `LyricsPanel` model surfaces rather than leaving them as orphan enum values.
+
+Concrete source results:
+
+- Kotlin source/test files scanned: **15**;
+- delimiter / string / comment lexical failures: **0**;
+- declared `ShellState` members: **357**;
+- distinct UI/test `state.*` references: **318**;
+- unresolved substantive state references: **0**;
+- Compose instrumentation tests: **39**, with **0 duplicate test names**;
+- Settings destination assignments / rendered routes / title routes: **20 / 20 / 20**, with **0 missing and 0 orphan routes**;
+- canonical capture rows: **46 / 46 unique**;
+- visual-sanity expected states: **46 / 46 unique**;
+- capture/verifier set differences: **0** in either direction;
+- Android manifest permissions: **0**;
+- TODO/FIXME/XXX markers in shell Kotlin source: **0**;
+- production runtime/build paths changed versus `main`: **0** under `app/`, `wear/`, `control-plane/`, root `build.gradle.kts`, or root `settings.gradle.kts`.
+
+The regression fixed in this reconciliation was concrete: `MockModels.kt` had acquired `PlayerMode.INFO` and `LyricsPanel { LINES, SOURCES, LANGUAGE }` while Expanded Listening still only rendered Queue/Lyrics/Output/Visual. The shell now renders an explicit **Info** listening mode, deterministic ADB launch supports `mode=info`, and Lyrics contains separate **Lines / Sources / Language** subspaces. Source priority is reorderable; auto-fetch/fallback, primary language, translation presentation, timing granularity and global delay are stateful. The Info mode exposes track-object truth—identity, year, duration, source, quality, availability, offline state, output, processing policy, and longform resume/chapter/bookmark—without displacing the stable transport.
+
+The dedicated regression `listeningInfoAndLyricsToolsAreReachableAndStateful` raises the interaction suite to **39 tests**. State `46-player-info` raises the deterministic visual matrix to **46** and is required to remain distinct from Queue/Lyrics/Output/Visual by the image-level verifier. Root/static/source/host/self-hosted gates have been reconciled to those exact cardinalities.
+
+This is source-contract evidence only. It does **not** substitute for current-head Android app + AndroidTest APK assembly, installation, **39/39** instrumentation execution, all **46** physical/emulated captures, Android TSUNAMI Sans v5.1 raster inspection, crash/logcat scanning, derived monochrome/squint evidence, or the mandatory human de-tackification/artwork-independent/non-streaming-clone review.
