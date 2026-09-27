@@ -9,8 +9,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -71,7 +73,7 @@ import com.tsunami.shell.theme.*
                     .background(p.ink)
                     .heightIn(min=48.dp)
                     .border(2.dp,if(bannerFocused)p.selected else Color.Transparent)
-                    .semantics{contentDescription="Dismiss message";role=Role.Button}
+                    .semantics{contentDescription="Dismiss message";role=Role.Button;liveRegion=LiveRegionMode.Polite}
                     .onFocusChanged{bannerFocused=it.isFocused}
                     .focusable()
                     .clickable{state.banner=null}
