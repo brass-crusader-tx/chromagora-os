@@ -13,7 +13,7 @@ ROOT=Path(__file__).resolve().parents[1]/"build/verification"
 EXPECTED={
     "01-listen-light","02-library-no-artwork","03-find-light","04-signal-error",
     "05-player-missing-lyrics","06-player-longform","36-player-podcast","07-settings-dark","08-onboarding-light",
-    "09-player-dark-queue","10-player-lyrics","11-player-output","12-player-visual",
+    "09-player-dark-queue","10-player-lyrics","11-player-output","12-player-visual","46-player-info",
     "13-listen-empty","14-listen-loading","15-library-40","16-library-4k","17-library-40k",
     "18-library-font-150","19-library-font-200","20-listen-accessibility","21-library-landscape",
     "22-library-medium","23-player-medium","24-listen-expanded","25-library-expanded",
@@ -61,7 +61,7 @@ if len(set(hashes.values())) < 20:
 # Critical topology/state pairs must differ individually. A global unique-count floor can still
 # conceal a broken launch extra if, for example, Queue/Lyrics both capture the same player mode.
 DISTINCT_GROUPS=(
-    ("09-player-dark-queue","10-player-lyrics","11-player-output","12-player-visual"),
+    ("09-player-dark-queue","10-player-lyrics","11-player-output","12-player-visual","46-player-info"),
     ("01-listen-light","13-listen-empty","14-listen-loading","27-listen-buffering"),
     ("15-library-40","16-library-4k","17-library-40k"),
     ("21-library-landscape","22-library-medium","25-library-expanded"),
