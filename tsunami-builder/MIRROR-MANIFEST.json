@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "9e344a03ec291359330460162d9569e7e44dc8c8",
+  "source_head": "d686042a45c381db27b2884cb4ac891750abe6fc",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror is byte-identical to private Genesis head 9e344a03ec291359330460162d9569e7e44dc8c8; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
+  "note": "Build-critical mirror is byte-identical to private Genesis head d686042a45c381db27b2884cb4ac891750abe6fc; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -51,13 +51,13 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/navigation/GenesisShell.kt",
-      "git_blob_sha": "2deb63c944ab900ba84661e88404592c98cd73e3",
-      "bytes": 17088
+      "git_blob_sha": "baf0d804b389de22ca1c6d07f82db013eb62729b",
+      "bytes": 17100
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/ExpandedListening.kt",
-      "git_blob_sha": "2df628660c7c91aa429db4243ecbe3f600ab83e1",
-      "bytes": 31872
+      "git_blob_sha": "728b1a082f0b3e1940bcf121b73956574b82042b",
+      "bytes": 31884
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/FindScreen.kt",
@@ -81,8 +81,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/SettingsScreen.kt",
-      "git_blob_sha": "08738eae53ff2239f0ac4d5d5caa13bfbf0ec412",
-      "bytes": 46520
+      "git_blob_sha": "0fb6a7bb56c7d1af0fdf14f4a09bc6530fd944ee",
+      "bytes": 46526
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/SignalScreen.kt",
@@ -161,8 +161,8 @@
     },
     {
       "path": "ui-shell/tools/accessibility_verify.py",
-      "git_blob_sha": "4c78832b49be8de0a4be127ccdd4c0bed783aee1",
-      "bytes": 8559
+      "git_blob_sha": "697f56c980d1ab7c13d237bb5490647b6824f9fe",
+      "bytes": 9588
     },
     {
       "path": "ui-shell/tools/bootstrap_gradle.sh",
@@ -278,12 +278,12 @@
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md",
-      "git_blob_sha": "2ec33a2c8d3f9d7e442af76868ce61c07cc8daa9",
-      "bytes": 6668
+      "git_blob_sha": "3113102027dd9539ca579477a8dc1df4b41e3ff0",
+      "bytes": 6825
     },
     {
       "path": "tools/ui_shell_codespace_build.py",
-      "git_blob_sha": "4b9207a5a0341a5ecaa2a5593dd2eca70a28913b",
+      "git_blob_sha": "22f98a9a1d1900c93d97101210b04afe948686b2",
       "bytes": 15997
     },
     {
@@ -304,13 +304,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "9e344a03ec291359330460162d9569e7e44dc8c8"
+    "source_head": "d686042a45c381db27b2884cb4ac891750abe6fc"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-27T01:34:47Z",
-    "private_head": "9e344a03ec291359330460162d9569e7e44dc8c8",
-    "reason": "exact-head rebuild after 39-test/46-state gate reconciliation",
-    "sequence": 34
+    "requested_at_utc": "2026-09-27T01:59:58Z",
+    "private_head": "d686042a45c381db27b2884cb4ac891750abe6fc",
+    "reason": "exact-head rebuild after scalable-chrome accessibility and Codespaces visual-count repair",
+    "sequence": 35
   },
-  "generated_at_utc": "2026-09-27T01:34:47Z"
+  "generated_at_utc": "2026-09-27T01:59:58Z"
 }
