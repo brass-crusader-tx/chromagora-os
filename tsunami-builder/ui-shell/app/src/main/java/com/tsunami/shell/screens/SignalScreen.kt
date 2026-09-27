@@ -59,7 +59,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
                 "SOURCE" to t.quality,
                 "OUTPUT" to state.output,
                 "POSITION" to "${formatTime(state.positionMs)} / ${formatTime(t.durationMs)}",
-                "STATE" to if(state.playing)"PLAYING" else "PAUSED",
+                "STATE" to playbackStateLabel(state),
                 "OFFLINE" to if(state.downloads[t.id]==DownloadState.DOWNLOADED)"YES" else "NO"
             ))
         }
@@ -89,12 +89,19 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
         }
         item{
             SectionHeader("Listening")
-            Row(Modifier.fillMaxWidth().padding(vertical=12.dp)){
-                SmallMetric("42h","this month")
-                SmallMetric("78%","avg completion")
-                SmallMetric("17","new artists")
+            if(!state.historyEnabled){
+                Text("Listening history is off.",style=Type.body.copy(color=p.ink2),modifier=Modifier.padding(vertical=14.dp))
+                TextCommand("Turn history on",{state.historyEnabled=true})
+            }else if(state.historyCleared){
+                Text("No listening history yet.",style=Type.body.copy(color=p.ink2),modifier=Modifier.padding(vertical=14.dp))
+            }else{
+                Row(Modifier.fillMaxWidth().padding(vertical=12.dp)){
+                    SmallMetric("42h","this month")
+                    SmallMetric("78%","avg completion")
+                    SmallMetric("17","new artists")
+                }
+                Rule()
             }
-            Rule()
         }
     }
 }
@@ -108,8 +115,8 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
             SignalLine("Track",t?.let{"${it.artist} — ${it.title}"}?:"Nothing playing")
             SignalLine("Container",t?.quality?.substringBefore(" ·")?:"Unknown")
             SignalLine("Bitrate","Not exposed by this source")
-            SignalLine("Sample rate",t?.quality?.substringAfter("·",missingDelimiterValue="Unknown")?.trim()?:"Unknown")
-            SignalLine("Bit depth",if(t?.quality?.contains("24")==true)"24-bit" else if(t?.quality?.contains("16")==true)"16-bit" else "Unknown / not exposed")
+            SignalLine("Sample rate",t?.quality?.let(::qualitySampleRate)?:"Unknown / not exposed")
+            SignalLine("Bit depth",t?.quality?.let(::qualityBitDepth)?:"Unknown / not exposed")
             SignalLine("Provider",if(t?.provenance?.name=="CATALOGUE")"Connected catalogue" else "Local / indexed")
         }
         item{
@@ -231,6 +238,20 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
 
 @Composable private fun ColumnScope.HistorySignal(state:ShellState){
     val p=LocalTsunamiPalette.current
+    if(!state.historyEnabled){
+        LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=28.dp)){
+            item{
+                SectionHeader("Listening history")
+                Text("Listening history is off.",style=Type.title.copy(color=p.ink),modifier=Modifier.padding(top=18.dp))
+                Spacer(Modifier.height(6.dp))
+                Text("Playback continues normally; no new listening record is added while this preference is off.",style=Type.body.copy(color=p.ink2))
+                Spacer(Modifier.height(12.dp))
+                TextCommand("Turn history on",{state.historyEnabled=true})
+                Rule()
+            }
+        }
+        return
+    }
     if(state.historyCleared){
         LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=28.dp)){
             item{
@@ -375,4 +396,29 @@ private fun signedSignalDb(v:Float)=when{
     v>0f->"+${v.toInt()}"
     v<0f->v.toInt().toString()
     else->"0"
+}
+
+
+private fun playbackStateLabel(state:ShellState):String {
+    val track=state.currentTrack ?: return "IDLE"
+    return when {
+        !track.available -> "UNAVAILABLE"
+        state.buffering -> "BUFFERING"
+        state.playing -> "PLAYING"
+        else -> "PAUSED"
+    }
+}
+
+
+private fun qualityBitDepth(quality:String):String = when {
+    quality.startsWith("FLAC") && quality.contains("24 /") -> "24-bit"
+    quality.startsWith("FLAC") && quality.contains("16 /") -> "16-bit"
+    else -> "Unknown / not exposed"
+}
+
+private fun qualitySampleRate(quality:String):String = when {
+    quality.startsWith("FLAC") && quality.contains("/ 96") -> "96 kHz"
+    quality.startsWith("FLAC") && quality.contains("/ 48") -> "48 kHz"
+    quality.startsWith("FLAC") && quality.contains("/ 44.1") -> "44.1 kHz"
+    else -> "Unknown / not exposed"
 }
