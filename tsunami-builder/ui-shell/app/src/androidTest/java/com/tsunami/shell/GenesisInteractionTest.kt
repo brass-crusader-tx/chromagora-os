@@ -193,6 +193,11 @@ class GenesisInteractionTest {
 
     @Test fun signalDepthIsInteractiveAndTruthful() {
         compose.onNodeWithText("Signal", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("FORMAT").assertExists()
+        compose.onNodeWithText("INDEXED").assertExists()
+        compose.onNodeWithText("OFFLINE TRACKS").assertExists()
+        compose.onAllNodesWithText("99.9%").assertCountEquals(0)
+        compose.onAllNodesWithText("3.2 GB").assertCountEquals(0)
         compose.onNodeWithText("Audio").performClick()
         compose.onNodeWithText("Audio path").assertExists()
         scrollListTo("signal-audio-list", "Test next transition")

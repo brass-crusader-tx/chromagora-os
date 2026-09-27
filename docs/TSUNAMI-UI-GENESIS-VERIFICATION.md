@@ -3,24 +3,26 @@
 Current verification date: 2026-09-26
 
 
-## Exact-current-head source reconciliation — 2026-09-26 17:xx EDT
+## Exact-current-head source reconciliation — 2026-09-26 22:4x EDT
 
-A fresh authenticated audit was run after the v5.1 generator/manifest reconciliation, against executable source head **`1fe4d52eaf9deee0b334e10caf6670442da41bc2`**; the intervening commit before this ledger refresh changes documentation only.
+A fresh authenticated audit was run against executable source head **`904a34b257a45228ff0f47f9dbea1909756d1836`** after the Signal truthfulness pass and its regression guard.
 
 Concrete current-source results:
 
 - **15** Kotlin source/test files inspected;
 - delimiter/string/comment balance failures: **0**;
-- unresolved `ShellState` references from UI/test source: **0**;
-- Compose instrumentation methods: **38**;
+- unfinished `TODO`/`FIXME`/`XXX` markers in executable shell Kotlin: **0**;
+- direct production-runtime anchors (MediaStore/content resolver/network/Room/filesystem coupling) in executable shell Kotlin: **0**;
+- Compose instrumentation methods: **39**;
 - isolated shell Android permissions: **0**;
 - forbidden anti-tackiness anchors checked (`RoundedCornerShape`, `CircleShape`, decorative shadows/gradients, FAB, stock Material theme/icons/cards): **0 hits**;
-- TSUNAMI Sans generator Git blob: **`43ae1290ae3063a717cddb0272080dc0c27d3b7f`**;
-- canonical v5.1 manifest generator blob: **same**;
-- generator metadata contains **Version 5.100**, v5.1 proof labels, and the shell-required non-breaking hyphen;
-- PR base-to-head diff at the audited source head changes **58 files**, with **0 production runtime/build paths** under `app/`, `wear/`, `control-plane/`, root `build.gradle.kts`, or root `settings.gradle.kts`.
+- Signal summary/library-health metrics now derive from shell state (current source/format, output, indexed count, roots, lyric-missing count, offline-track count, audit results) rather than ornamental fixed percentages/capacity figures;
+- the static source gate now explicitly rejects the removed fabricated Signal strings, and the existing Signal instrumentation test asserts that `99.9%` and `3.2 GB` do not return;
+- TSUNAMI Sans generator Git blob: **`ea17b0e4e51e40a6ac9a0a8845ac83b53c620ae2`**;
+- generator metadata remains **Version 5.100**, with the canonical v5.1 manifest and proof contract;
+- PR base-to-head diff changes **60 files**, with **0 production runtime/build paths** under `app/`, `wear/`, `control-plane/`, root `build.gradle.kts`, or root `settings.gradle.kts`.
 
-The canonical font source of truth is now `docs/TSUNAMI-SANS-v5.1-MANIFEST.json`; the current review log has been reconciled to its five master/proof hashes rather than retaining a divergent prose hash table.
+The canonical font source of truth remains `docs/TSUNAMI-SANS-v5.1-MANIFEST.json`.
 
 ### Executable evidence still outstanding
 
@@ -28,14 +30,14 @@ No Android PASS is inferred from the source checks above. The exact-current-head
 
 1. assemble the debug application APK and AndroidTest APK;
 2. install isolated package `com.tsunami.shell`;
-3. execute all **38** Compose instrumentation tests;
-4. capture all **45** deterministic device/emulator states;
+3. execute all **39** Compose instrumentation tests;
+4. capture all **46** deterministic device/emulator states;
 5. inspect TSUNAMI Sans v5.1 under Android rasterization;
 6. perform the artwork-removed, monochrome, squint and non-streaming-clone human review;
 7. scan logcat for shell crashes;
 8. package final APK/evidence hashes.
 
-Repository Actions still fails before job allocation. Fresh branch runs at current lineage return synthetic `BuildFailed` / `startup_failure` with no jobs, and contemporaneous `main` issue-triggered workflows exhibit the same zero-job signature. This materially strengthens the diagnosis that the observed Actions result is repository/account/platform startup infrastructure rather than evidence of a Kotlin/Gradle/Android compile failure.
+Hosted GitHub runners continue to terminate before user steps with the previously reproduced zero-step/startup-failure signature. The public self-hosted build lane has now reached a queued job rather than a synthetic hosted-runner failure; that queued state is not counted as executable evidence until a self-hosted runner actually accepts and executes it.
 
 
 This ledger records concrete checks against the isolated `ui-shell` branch. It deliberately distinguishes evidence that has actually run from checks that still require an Android build environment.
@@ -702,3 +704,67 @@ Concrete results:
 - Self-hosted run `36260963689`, job `108456555760`, is currently queued awaiting the registered executor. No build/device pass is inferred from that queued state.
 
 The acceptance boundary is unchanged: current-head app APK + AndroidTest APK assembly, isolated-package installation, all 38 Compose instrumentation tests, the exact 45-state visual matrix, Android TSUNAMI Sans v5.1 raster inspection, crash/logcat scan, monochrome/squint/artwork-independent review, and final artifact hashes must execute before completion can be certified.
+
+
+## Current listening-info / lyric-tools reconciliation — 2026-09-26 21:2x EDT
+
+A fresh authenticated source audit was executed against pre-documentation executable head `cb25ffa6c63a7ac956ffdd4b95bf61f186d3ae2b` after completing the newly introduced `PlayerMode.INFO` and `LyricsPanel` model surfaces rather than leaving them as orphan enum values.
+
+Concrete source results:
+
+- Kotlin source/test files scanned: **15**;
+- delimiter / string / comment lexical failures: **0**;
+- declared `ShellState` members: **357**;
+- distinct UI/test `state.*` references: **318**;
+- unresolved substantive state references: **0**;
+- Compose instrumentation tests: **39**, with **0 duplicate test names**;
+- Settings destination assignments / rendered routes / title routes: **20 / 20 / 20**, with **0 missing and 0 orphan routes**;
+- canonical capture rows: **46 / 46 unique**;
+- visual-sanity expected states: **46 / 46 unique**;
+- capture/verifier set differences: **0** in either direction;
+- Android manifest permissions: **0**;
+- TODO/FIXME/XXX markers in shell Kotlin source: **0**;
+- production runtime/build paths changed versus `main`: **0** under `app/`, `wear/`, `control-plane/`, root `build.gradle.kts`, or root `settings.gradle.kts`.
+
+The regression fixed in this reconciliation was concrete: `MockModels.kt` had acquired `PlayerMode.INFO` and `LyricsPanel { LINES, SOURCES, LANGUAGE }` while Expanded Listening still only rendered Queue/Lyrics/Output/Visual. The shell now renders an explicit **Info** listening mode, deterministic ADB launch supports `mode=info`, and Lyrics contains separate **Lines / Sources / Language** subspaces. Source priority is reorderable; auto-fetch/fallback, primary language, translation presentation, timing granularity and global delay are stateful. The Info mode exposes track-object truth—identity, year, duration, source, quality, availability, offline state, output, processing policy, and longform resume/chapter/bookmark—without displacing the stable transport.
+
+The dedicated regression `listeningInfoAndLyricsToolsAreReachableAndStateful` raises the interaction suite to **39 tests**. State `46-player-info` raises the deterministic visual matrix to **46** and is required to remain distinct from Queue/Lyrics/Output/Visual by the image-level verifier. Root/static/source/host/self-hosted gates have been reconciled to those exact cardinalities.
+
+This is source-contract evidence only. It does **not** substitute for current-head Android app + AndroidTest APK assembly, installation, **39/39** instrumentation execution, all **46** physical/emulated captures, Android TSUNAMI Sans v5.1 raster inspection, crash/logcat scanning, derived monochrome/squint evidence, or the mandatory human de-tackification/artwork-independent/non-streaming-clone review.
+
+
+## Product-language de-tackification pass — 2026-09-26/27
+
+A fresh no-designer-explanation audit was run after the current listening-info, lyrics, advanced-settings and Signal environments had accumulated explicit development disclaimers. Those labels were useful while scaffolding the backend-free shell, but they violated the product thesis once they became visible interface copy: a listener should not need to parse phrases such as “mock,” “simulated,” “preview only,” or “no production data” in order to understand a music control.
+
+The executable product surfaces were therefore revised without changing their state model:
+
+- Expanded Listening now describes lyric sources, visual state and object details in task language rather than implementation disclaimers.
+- Settings now describes service imports, processing order, equalizer reset semantics, visualizer behavior, shuffle scope, hardware/external controls, scrobbling and backup actions as product tasks rather than preview mechanics.
+- Signal now labels source/decoder/library/diagnostic state directly rather than qualifying it as simulated telemetry.
+- Onboarding now frames the three starting choices as local, connected or sample-library paths without explaining the prototype implementation.
+- `source_verify.py` now rejects development-language tokens across every screen: `mock `, `simulated `, `preview only`, `this preview`, `sample state`, `no production`, in addition to the prior demo/prototype/backend-free guards.
+
+A connector-side scan of all seven screen source files at pre-documentation executable head `e41fa606d175e2d405e8067615cc215d3da73626` found **0** occurrences of the guarded development-language tokens. The visual-review protocol now treats any such leakage as an explicit REVISE condition alongside cards/pills/gradients/artwork-dependent identity.
+
+This pass is source-level de-tackification evidence. It does not replace the outstanding Android build, 39-test instrumentation, 46-state device capture, Android TSUNAMI Sans raster review, crash scan, or human visual acceptance.
+
+
+## Signal truthfulness pass — 2026-09-26/27
+
+The de-tackification audit was extended from vocabulary to technical truthfulness. The backend-free shell had retained several precise-looking Signal values that were not derived from any fixture state—fixed PCM peaks, a fixed 384 MiB / 2 GiB cache figure, nominal 96 kHz mixer claims, a fabricated −6.20 dB ReplayGain value and fixed 118 BPM / C-minor / energy analysis. Those values made the surface look more “audiophile” without carrying trustworthy information, which is explicitly outside the Genesis brief.
+
+The Signal environment now:
+
+- reports source bitrate as unavailable when the source does not expose it;
+- describes byte verification, seekability and caching by capability/state rather than invented byte counts;
+- treats platform output format and conversion as route-negotiated/reported information rather than hard-coding 96 kHz / PCM-float claims;
+- removes fixed PCM-peak and clipping telemetry;
+- preserves the meaningful stateful diagnostic counters and gapless probe;
+- labels duplicate hashing as SHA-256 over the indexed audio payload rather than “sample bytes”;
+- reports ReplayGain policy and analysis completion without fabricated musical measurements;
+- derives visible-object format counts directly from the current fixture track set rather than hard-coding an internally inconsistent 24-bit count.
+
+`source_verify.py` now rejects the removed ornamental-precision literals if they reappear. The visual-review protocol likewise requires REVISE when precise technical numbers are present only to make the shell look technical.
+
+The corresponding state-only track-analysis action still changes from Ready → complete and remains testable, but no longer invents BPM/key/energy values. Android/device execution remains outstanding and no build PASS is inferred from this source pass.

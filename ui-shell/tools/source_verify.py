@@ -160,6 +160,20 @@ PRIMARY_COPY_GUARDS = {
     ],
     "screens/SignalScreen.kt": [
         "Technical information appears only where it changes understanding, trust, or recovery.",
+        "384 MiB / 2 GiB",
+        "Nominal 96 kHz",
+        "L 0.842 · R 0.816",
+        "−6.20 dB sample",
+        "118 BPM · C minor · energy 64%",
+        "sample audio bytes",
+        "\"MIXER\" to \"96 kHz · float\"",
+        "\"INDEX\" to if(state.diagnosticsFault)\"97.8%\" else \"99.9%\"",
+        "\"LYRICS\" to if(state.fixture.missingLyrics)\"81%\" else \"93%\"",
+        "\"PLAYLISTS\" to \"100%\"",
+        "\"OFFLINE\" to \"3.2 GB\"",
+        "\"ZERO-BYTE\" to \"0\"",
+        "\"UNDECODABLE\" to \"0\"",
+        "\"ORPHAN SIDECARS\" to \"2\"",
     ],
     "screens/ExpandedListening.kt": [
         "TSUNAMI does not fabricate a karaoke layer.",
@@ -309,7 +323,7 @@ def main() -> int:
         present = [phrase for phrase in forbidden_phrases if phrase in src]
         if present:
             die(f"{rel} regressed to portfolio/prototype microcopy on a primary surface: {present}")
-    product_copy_forbidden=("demo ","prototype status","backend-free","experiential prototype")
+    product_copy_forbidden=("demo ","prototype status","backend-free","experiential prototype","mock ","simulated ","preview only","this preview","sample state","no production")
     product_copy_hits={}
     for path in sorted((SRC / "screens").glob("*.kt")):
         src=path.read_text(encoding="utf-8").lower()
@@ -455,7 +469,7 @@ def main() -> int:
         if "TSUNAMI-SANS-v5.1-MANIFEST.json" not in contract_source:
             die(f"{contract_name} must bind generated fonts to the canonical v5.1 manifest")
     if "OK (39 tests)" not in host_build or "OK (39 tests)" not in root_gate:
-        die("Android acceptance paths must require the full 38-test instrumentation suite")
+        die("Android acceptance paths must require the full 39-test instrumentation suite")
     for anchor in (
         'JDK 17 or newer',
         '/usr/libexec/java_home -v 17',
@@ -487,7 +501,7 @@ def main() -> int:
         'test_apk_hash_match',
         'remote_source_verify',
         'remote_accessibility_verify',
-        'if len(base_captures) != 45:',
+        'if len(base_captures) != 46:',
         '--untracked-files=all',
     ):
         if anchor not in codespace_build:
@@ -506,7 +520,7 @@ def main() -> int:
     if not expected_match:
         die("visual sanity EXPECTED state set could not be parsed")
     expected_names=set(re.findall(r'"([0-9][0-9]-[^"]+)"',expected_match.group("body")))
-    if len(capture_names)!=45 or len(set(capture_names))!=45 or len(expected_names)!=45:
+    if len(capture_names)!=46 or len(set(capture_names))!=46 or len(expected_names)!=46:
         die(f"visual matrix cardinality drift capture={len(capture_names)} unique={len(set(capture_names))} expected={len(expected_names)}")
     if set(capture_names)!=expected_names:
         die(
@@ -532,7 +546,7 @@ def main() -> int:
     ):
         if literal not in visual_sanity:
             die(f"visual sanity critical-group coverage missing: {literal}")
-    print("VISUAL_MATRIX_PARITY=PASS states=45 names=exact")
+    print("VISUAL_MATRIX_PARITY=PASS states=46 names=exact")
     print("ADVERSARIAL_VISUAL_CONTRACT=PASS search queue provider downloads library-index")
     for anchor in (
         "ARTWORK_IDENTITY_PAIRS",
@@ -548,7 +562,7 @@ def main() -> int:
     for anchor in (
         'bash ui-shell/tools/build_host.sh',
         'bash ui-shell/tools/build_host.sh --verify-device "$SERIAL"',
-        'VISUAL_CAPTURE=PASS states=45',
+        'VISUAL_CAPTURE=PASS states=46',
         'VISUAL_SANITY=PASS',
         'CRASH_SCAN=PASS',
         'instrumentation.txt',
@@ -569,7 +583,7 @@ def main() -> int:
     print("BUILD_STACK_CONTRACT=PASS compileSdk=36 targetSdk=36 compose=1.11.4 agp=9.2.1 builtInKotlin=2.2.10 gradle=9.4.1")
     print("PORTAL_PUBLISH_CONTRACT=PASS host_then_codespace hash_bound atomic_manifested")
     print("VISUAL_IDENTITY_GATE_CONTRACT=PASS monochrome squint hierarchy artwork-removal")
-    print("SELFHOSTED_DEVICE_GATE_CONTRACT=PASS build instrumentation visual45 crash_scan")
+    print("SELFHOSTED_DEVICE_GATE_CONTRACT=PASS build instrumentation visual46 crash_scan")
     print("INTERACTION_COUNTS=" + ",".join(f"{k}:{v}" for k,v in counts.items()))
     return 0
 

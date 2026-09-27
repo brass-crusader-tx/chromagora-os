@@ -65,22 +65,24 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
         }
         item{
             SectionHeader("Audio path")
+            val t=state.currentTrack
             MetricGrid(listOf(
-                "MIXER" to "96 kHz · float",
+                "FORMAT" to (t?.quality ?: "No active source"),
+                "OUTPUT" to state.output,
                 "SPEED" to "${state.playbackSpeed}×",
                 "REPLAYGAIN" to state.replayGainMode,
                 "DSP" to if(state.dspEnabled)"ON · ${signedSignalDb(state.dspPreampDb)} dB" else "BYPASS",
-                "UNDERRUNS" to state.diagnosticUnderruns.toString(),
                 "GAPLESS" to state.gaplessProbeResult
             ))
         }
         item{
             SectionHeader("Library health")
+            val offlineTracks=state.downloads.count{it.value==DownloadState.DOWNLOADED}
             MetricGrid(listOf(
-                "INDEX" to if(state.diagnosticsFault)"97.8%" else "99.9%",
-                "LYRICS" to if(state.fixture.missingLyrics)"81%" else "93%",
-                "PLAYLISTS" to "100%",
-                "OFFLINE" to "3.2 GB",
+                "INDEXED" to state.fixture.libraryCount.toString(),
+                "ROOTS" to state.libraryRoots.size.toString(),
+                "LYRICS MISSING" to state.lyricMissingCount.toString(),
+                "OFFLINE TRACKS" to offlineTracks.toString(),
                 "DUPLICATES" to if(state.duplicateGroups<0)"NOT SCANNED" else state.duplicateGroups.toString(),
                 "FLAC FAIL" to if(state.flacIntegrityFailures<0)"NOT SCANNED" else state.flacIntegrityFailures.toString()
             ))
@@ -157,12 +159,13 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
     LazyColumn(Modifier.weight(1f).testTag("signal-library-list"),contentPadding=PaddingValues(bottom=28.dp)){
         item{
             SectionHeader("Health audit")
+            val offlineTracks=state.downloads.count{it.value==DownloadState.DOWNLOADED}
             MetricGrid(listOf(
                 "INDEXED" to state.fixture.libraryCount.toString(),
-                "MISSING" to if(state.diagnosticsFault)"11" else "1",
-                "ZERO-BYTE" to "0",
-                "UNDECODABLE" to "0",
-                "ORPHAN SIDECARS" to "2",
+                "ROOTS" to state.libraryRoots.size.toString(),
+                "SOURCE ISSUES" to if(state.sourceError)"1" else "0",
+                "LYRICS MISSING" to state.lyricMissingCount.toString(),
+                "OFFLINE TRACKS" to offlineTracks.toString(),
                 "PROFILE" to state.activeLibraryProfile
             ))
             TextCommand("Refresh health",{state.diagnosticsFault=false;state.sourceError=false;state.banner="Library health refreshed"})
