@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "aaa5df22344403fdd527a298e93cbfb0822d9abb",
+  "source_head": "7fe213094282b5d2793725834a219547c5a90e2b",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror is byte-identical to private Genesis head aaa5df22344403fdd527a298e93cbfb0822d9abb; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
+  "note": "Build-critical mirror is byte-identical to private Genesis head 7fe213094282b5d2793725834a219547c5a90e2b; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -56,8 +56,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/ExpandedListening.kt",
-      "git_blob_sha": "f24896341c376e004c4ab94832ac1131c6dfef66",
-      "bytes": 31878
+      "git_blob_sha": "74814f8dd6325ada4208572225a64336c4569844",
+      "bytes": 31884
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/FindScreen.kt",
@@ -206,8 +206,8 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "c5f74d777b178d0316b993638992714bdc09e1b1",
-      "bytes": 33568
+      "git_blob_sha": "838c89c886b2af413a1eb2b30687906406467615",
+      "bytes": 33600
     },
     {
       "path": "ui-shell/tools/visual_sanity_verify.py",
@@ -258,8 +258,8 @@
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-COVERAGE.md",
-      "git_blob_sha": "2c0608240cbaeaaf7a6f63888765b114239f684e",
-      "bytes": 17377
+      "git_blob_sha": "df9aaee22d4c4ef6f02f79ff43f3bb6a7676a3b9",
+      "bytes": 17649
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-RESEARCH.md",
@@ -304,13 +304,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "aaa5df22344403fdd527a298e93cbfb0822d9abb"
+    "source_head": "7fe213094282b5d2793725834a219547c5a90e2b"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-27T05:15:00Z",
-    "private_head": "aaa5df22344403fdd527a298e93cbfb0822d9abb",
-    "reason": "exact-head rebuild after Signal playback/history privacy and quality-field truthfulness pass",
-    "sequence": 44
+    "requested_at_utc": "2026-09-27T05:31:00Z",
+    "private_head": "7fe213094282b5d2793725834a219547c5a90e2b",
+    "reason": "exact-head rebuild after output-route precision removal and coverage reconciliation",
+    "sequence": 45
   },
-  "generated_at_utc": "2026-09-27T05:15:00Z"
+  "generated_at_utc": "2026-09-27T05:31:00Z"
 }
