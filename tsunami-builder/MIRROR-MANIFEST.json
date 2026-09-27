@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "1bda14b0a1b1f48a9243433c5bd7d668198cab11",
+  "source_head": "6da0360089dc3d5644589da1c4e401ba8a0de263",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical public mirror is byte-identical to private Genesis head 1bda14b0a1b1f48a9243433c5bd7d668198cab11; canonical TSUNAMI Sans v5.2 is bound by generator Git blob and two-pass reproducibility contract.",
+  "note": "Exact public mirror of private Genesis head 6da0360089dc3d5644589da1c4e401ba8a0de263; v5.2 is the sole font manifest and static verification rejects retired v5.1 coexistence or generator drift.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -206,8 +206,8 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "4299db1ffcfbaf330713d3c22c8c463f086c3b81",
-      "bytes": 35208
+      "git_blob_sha": "63c0b8a38f82cd50601ee244b4bb3744402151e7",
+      "bytes": 35426
     },
     {
       "path": "ui-shell/tools/visual_sanity_verify.py",
