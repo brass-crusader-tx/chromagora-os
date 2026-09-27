@@ -299,13 +299,13 @@ def main() -> int:
     if not REQUIRED_SCENARIOS <= scenarios:
         fail("mock scenario coverage missing: " + ", ".join(sorted(REQUIRED_SCENARIOS - scenarios)))
 
-    mode_literals = set(re.findall(r'"(lyrics|output|visual)"\s*->\s*PlayerMode\.', activity)) | {"queue"}
+    mode_literals = set(re.findall(r'"(lyrics|output|visual|info)"\s*->\s*PlayerMode\.', activity)) | {"queue"}
     if mode_literals != REQUIRED_PLAYER_MODES:
         fail(f"player launch modes drifted: {sorted(mode_literals)}")
 
     captures = capture_rows(read(CAPTURE))
-    if len(captures) != 45:
-        fail(f"visual matrix count drifted: {len(captures)} != 45 captures")
+    if len(captures) != 46:
+        fail(f"visual matrix count drifted: {len(captures)} != 46 captures")
     capture_names = [row[0] for row in captures]
     if len(set(capture_names)) != len(capture_names):
         duplicates = sorted({name for name in capture_names if capture_names.count(name) > 1})
@@ -324,9 +324,9 @@ def main() -> int:
             f"missing_from_verifier={missing_from_verifier} "
             f"missing_from_capture={missing_from_capture}"
         )
-    if len(expected_names) != 45:
-        fail(f"visual sanity expected-state count drifted: {len(expected_names)} != 45")
-    print("VISUAL_MATRIX_PARITY=PASS states=45 names=exact")
+    if len(expected_names) != 46:
+        fail(f"visual sanity expected-state count drifted: {len(expected_names)} != 46")
+    print("VISUAL_MATRIX_PARITY=PASS states=46 names=exact")
     capture_scenarios = {row[2] for row in captures}
     unknown_scenarios = sorted(capture_scenarios - REQUIRED_SCENARIOS)
     if unknown_scenarios:
