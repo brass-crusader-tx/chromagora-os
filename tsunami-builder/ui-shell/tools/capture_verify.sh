@@ -6,12 +6,33 @@ OUT=build/verification
 rm -rf "$OUT"
 mkdir -p "$OUT"
 APK="${TSUNAMI_UI_SHELL_APK:-app/build/outputs/apk/debug/app-debug.apk}"
+
+# Device verification deliberately changes font scale, orientation and logical display
+# metrics. Preserve the user's exact pre-run state rather than assuming Android defaults.
+ORIG_FONT_SCALE="$(adb shell settings get system font_scale 2>/dev/null | tr -d '\r' || true)"
+ORIG_USER_ROTATION="$(adb shell settings get system user_rotation 2>/dev/null | tr -d '\r' || true)"
+ORIG_ACCEL_ROTATION="$(adb shell settings get system accelerometer_rotation 2>/dev/null | tr -d '\r' || true)"
+ORIG_WM_SIZE="$(adb shell wm size 2>/dev/null | tr -d '\r' | awk -F': ' '/Override size/{print $2;exit}' || true)"
+ORIG_WM_DENSITY="$(adb shell wm density 2>/dev/null | tr -d '\r' | awk -F': ' '/Override density/{print $2;exit}' || true)"
+
+restore_setting() {
+  local key="$1" value="$2"
+  if [[ -n "$value" && "$value" != "null" ]]; then
+    adb shell settings put system "$key" "$value" >/dev/null 2>&1 || true
+  else
+    adb shell settings delete system "$key" >/dev/null 2>&1 || true
+  fi
+}
 restore_device() {
-  adb shell settings put system font_scale 1.0 >/dev/null 2>&1 || true
-  adb shell settings put system user_rotation 0 >/dev/null 2>&1 || true
-  adb shell settings put system accelerometer_rotation 1 >/dev/null 2>&1 || true
-  adb shell wm size reset >/dev/null 2>&1 || true
-  adb shell wm density reset >/dev/null 2>&1 || true
+  restore_setting font_scale "$ORIG_FONT_SCALE"
+  restore_setting user_rotation "$ORIG_USER_ROTATION"
+  restore_setting accelerometer_rotation "$ORIG_ACCEL_ROTATION"
+  if [[ -n "$ORIG_WM_SIZE" ]]; then adb shell wm size "$ORIG_WM_SIZE" >/dev/null 2>&1 || true
+  else adb shell wm size reset >/dev/null 2>&1 || true
+  fi
+  if [[ -n "$ORIG_WM_DENSITY" ]]; then adb shell wm density "$ORIG_WM_DENSITY" >/dev/null 2>&1 || true
+  else adb shell wm density reset >/dev/null 2>&1 || true
+  fi
 }
 trap restore_device EXIT
 test -s "$APK" || { echo "APK missing: $APK" >&2; exit 2; }
@@ -109,8 +130,7 @@ capture 24-listen-expanded listen default light
 capture 25-library-expanded library huge-list light
 capture 26-player-expanded player default dark lyrics
 
-adb shell wm size reset
-adb shell wm density reset
+restore_device
 sleep 2
 adb logcat -d -t 1200 > "$OUT/logcat-tail.txt" || true
 for f in "$OUT"/*.png; do test "$(wc -c < "$f")" -gt 10000 || { echo "capture too small: $f"; exit 1; }; done
