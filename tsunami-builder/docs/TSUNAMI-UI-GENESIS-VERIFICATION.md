@@ -729,3 +729,20 @@ The regression fixed in this reconciliation was concrete: `MockModels.kt` had ac
 The dedicated regression `listeningInfoAndLyricsToolsAreReachableAndStateful` raises the interaction suite to **39 tests**. State `46-player-info` raises the deterministic visual matrix to **46** and is required to remain distinct from Queue/Lyrics/Output/Visual by the image-level verifier. Root/static/source/host/self-hosted gates have been reconciled to those exact cardinalities.
 
 This is source-contract evidence only. It does **not** substitute for current-head Android app + AndroidTest APK assembly, installation, **39/39** instrumentation execution, all **46** physical/emulated captures, Android TSUNAMI Sans v5.1 raster inspection, crash/logcat scanning, derived monochrome/squint evidence, or the mandatory human de-tackification/artwork-independent/non-streaming-clone review.
+
+
+## Product-language de-tackification pass — 2026-09-26/27
+
+A fresh no-designer-explanation audit was run after the current listening-info, lyrics, advanced-settings and Signal environments had accumulated explicit development disclaimers. Those labels were useful while scaffolding the backend-free shell, but they violated the product thesis once they became visible interface copy: a listener should not need to parse phrases such as “mock,” “simulated,” “preview only,” or “no production data” in order to understand a music control.
+
+The executable product surfaces were therefore revised without changing their state model:
+
+- Expanded Listening now describes lyric sources, visual state and object details in task language rather than implementation disclaimers.
+- Settings now describes service imports, processing order, equalizer reset semantics, visualizer behavior, shuffle scope, hardware/external controls, scrobbling and backup actions as product tasks rather than preview mechanics.
+- Signal now labels source/decoder/library/diagnostic state directly rather than qualifying it as simulated telemetry.
+- Onboarding now frames the three starting choices as local, connected or sample-library paths without explaining the prototype implementation.
+- `source_verify.py` now rejects development-language tokens across every screen: `mock `, `simulated `, `preview only`, `this preview`, `sample state`, `no production`, in addition to the prior demo/prototype/backend-free guards.
+
+A connector-side scan of all seven screen source files at pre-documentation executable head `e41fa606d175e2d405e8067615cc215d3da73626` found **0** occurrences of the guarded development-language tokens. The visual-review protocol now treats any such leakage as an explicit REVISE condition alongside cards/pills/gradients/artwork-dependent identity.
+
+This pass is source-level de-tackification evidence. It does not replace the outstanding Android build, 39-test instrumentation, 46-state device capture, Android TSUNAMI Sans raster review, crash scan, or human visual acceptance.
