@@ -2,5 +2,13 @@ jdk:
   - openjdk17
 
 install:
+  # JitPack's base image can expose python3 without a functional stdlib venv
+  # interpreter. Bootstrap virtualenv explicitly into the exact cache path that
+  # build_host.sh expects; this is transport-only and leaves all 58 mirrored
+  # TSUNAMI source/support contract files byte-identical to private head
+  # 1e65095a651394be923a7aa875cfc3b83a8254f6.
+  - python3 -m pip install --user --disable-pip-version-check "virtualenv==20.35.4"
+  - python3 -m virtualenv --system-site-packages tsunami-builder/build/.ui-shell-toolchain/venv
+  - test -x tsunami-builder/build/.ui-shell-toolchain/venv/bin/python
   - cd tsunami-builder && bash ui-shell/tools/build_host.sh
   - python3 tsunami-builder/tools/jitpack_publish_apk.py
