@@ -1,10 +1,10 @@
 # TSUNAMI UI Genesis JitPack trigger
 
-Private Genesis source head: `9e344a03ec291359330460162d9569e7e44dc8c8`.
+Private Genesis source head: `d686042a45c381db27b2884cb4ac891750abe6fc`.
 
 This immutable build transport commit is bound by `tsunami-builder/MIRROR-MANIFEST.json`. The public mirror is Git-blob-identical to all 58 build/support files in the private Genesis head.
 
-Rebuild request: sequence 34 · 2026-09-27T01:38:00Z.
+Rebuild request: sequence 35 · 2026-09-27T01:59:58Z.
 
 Current executable contract: 39 Compose interaction tests and a canonical 46-state capture matrix, including queue, lyrics/source/language tools, listening INFO, responsive sizes, no-artwork, monochrome, accessibility, longform and failure/recovery states.
 
