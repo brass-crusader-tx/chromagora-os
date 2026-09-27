@@ -257,7 +257,7 @@ def main()->int:
     dirty=run([
         "git","status","--porcelain","--untracked-files=all","--",
         "ui-shell","brand","docs/TSUNAMI-UI-GENESIS-RESEARCH.md",
-        "docs/TSUNAMI-UI-GENESIS-COVERAGE.md","docs/TSUNAMI-SANS-v5.1-MANIFEST.json",
+        "docs/TSUNAMI-UI-GENESIS-COVERAGE.md","docs/TSUNAMI-SANS-v5.2-MANIFEST.json",
         "tools/ui_shell_gate.py","tools/ui_shell_static_check.py",
         "tools/ui_shell_codespace_build.py","tools/ui_shell_jitpack_fetch.py",
     ],capture=True).stdout.strip()
