@@ -40,7 +40,7 @@ def s_curve(w,h,t):
 
 def Cshape(w,h,t):
     ov=OV_CAP if h>=CAP else OV_X
-    outer=ring(w/2,h/2,w*.46,h/2+ov,t)
+    outer=ring(w/2,h/2,w*.38,h/2+ov,t)
     # Aperture expands slightly as the stroke grows. This prevents C/G from
     # becoming a nearly closed ring in Semibold/Bold at Android UI sizes.
     aperture=max(.55, .62-(t-42)/1300)
@@ -53,7 +53,7 @@ def arch_top(cx,base,rx,ry,t):
     return clip(ring(cx,base,rx,ry,t),cx-rx-2,base,cx+rx+2,base+ry+2)
 
 def caps(ch,t):
-    w=680; h=CAP; m=58; mid=h/2
+    w=620; h=CAP; m=58; mid=h/2
     if ch=='A': return U(line(m,0,w/2,h,t),line(w-m,0,w/2,h,t),R(w*.23,h*.30,w*.77,h*.30+t)),w
     if ch=='B': return U(R(m,0,m+t,h),arc_right(m+t,h*.73,w-m-(m+t),h*.27,t),arc_right(m+t,h*.27,w-m-(m+t),h*.27,t)),w
     if ch=='C': return Cshape(w,h,t),w
@@ -68,9 +68,9 @@ def caps(ch,t):
     if ch=='L': return U(R(m,0,m+t,h),R(m,0,w-m,t)),w
     if ch=='M': return U(R(m,0,m+t,h),R(w-m-t,0,w-m,h),line(m+t/2,h,w/2,h*.34,t),line(w/2,h*.34,w-m-t/2,h,t)),w
     if ch=='N': return U(R(m,0,m+t,h),R(w-m-t,0,w-m,h),line(m+t/2,h,w-m-t/2,0,t)),w
-    if ch=='O': return ring(w/2,h/2,w*.46,h/2+OV_CAP,t),w
+    if ch=='O': return ring(w/2,h/2,w*.38,h/2+OV_CAP,t),w
     if ch=='P': return U(R(m,0,m+t,h),arc_right(m+t,h*.72,w-m-(m+t),h*.28,t)),w
-    if ch=='Q': return U(ring(w/2,h/2,w*.46,h/2+OV_CAP,t),line(w*.53,h*.18,w*.82,-h*.06,t)),w
+    if ch=='Q': return U(ring(w/2,h/2,w*.38,h/2+OV_CAP,t),line(w*.53,h*.18,w*.82,-h*.06,t)),w
     if ch=='R': return U(R(m,0,m+t,h),arc_right(m+t,h*.72,w-m-(m+t),h*.28,t),line(m+t,h*.46,w-m,0,t)),w
     if ch=='S': return s_curve(w,h,t),w
     if ch=='T': return U(R(m,h-t,w-m,h),R(w/2-t/2,0,w/2+t/2,h)),w
@@ -83,8 +83,8 @@ def caps(ch,t):
     return ring(w/2,h/2,w*.35,h*.45,t),w
 
 def lower(ch,t):
-    h=XH; w=580; m=54; tl=max(34,t*.95)
-    o=lambda: ring(w/2,h/2,w*.43,h/2+OV_X,tl)
+    h=XH; w=540; m=54; tl=max(34,t*.95)
+    o=lambda: ring(w/2,h/2,w*.39,h/2+OV_X,tl)
     if ch=='a': return U(o(),R(w-m-tl,0,w-m,h)),w
     if ch=='b': return U(R(m,0,m+tl,ASC),translate(o(),xoff=18)),w
     if ch=='c': return o().difference(R(w*.64,h*.14,w+80,h*.86)),w
@@ -116,7 +116,7 @@ def lower(ch,t):
     if ch=='k': return U(R(m,0,m+tl,ASC),line(m+tl/2,h*.44,w-m,h,t),line(m+tl/2,h*.44,w-m,0,t)),w
     if ch=='l': return U(R(w/2-tl/2,0,w/2+tl/2,ASC),R(w/2-tl/2,0,w/2+70,tl)),300
     if ch=='m':
-        w2=800; left=m; right=w2-m; span=(right-left)/2
+        w2=760; left=m; right=w2-m; span=(right-left)/2
         return U(R(left,0,left+tl,h),arch_top(left+span/2,h*.47,span/2,h*.47,tl),arch_top(left+span+span/2,h*.47,span/2,h*.47,tl),R(left+span-tl,0,left+span,h*.47),R(right-tl,0,right,h*.47)),w2
     if ch=='n': return U(R(m,0,m+tl,h),arch_top((m+w-m)/2,h*.47,(w-2*m)/2,h*.47,tl),R(w-m-tl,0,w-m,h*.47)),w
     if ch=='o': return o(),w
@@ -135,7 +135,7 @@ def lower(ch,t):
         return U(stem,cross),350
     if ch=='u': return U(R(m,h*.18,m+tl,h),R(w-m-tl,h*.18,w-m,h),clip(ring(w/2,h*.18,w*.37,h*.23,tl),m,-65,w-m,h*.22)),w
     if ch=='v': return U(line(m,h,w/2,0,tl),line(w-m,h,w/2,0,tl)),w
-    if ch=='w': return U(line(m,h,w*.21,0,tl),line(w*.21,0,w*.50,h*.46,tl),line(w*.50,h*.46,w*.79,0,tl),line(w*.79,0,w-m,h,tl)),690
+    if ch=='w': return U(line(m,h,w*.21,0,tl),line(w*.21,0,w*.50,h*.46,tl),line(w*.50,h*.46,w*.79,0,tl),line(w*.79,0,w-m,h,tl)),650
     if ch=='x': return U(line(m,0,w-m,h,tl),line(m,h,w-m,0,tl)),w
     if ch=='y': return U(line(m,h,w/2,h*.12,tl),line(w-m,h,w/2,h*.12,tl),line(w/2,h*.12,w*.38,DESC,tl)),w
     if ch=='z': return U(R(m,h-tl,w-m,h),line(w-m,h,m,0,tl),R(m,0,w-m,tl)),w
@@ -321,7 +321,7 @@ def build(style,weight,t):
         order.append(name); glyphs[name]=glyph(sh); metrics[name]=(adv,0); cmap[ord(ch)]=name
     fb=FontBuilder(UPM,isTTF=True); fb.font['head'].created=FONT_TIMESTAMP; fb.font['head'].modified=FONT_TIMESTAMP; fb.setupGlyphOrder(order); fb.setupCharacterMap(cmap); fb.setupGlyf(glyphs); fb.setupHorizontalMetrics(metrics); fb.setupHorizontalHeader(ascent=ASC,descent=DESC,lineGap=110)
     fb.setupOS2(sTypoAscender=ASC,sTypoDescender=DESC,sTypoLineGap=110,usWinAscent=940,usWinDescent=260,usWeightClass=weight,fsSelection=(1<<6 if weight==400 else 0),sxHeight=XH,sCapHeight=CAP,achVendID='TSNM')
-    fb.setupNameTable({'familyName':'TSUNAMI Sans','styleName':style,'uniqueFontIdentifier':f'TSUNAMI Sans {style} 5.2','fullName':f'TSUNAMI Sans {style}','psName':f'TSUNAMISans-{style}','version':'Version 5.200'}); fb.setupPost(); fb.setupMaxp()
+    fb.setupNameTable({'familyName':'TSUNAMI Sans','styleName':style,'uniqueFontIdentifier':f'TSUNAMI Sans {style} 5.1','fullName':f'TSUNAMI Sans {style}','psName':f'TSUNAMISans-{style}','version':'Version 5.100'}); fb.setupPost(); fb.setupMaxp()
     kern_pairs=[('A','V',-40),('A','W',-34),('A','Y',-42),('V','A',-40),('W','A',-30),('Y','A',-44),('T','A',-28),('T','o',-34),('T','e',-34),('T','a',-30),('T','y',-24),('F','o',-22),('F','a',-18),('L','T',-20),('L','Y',-28),('Y','o',-36),('Y','e',-36),('P','a',-18),('r','y',-12)]
     feature_lines=[]
     for left,right,value in kern_pairs:
@@ -334,7 +334,7 @@ def build(style,weight,t):
 def proof(fonts):
     W,H=1700,1510; im=Image.new('RGB',(W,H),'#F4F1EA'); d=ImageDraw.Draw(im)
     def F(wt,size): return ImageFont.truetype(str(fonts[wt]),size)
-    d.text((70,45),'TSUNAMI Sans — Genesis Proof v5.2',font=F('Semibold',54),fill='#111216')
+    d.text((70,45),'TSUNAMI Sans — Genesis Proof v5.1',font=F('Semibold',54),fill='#111216')
     d.text((70,118),'H O n o  ·  optical control glyphs',font=F('Regular',34),fill='#44464C')
     y=185
     samples=[('ABCDEFGHIJKLM','Regular',56),('NOPQRSTUVWXYZ','Regular',56),('abcdefghijklm','Regular',48),('nopqrstuvwxyz','Regular',48),('0123456789  01:42 / 04:19','Medium',46),('S s  G R  a e g r t k y  2 3 5 6 8','Regular',44),('I l 1   O 0   rn m   c e   v y','Regular',42),('S s  G C  R  a e g r t k y   & ? @   [] {}','Regular',36),('Æ æ  Œ œ  Ø ø  Ð ð  Þ þ  ß  Ñ ñ','Regular',34),('ÀÁÂÃÄÅ Ç ÈÉÊË Ï Ö Ü  àáâä ç éêë ï ö ü','Regular',36),('“Afterglow at the edge of the city”','Semibold',46),('Mira Sol · Refractions / Deluxe Edition','Medium',34),('FLAC 24-bit · 96 kHz   OFFLINE   QUEUED','Regular',28)]
@@ -346,7 +346,7 @@ def proof(fonts):
     im.save(PROOFS/'tsunami-sans-proof.png')
 
     ui=Image.new('RGB',(1280,1260),'#F4F1EA'); u=ImageDraw.Draw(ui)
-    u.text((64,42),'TSUNAMI Sans — UI-size proof v5.2',font=F('Semibold',38),fill='#111216')
+    u.text((64,42),'TSUNAMI Sans — UI-size proof v5.1',font=F('Semibold',38),fill='#111216')
     y=118
     ui_samples=[
         (12,'Medium','12 px metadata · FLAC 24-bit · 96 kHz · OFFLINE'),
