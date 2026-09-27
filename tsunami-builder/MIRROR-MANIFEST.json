@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "59a3bec71e468d8442cd1df2160bff0d418b87ea",
+  "source_head": "830e3b38f1c010a9077998b022f9cae62cb5345e",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror remains byte-identical to private Genesis head 59a3bec71e468d8442cd1df2160bff0d418b87ea; metadata-only retry requests exact-source host/device acceptance without altering mirrored source.",
+  "note": "Build-critical mirror remains byte-identical to private Genesis head 830e3b38f1c010a9077998b022f9cae62cb5345e; synchronized font legibility refinement and exact v5.1 evidence.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -186,8 +186,8 @@
     },
     {
       "path": "ui-shell/tools/generate_tsunami_sans.py",
-      "git_blob_sha": "43ae1290ae3063a717cddb0272080dc0c27d3b7f",
-      "bytes": 24366
+      "git_blob_sha": "ea17b0e4e51e40a6ac9a0a8845ac83b53c620ae2",
+      "bytes": 24424
     },
     {
       "path": "ui-shell/tools/jvm_state_gate.sh",
@@ -243,13 +243,13 @@
     },
     {
       "path": "docs/TSUNAMI-SANS-v5.1-MANIFEST.json",
-      "git_blob_sha": "9f0bd41aeece78fb386e3e2788969e4ddd55cfd6",
+      "git_blob_sha": "a70d6ebd4a50273210ad914714802ba55e7341b4",
       "bytes": 2179
     },
     {
       "path": "docs/TSUNAMI-SANS-VISUAL-REVIEW.md",
-      "git_blob_sha": "9bd1a553e384e26bb9f5063a938c6da171111d65",
-      "bytes": 6455
+      "git_blob_sha": "531ea27ba00bf8f74d71802372f5722ba9734207",
+      "bytes": 6523
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-BUILD-BLOCKER.md",
@@ -307,10 +307,10 @@
     "source_head": "59a3bec71e468d8442cd1df2160bff0d418b87ea"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-26T23:54:00Z",
-    "private_head": "59a3bec71e468d8442cd1df2160bff0d418b87ea",
-    "reason": "worker continuation: exact-head self-hosted build, Motorola acceptance, and portal publication retry",
-    "sequence": 26
+    "requested_at_utc": "2026-09-27T00:08:00Z",
+    "private_head": "830e3b38f1c010a9077998b022f9cae62cb5345e",
+    "reason": "exact-head rebuild after TSUNAMI Sans f/r/t legibility refinement",
+    "sequence": 27
   },
-  "generated_at_utc": "2026-09-26T23:54:00Z"
+  "generated_at_utc": "2026-09-27T00:08:00Z"
 }
