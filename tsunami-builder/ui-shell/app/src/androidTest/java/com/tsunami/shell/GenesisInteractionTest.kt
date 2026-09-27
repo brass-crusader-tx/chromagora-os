@@ -269,6 +269,14 @@ class GenesisInteractionTest {
         compose.onNodeWithText("Signal", useUnmergedTree = true).performClick()
         compose.onNodeWithText("History").performClick()
         compose.onNodeWithText("No listening history yet.").assertExists()
+
+        compose.onNodeWithContentDescription("Settings").performClick()
+        scrollListTo("settings-root-list", "Listening history")
+        compose.onNodeWithText("Listening history").performClick()
+        compose.onNodeWithContentDescription("Back").performClick()
+        compose.onNodeWithText("Listening history is off.").assertExists()
+        compose.onNodeWithText("Turn history on").performClick()
+        compose.onNodeWithText("No listening history yet.").assertExists()
     }
 
     @Test fun advancedSettingsUseProgressiveDisclosure() {
