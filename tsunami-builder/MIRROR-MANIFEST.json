@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "b2d3a52cb9a5c2276e01bd21bb803ba20ce46885",
+  "source_head": "54f8d41d8b76464b093388d006d06d123061d160",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror is byte-identical to private Genesis head b2d3a52cb9a5c2276e01bd21bb803ba20ce46885; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
+  "note": "Build-critical mirror is byte-identical to private Genesis head 54f8d41d8b76464b093388d006d06d123061d160; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -76,8 +76,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/OnboardingScreen.kt",
-      "git_blob_sha": "225cc257dfcb2ec371a86198c5dca1409fec91c5",
-      "bytes": 3149
+      "git_blob_sha": "a0843ca6871917e89da685e204e7b571edc09e63",
+      "bytes": 3060
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/SettingsScreen.kt",
@@ -304,13 +304,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "b2d3a52cb9a5c2276e01bd21bb803ba20ce46885"
+    "source_head": "54f8d41d8b76464b093388d006d06d123061d160"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-27T04:14:00Z",
-    "private_head": "b2d3a52cb9a5c2276e01bd21bb803ba20ce46885",
-    "reason": "exact-head rebuild after fixing Signal diagnostics test landmark",
-    "sequence": 41
+    "requested_at_utc": "2026-09-27T04:22:00Z",
+    "private_head": "54f8d41d8b76464b093388d006d06d123061d160",
+    "reason": "exact-head rebuild after removing duplicate onboarding settings overlay",
+    "sequence": 42
   },
-  "generated_at_utc": "2026-09-27T04:14:00Z"
+  "generated_at_utc": "2026-09-27T04:22:00Z"
 }
