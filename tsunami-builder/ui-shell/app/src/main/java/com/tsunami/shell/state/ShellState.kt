@@ -447,7 +447,7 @@ class ShellState(val fixture: ShellFixture, initialScreen: PrimarySpace = Primar
     fun fetchMissingLyrics(){ if(lyricMissingCount>0)lyricMissingCount=(lyricMissingCount-1).coerceAtLeast(0); lyricAuditStatus="Exact fetch complete";banner="Exact lyric fetch · $lyricMissingCount still missing" }
     fun scanDuplicateHashes(){ duplicateGroups=if(duplicateGroups<0)2 else 0;banner="SHA-256 duplicate scan · $duplicateGroups groups" }
     fun scanFlacIntegrity(){ flacIntegrityFailures=if(flacIntegrityFailures<0)0 else (flacIntegrityFailures+1)%2;banner="FLAC decode scan · $flacIntegrityFailures failures" }
-    fun analyzeCurrentTrack(){ analysisStatus=currentTrack?.let{"${it.title} · 118 BPM · C minor · energy 64%"}?:"Nothing playing";banner="Track analysis complete" }
+    fun analyzeCurrentTrack(){ analysisStatus=currentTrack?.let{"${it.title} · analysis complete"}?:"Nothing playing";banner="Track analysis complete" }
     fun analyzeLibrary(){ analysisStatus="Analysed ${fixture.libraryCount} indexed items";banner="Library analysis complete" }
     fun cycleReplayPeriod(){ replayPeriod=when(replayPeriod){"Week"->"Month";"Month"->"Year";"Year"->"All";else->"Week"} }
     fun exportReplay(kind:String){ replayExportCount++;banner="TSUNAMI Replay · $kind export ready" }
