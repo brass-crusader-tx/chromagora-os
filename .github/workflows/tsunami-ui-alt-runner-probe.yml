@@ -1,0 +1,57 @@
+name: TSUNAMI UI Genesis Alternate Runner Allocation Probe
+
+on:
+  push:
+    branches:
+      - build/tsunami-ui-genesis-20260925
+    paths:
+      - .github/workflows/tsunami-ui-alt-runner-probe.yml
+
+permissions:
+  contents: read
+
+jobs:
+  slim:
+    runs-on: ubuntu-slim
+    steps:
+      - name: Probe
+        run: |
+          echo "ALT_RUNNER=ubuntu-slim"
+          uname -a
+          echo "ALLOCATION=PASS"
+
+  ubuntu26:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Probe
+        run: |
+          echo "ALT_RUNNER=ubuntu-26.04"
+          uname -a
+          echo "ALLOCATION=PASS"
+
+  ubuntu_arm:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Probe
+        run: |
+          echo "ALT_RUNNER=ubuntu-24.04-arm"
+          uname -a
+          echo "ALLOCATION=PASS"
+
+  mac_intel:
+    runs-on: macos-15-intel
+    steps:
+      - name: Probe
+        run: |
+          echo "ALT_RUNNER=macos-15-intel"
+          uname -a
+          echo "ALLOCATION=PASS"
+
+  windows_arm:
+    runs-on: windows-11-arm
+    steps:
+      - name: Probe
+        shell: pwsh
+        run: |
+          Write-Output "ALT_RUNNER=windows-11-arm"
+          Write-Output "ALLOCATION=PASS"
