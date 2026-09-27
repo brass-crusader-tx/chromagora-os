@@ -471,6 +471,15 @@ def main() -> int:
         die(f"font manifest identity drift: {manifest.get('family')!r} {manifest.get('version')!r}")
     if set(manifest.get("weights", {})) != {"Light","Regular","Medium","Semibold","Bold"}:
         die("font manifest must enumerate exactly five static masters")
+    expected_weight_contract={"Light":300,"Regular":400,"Medium":500,"Semibold":600,"Bold":700}
+    actual_weight_contract={name:int(meta.get("weight_class",-1)) for name,meta in manifest["weights"].items()}
+    if actual_weight_contract != expected_weight_contract:
+        die(f"font manifest weight classes drifted: {actual_weight_contract}")
+    if manifest.get("proofs") != ["tsunami-sans-proof.png","tsunami-sans-ui-proof.png"]:
+        die(f"font manifest proof contract drifted: {manifest.get('proofs')!r}")
+    repro=(manifest.get("validated_contract") or {}).get("reproducibility","")
+    if "two consecutive generator executions" not in repro or "byte-identical" not in repro:
+        die("font manifest must require two-pass byte-identical v5.2 generation")
     font_bytes = FONT_GEN.read_bytes()
     actual_font_blob = hashlib.sha1(
         b"blob " + str(len(font_bytes)).encode("ascii") + b"\0" + font_bytes
