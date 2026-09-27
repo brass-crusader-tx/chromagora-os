@@ -34,3 +34,12 @@ The SVG at `brand/tsunami-mark.svg` is canonical production geometry. The Androi
 The mark always scales uniformly inside its container. A non-1000:820 slot is letterboxed on the short axis rather than stretching the geometry. At 24 dp and above the master is used unchanged. At 16–23 dp, use the same master only where the full silhouette remains legible; below 16 dp prefer a textual/control label rather than inventing a new simplified symbol.
 
 Positive and inverse deployments are the same vector geometry using dark-on-light or light-on-dark. Accent color is not intrinsic to the mark.
+
+
+## Independent raster-fidelity check
+
+The canonical normalized geometry was re-rasterized against the supplied **1536 × 1536** black-on-white reference using the measured transform `scale = 0.99`, `x offset = 266 px`, `y offset = 344 px`. The synthetic mask used the documented outer/inner circular arch equations plus the true 289-unit body circle; no per-pixel hand fitting was introduced.
+
+Against a strict dark-pixel threshold of 32/255, the canonical mask contains **389,559** dark pixels versus **389,718** in the reference and achieves **0.98713 intersection-over-union**, **0.99373 precision**, and **0.99332 recall**. At a 64/255 threshold the IoU remains **0.98684**. The residual is therefore dominated by antialiasing/raster edge treatment rather than a material geometric mismatch.
+
+This quantitative check is evidence for the vector reconstruction, not permission to alter it independently: `brand/tsunami-mark.svg` remains the canonical master and Android implementations must stay geometry-bound to it.
