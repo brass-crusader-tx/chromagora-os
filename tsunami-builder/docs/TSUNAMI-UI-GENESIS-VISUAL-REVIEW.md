@@ -63,8 +63,9 @@ label/state and location without consulting the research rationale.
 Reject and revise if the screenshots show gratuitous pills/cards, decorative gradients, fake glass,
 arbitrary glow/shadows, artwork-derived chrome, giant empty greetings, indiscriminate uppercase
 letterspacing, visually equal weight across all regions, album art doing the work of the design
-system, or development-language explanations such as “mock,” “simulated,” “preview only,” and
-“no production data” leaking into user-facing product surfaces.
+system, development-language explanations such as “mock,” “simulated,” “preview only,” and
+“no production data” leaking into user-facing product surfaces, or invented high-precision signal
+numbers whose only purpose is to make the shell look technical.
 
 ## Acceptance recording
 
