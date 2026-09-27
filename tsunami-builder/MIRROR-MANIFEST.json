@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "aa68aba528368bfe1464e0331aaec1901e5e48e1",
+  "source_head": "2ea125626413e5ed11dc478101ae651f5dd03622",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror is byte-identical to private Genesis head aa68aba528368bfe1464e0331aaec1901e5e48e1; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
+  "note": "Build-critical mirror is byte-identical to private Genesis head 2ea125626413e5ed11dc478101ae651f5dd03622; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -21,8 +21,8 @@
     },
     {
       "path": "ui-shell/app/src/androidTest/java/com/tsunami/shell/GenesisInteractionTest.kt",
-      "git_blob_sha": "c37359c87640499c775140e0e9ccd54c3e746fc1",
-      "bytes": 33650
+      "git_blob_sha": "70d795ece6eae37f8d2f3a7de6548adb233038bc",
+      "bytes": 33636
     },
     {
       "path": "ui-shell/app/src/main/AndroidManifest.xml",
@@ -66,8 +66,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/LibraryScreen.kt",
-      "git_blob_sha": "b53c944ae6f631f130149570384594ec368adb98",
-      "bytes": 20229
+      "git_blob_sha": "aac9d5bd04251f116b604286098fb9e79180ed0a",
+      "bytes": 20231
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/ListenScreen.kt",
@@ -86,13 +86,13 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/screens/SignalScreen.kt",
-      "git_blob_sha": "31710118a4deac9207ca15888d9f74c2b6a5b853",
-      "bytes": 17864
+      "git_blob_sha": "ac772bf3c8ed02702e49e019da5a13555f9b105b",
+      "bytes": 18308
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/state/ShellState.kt",
-      "git_blob_sha": "ddfbe0208d259b457e3561601fe1f07f5a0483c5",
-      "bytes": 40318
+      "git_blob_sha": "5d5d8793a493a90f219fcdd297c751f8ade281c5",
+      "bytes": 40303
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/theme/TsunamiTheme.kt",
@@ -206,8 +206,8 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "263fa4328f8aca5a7508d527ec9f286ae46597a5",
-      "bytes": 31813
+      "git_blob_sha": "65e8a675dbfe7f098715e03393f42102cedc0c3f",
+      "bytes": 31999
     },
     {
       "path": "ui-shell/tools/visual_sanity_verify.py",
@@ -273,13 +273,13 @@
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VERIFICATION.md",
-      "git_blob_sha": "6d984752a000d49b09b51b6191cf7910282c23f9",
-      "bytes": 72677
+      "git_blob_sha": "33d039097f1b74020efb3f0252d74c7987e245f5",
+      "bytes": 74549
     },
     {
       "path": "docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md",
-      "git_blob_sha": "8388cdb26523b9a6cede43c2c259c5ab7519c096",
-      "bytes": 6988
+      "git_blob_sha": "0bfc3dbd9dd1f122e80992afaf12173da39fd96c",
+      "bytes": 7083
     },
     {
       "path": "tools/ui_shell_codespace_build.py",
@@ -304,13 +304,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "aa68aba528368bfe1464e0331aaec1901e5e48e1"
+    "source_head": "2ea125626413e5ed11dc478101ae651f5dd03622"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-27T02:31:30Z",
-    "private_head": "aa68aba528368bfe1464e0331aaec1901e5e48e1",
-    "reason": "exact-head rebuild after no-designer-explanation de-tackification pass",
-    "sequence": 36
+    "requested_at_utc": "2026-09-27T02:38:30Z",
+    "private_head": "2ea125626413e5ed11dc478101ae651f5dd03622",
+    "reason": "exact-head rebuild after product-language and Signal truthfulness passes",
+    "sequence": 37
   },
-  "generated_at_utc": "2026-09-27T02:31:30Z"
+  "generated_at_utc": "2026-09-27T02:38:30Z"
 }
