@@ -97,11 +97,13 @@ def lower(ch,t):
         bar=R(m+12,h*.47,w*.78,h*.47+tl)
         return U(bowl,bar),w
     if ch=='f':
-        top_y=ASC-82
-        stem=R(w*.40,0,w*.40+tl,top_y)
-        hook=path(bezier((w*.40+tl/2,top_y),(w*.41,ASC-18),(w*.56,ASC+2),(w*.67,ASC-30),n=14),tl,cap=2)
-        cross=R(w*.16,h*.66,w*.68,h*.66+tl)
-        return U(stem,hook,cross),350
+        # Restrained geometric f: clear ascender, modest shoulder, flat baseline.
+        # Avoid the earlier hook that read as a dagger at Android UI sizes.
+        x=w*.43; top_y=ASC-76
+        stem=R(x,0,x+tl,top_y)
+        shoulder=path(bezier((x+tl/2,top_y),(x+tl/2,ASC+4),(w*.52,ASC+6),(w*.61,ASC-20),n=14),tl,cap=1)
+        cross=R(w*.18,h*.64,w*.70,h*.64+tl)
+        return U(stem,shoulder,cross),350
     if ch=='g':
         bowl=o()
         stem=R(w-m-tl,-44,w-m,h*.47)
@@ -121,15 +123,16 @@ def lower(ch,t):
     if ch=='p': return U(R(m,DESC,m+tl,h),translate(o(),xoff=18)),w
     if ch=='q': return U(R(w-m-tl,DESC,w-m,h),translate(o(),xoff=-18)),w
     if ch=='r':
-        shoulder_pts=bezier((m+tl/2,h*.48),(m+tl/2,h*.84),(m+125,h*.98),(m+215,h*.84),n=16)
-        return U(R(m,0,m+tl,h),path(shoulder_pts,tl,cap=1)),340
+        # Open, compact shoulder: unmistakably r without a decorative flourish.
+        shoulder_pts=bezier((m+tl/2,h*.46),(m+tl/2,h*.74),(m+95,h*.84),(m+170,h*.76),n=16)
+        return U(R(m,0,m+tl,h),path(shoulder_pts,tl,cap=1)),330
     if ch=='s': return s_curve(w,h,tl),w
     if ch=='t':
-        x=w*.45; top_y=XH+122
-        stem=R(x,28,x+tl,top_y)
-        cross=R(w*.22,h*.66,w*.70,h*.66+tl)
-        foot=path(bezier((x+tl/2,28),(x+tl/2,3),(w*.58,-4),(w*.64,18),n=10),tl*.80,cap=1)
-        return U(stem,cross,foot),350
+        # Plain geometric t: no calligraphic foot or decorative spur.
+        x=w*.45; top_y=XH+112
+        stem=R(x,0,x+tl,top_y)
+        cross=R(w*.20,h*.63,w*.71,h*.63+tl)
+        return U(stem,cross),350
     if ch=='u': return U(R(m,h*.18,m+tl,h),R(w-m-tl,h*.18,w-m,h),clip(ring(w/2,h*.18,w*.37,h*.23,tl),m,-65,w-m,h*.22)),w
     if ch=='v': return U(line(m,h,w/2,0,tl),line(w-m,h,w/2,0,tl)),w
     if ch=='w': return U(line(m,h,w*.21,0,tl),line(w*.21,0,w*.50,h*.46,tl),line(w*.50,h*.46,w*.79,0,tl),line(w*.79,0,w-m,h,tl)),650
