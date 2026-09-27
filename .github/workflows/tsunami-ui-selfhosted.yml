@@ -170,3 +170,5 @@ jobs:
           if-no-files-found: warn
 
 # exact-current acceptance trigger source=1e65095a651394be923a7aa875cfc3b83a8254f6
+
+# exact-current recovery probe 2026-09-27 source=1e65095a
