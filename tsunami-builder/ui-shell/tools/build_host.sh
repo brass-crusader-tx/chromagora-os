@@ -305,6 +305,11 @@ if [[ "$MODE" == "--install" || "$MODE" == "--verify-device" ]]; then
   echo "DEVICE_INSTALL=PASS serial=$SERIAL" | tee -a "$REPORT/build.txt"
 
   if [[ "$MODE" == "--verify-device" ]]; then
+    TEST_PACKAGE="com.tsunami.shell.test"
+    cleanup_test_package() {
+      "$ADB" -s "$SERIAL" uninstall "$TEST_PACKAGE" >/dev/null 2>&1 || true
+    }
+    trap cleanup_test_package EXIT
     install_apk "$OUT_TEST"
     "$ADB" -s "$SERIAL" logcat -c || true
     "$ADB" -s "$SERIAL" shell am instrument -w -e class com.tsunami.shell.GenesisInteractionTest \
