@@ -1,12 +1,15 @@
 # TSUNAMI UI Genesis JitPack trigger
 
-Exact build-transport commit: `8db11b126d6a798dd543c3cee1791d4742745e93`.
+Private Genesis source head: `830e3b38f1c010a9077998b022f9cae62cb5345e`.
 
-That immutable public-mirror commit is bound by `tsunami-builder/MIRROR-MANIFEST.json` to private Genesis source head `59a3bec71e468d8442cd1df2160bff0d418b87ea`.
+This commit is an immutable build-transport trigger for the byte-identical public mirror. The mirrored build-critical source is bound by `tsunami-builder/MIRROR-MANIFEST.json`; JitPack is expected to build `tsunami-builder/ui-shell` through the repository `jitpack.yml`.
 
-- [Request exact JitPack POM](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/8db11b126d/chromagora-os-8db11b126d.pom)
-- [Request exact UI Genesis APK](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/8db11b126d/chromagora-os-8db11b126d.apk)
-- [Request exact AndroidTest APK](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/8db11b126d/chromagora-os-8db11b126d-androidTest.apk)
-- [Exact JitPack build log](https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/8db11b126d/build.log)
+Rebuild request: sequence 26 · 2026-09-26T23:43:00Z.
 
-The normal hosted Actions lanes still fail before steps on this account; the self-hosted exact-source run remains the preferred device-acceptance path when its runner is online. This file is outside those workflow path filters and exists only as an immutable JitPack build trigger/reference.
+This rebuild includes the exact-source TSUNAMI Sans v5.1 f/r/t legibility refinement, with regenerated deterministic TTF/proof hashes bound in the mirrored font manifest.
+
+After this file is committed, use the resulting commit SHA (or its canonical 10-character prefix) as the JitPack version:
+
+- APK: `https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/<VERSION>/chromagora-os-<VERSION>.apk`
+- AndroidTest APK: `https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/<VERSION>/chromagora-os-<VERSION>-androidTest.apk`
+- Build log: `https://jitpack.io/com/github/brass-crusader-tx/chromagora-os/<VERSION>/build.log`
