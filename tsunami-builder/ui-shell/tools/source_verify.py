@@ -324,7 +324,7 @@ def main() -> int:
         present = [phrase for phrase in forbidden_phrases if phrase in src]
         if present:
             die(f"{rel} regressed to portfolio/prototype microcopy on a primary surface: {present}")
-    product_copy_forbidden=("demo ","prototype status","backend-free","experiential prototype","mock ","simulated ","preview only","this preview","preview library","sample state","sample library","preview listening record","diagnostic fault injected","no production")
+    product_copy_forbidden=("demo ","prototype status","backend-free","experiential prototype","mock ","simulated ","preview only","this preview","preview library","sample state","sample library","preview listening record","diagnostic fault injected","no production","tsunami ui genesis")
     product_copy_hits={}
     product_copy_paths=list(sorted((SRC / "screens").glob("*.kt"))) + [
         SRC / "state/ShellState.kt",
