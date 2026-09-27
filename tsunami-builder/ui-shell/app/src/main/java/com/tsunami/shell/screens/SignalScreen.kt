@@ -49,7 +49,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
 
 @Composable private fun ColumnScope.SummarySignal(state:ShellState){
     val p=LocalTsunamiPalette.current
-    LazyColumn(Modifier.weight(1f).testTag("signal-logs-list"),contentPadding=PaddingValues(bottom=28.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("signal-summary-list"),contentPadding=PaddingValues(bottom=28.dp)){
         item{
             SectionHeader("Now playing")
             val t=state.currentTrack
@@ -301,7 +301,7 @@ private fun signalTitle(state:ShellState)=when(state.signalSection){
 
 @Composable private fun ColumnScope.LogsSignal(state:ShellState){
     val p=LocalTsunamiPalette.current
-    LazyColumn(Modifier.weight(1f),contentPadding=PaddingValues(bottom=28.dp)){
+    LazyColumn(Modifier.weight(1f).testTag("signal-logs-list"),contentPadding=PaddingValues(bottom=28.dp)){
         item{
             SectionHeader("Diagnostics")
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
