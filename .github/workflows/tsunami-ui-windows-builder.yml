@@ -1,0 +1,137 @@
+name: TSUNAMI UI Genesis Windows Builder
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/tsunami-ui-windows-builder.yml"
+      - "tsunami-builder/**"
+  push:
+    branches:
+      - build/tsunami-ui-genesis-20260925
+    paths:
+      - ".github/workflows/tsunami-ui-windows-builder.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2025
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.4.1"
+
+      - name: Install Android SDK 36
+        shell: pwsh
+        run: |
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Verify exact private-source mirror
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, pathlib, subprocess
+          root=pathlib.Path("tsunami-builder")
+          manifest=json.loads((root/"MIRROR-MANIFEST.json").read_text())
+          assert isinstance(manifest.get("source_head"),str) and len(manifest["source_head"])==40
+          bad=[]
+          for row in manifest["files"]+manifest["support_files"]:
+              p=root/row["path"]
+              actual=subprocess.check_output(["git","hash-object",str(p)],text=True).strip() if p.is_file() else "missing"
+              size=p.stat().st_size if p.is_file() else -1
+              if actual!=row["git_blob_sha"] or size!=int(row["bytes"]):
+                  bad.append((row["path"],actual,size,row["git_blob_sha"],row["bytes"]))
+          assert not bad,bad[:8]
+          print("MIRROR_BINDING=PASS",manifest["source_head"],len(manifest["files"]),len(manifest["support_files"]))
+          PY
+
+      - name: Static, accessibility and deterministic type gates
+        working-directory: tsunami-builder
+        shell: bash
+        run: |
+          python -m pip install --disable-pip-version-check "fonttools==4.63.0" "shapely==2.1.2" "pillow==12.3.0"
+          python tools/ui_shell_static_check.py
+          python ui-shell/tools/source_verify.py
+          python ui-shell/tools/accessibility_verify.py
+          python ui-shell/tools/prepare_fonts.py
+          python - <<'PY'
+          import hashlib,json,pathlib
+          from fontTools.ttLib import TTFont
+          root=pathlib.Path(".")
+          manifest=json.loads((root/"docs/TSUNAMI-SANS-v5.2-MANIFEST.json").read_text())
+          fonts=sorted((root/"ui-shell/app/src/main/res/font").glob("tsunami_sans_*.ttf"))
+          assert len(fonts)==5
+          weights=set()
+          for p in fonts:
+              f=TTFont(p)
+              try:
+                  weights.add(int(f["OS/2"].usWeightClass))
+                  family=next(n.toUnicode() for n in f["name"].names if n.nameID==1)
+                  version=next(n.toUnicode() for n in f["name"].names if n.nameID==5)
+                  assert family=="TSUNAMI Sans" and version=="Version 5.200"
+                  assert "GPOS" in f
+              finally:
+                  f.close()
+          assert weights=={300,400,500,600,700}
+          for name,meta in manifest["weights"].items():
+              p=root/"ui-shell/app/src/main/res/font"/f"tsunami_sans_{name.lower()}.ttf"
+              assert p.stat().st_size==int(meta["bytes"])
+              assert hashlib.sha256(p.read_bytes()).hexdigest()==meta["sha256"]
+          print("FONT_CANONICAL_V52_MANIFEST=PASS")
+          PY
+
+      - name: Compile isolated UI shell APK pair
+        working-directory: tsunami-builder/ui-shell
+        shell: pwsh
+        env:
+          TSUNAMI_FONT_PYTHON: python
+        run: |
+          gradle --no-daemon --stacktrace --console=plain :app:assembleDebug :app:assembleDebugAndroidTest
+          if (!(Test-Path "app/build/outputs/apk/debug/app-debug.apk")) { throw "app APK missing" }
+          if (!(Test-Path "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk")) { throw "test APK missing" }
+
+      - name: Verify backend-free binary manifest
+        working-directory: tsunami-builder
+        shell: pwsh
+        run: |
+          $app = "ui-shell/app/build/outputs/apk/debug/app-debug.apk"
+          $id = (apkanalyzer manifest application-id $app).Trim()
+          if ($id -ne "com.tsunami.shell") { throw "unexpected application id: $id" }
+          $permissions = apkanalyzer manifest permissions $app
+          if ($permissions -match "android\.permission\.") { throw "backend-free shell declares Android permissions: $permissions" }
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item $app dist/TSUNAMI-UI-Genesis-debug.apk
+          Copy-Item "ui-shell/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk" dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
+          Get-FileHash dist/TSUNAMI-UI-Genesis-debug.apk -Algorithm SHA256
+          Get-FileHash dist/TSUNAMI-UI-Genesis-debug-androidTest.apk -Algorithm SHA256
+          "WINDOWS_HOST_BUILD=PASS application_id=$id permissions=0" | Set-Content dist/windows-build.txt
+
+      - name: Upload exact-source Windows APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: TSUNAMI-UI-Genesis-windows
+          path: |
+            tsunami-builder/dist/TSUNAMI-UI-Genesis-debug.apk
+            tsunami-builder/dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
+            tsunami-builder/dist/windows-build.txt
+            tsunami-builder/ui-shell/tools/proofs/
+            tsunami-builder/MIRROR-MANIFEST.json
+          if-no-files-found: error

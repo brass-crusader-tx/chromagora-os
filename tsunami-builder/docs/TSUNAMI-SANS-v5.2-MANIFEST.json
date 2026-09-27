@@ -1,0 +1,59 @@
+{
+  "family": "TSUNAMI Sans",
+  "version": "5.200",
+  "generated_from": "ui-shell/tools/generate_tsunami_sans.py",
+  "generator_blob_sha1": "c99945106bf51e643641bd35b6d6a52a99ed1004",
+  "proof_status": "v5.2 is generated from the exact manifest-bound source at build time; canonical acceptance requires two consecutive byte-identical generations plus fresh full and UI-size proofs, followed by Android raster review in the device matrix.",
+  "weights": {
+    "Light": {
+      "weight_class": 300
+    },
+    "Regular": {
+      "weight_class": 400
+    },
+    "Medium": {
+      "weight_class": 500
+    },
+    "Semibold": {
+      "weight_class": 600
+    },
+    "Bold": {
+      "weight_class": 700
+    }
+  },
+  "proofs": [
+    "tsunami-sans-proof.png",
+    "tsunami-sans-ui-proof.png"
+  ],
+  "validated_contract": {
+    "family_metadata": "TSUNAMI Sans",
+    "weight_classes": [
+      300,
+      400,
+      500,
+      600,
+      700
+    ],
+    "required_ui_glyph_coverage": true,
+    "western_european_ui_coverage": true,
+    "gpos_kerning": true,
+    "optical_metadata": {
+      "x_height": 500,
+      "cap_height": 710,
+      "vendor_id": "TSNM"
+    },
+    "control_pairs": [
+      "I/l/1",
+      "O/0",
+      "rn/m",
+      "c/e",
+      "v/y"
+    ],
+    "reproducibility": "two consecutive generator executions must produce identical SHA-256 and byte counts for all five TTF masters and both proof PNGs"
+  },
+  "toolchain": {
+    "fonttools": "4.63.0",
+    "shapely": "2.1.2",
+    "pillow": "12.3.0"
+  }
+}

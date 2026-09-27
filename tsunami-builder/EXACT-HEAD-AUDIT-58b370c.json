@@ -1,0 +1,121 @@
+{
+  "schema": "tsunami.ui-genesis.exact-head-audit.v1",
+  "source_repository": "brass-crusader-tx/TSUNAMI",
+  "source_branch": "genesis/ui-shell-20260923",
+  "source_head": "58b370c284c648ee59b91fcbb600b7e390374a37",
+  "source_changes_this_boundary": [
+    "Signal summary/library-health values now derive from mutable shell state instead of ornamental fixed percentages, storage capacity, or fabricated file-health counts.",
+    "Signal interaction coverage now asserts the derived metric surface and explicitly rejects the removed 99.9% and 3.2 GB strings.",
+    "The static source gate now rejects the removed fabricated Signal precision if it returns.",
+    "Verification ledger reconciled to the 39-test / 46-state exact-head acceptance boundary."
+  ],
+  "mirror_repository": "brass-crusader-tx/chromagora-os",
+  "mirror_branch": "build/tsunami-ui-genesis-20260925",
+  "mirror_workflow_head": "3bb0ca53d19516fe4f854c8103d83665020fe81b",
+  "mirror_manifest_blob": "09f8d6d86237da892f098bfdb7b86b38f177f945",
+  "mirror_parity": {
+    "checked_entries": 58,
+    "missing": 0,
+    "divergent_sha": 0,
+    "divergent_bytes": 0,
+    "result": "PASS"
+  },
+  "static_contract": {
+    "kotlin_files": 15,
+    "compose_instrumentation_tests": {
+      "count": 39,
+      "unique": 39
+    },
+    "declared_permissions": 0,
+    "unfinished_markers": 0,
+    "direct_backend_tokens": 0,
+    "anti_tackiness_anchor_hits": 0,
+    "signal_fixed_precision_regression_guard": true,
+    "visual_capture_matrix": {
+      "count": 46,
+      "unique": 46,
+      "visual_sanity_expected": 46,
+      "mismatch": 0
+    }
+  },
+  "type_contract": {
+    "family": "TSUNAMI Sans",
+    "version": "5.100",
+    "generator_blob": "ea17b0e4e51e40a6ac9a0a8845ac83b53c620ae2",
+    "weights": {
+      "Light": {
+        "bytes": 103448,
+        "sha256": "cc9c5b0ee976bfdb16bf870f81d797b843de25ab9189ec82ee52f424f86815c5"
+      },
+      "Regular": {
+        "bytes": 106004,
+        "sha256": "bf9ad008744b4ca49cf3c8c0241d5e7ba951c0817592d951313f4555c80dd741"
+      },
+      "Medium": {
+        "bytes": 107008,
+        "sha256": "10e1797a3dae517c14403474b881311fe48e9c15fb100bc54a33ed417430b9b6"
+      },
+      "Semibold": {
+        "bytes": 107588,
+        "sha256": "48ce7ce31ddc7094afe5a71c8524c4e40d67304c9f6f5062f7fd57fbd7dd1820"
+      },
+      "Bold": {
+        "bytes": 106940,
+        "sha256": "fb92d22131ccbf2ff95e3a482e52f9d6c2fe3de6aea41f1d2b73d29fd90f7d12"
+      }
+    },
+    "proofs": {
+      "tsunami-sans-proof.png": {
+        "bytes": 162883,
+        "sha256": "3ab66015adfa5b5531016d957b30b029dfd5b0510ffd588acf00f6e04c940d86"
+      },
+      "tsunami-sans-ui-proof.png": {
+        "bytes": 74005,
+        "sha256": "9c39c4b60f74749279f514eeeb8af4b29d038c07ec6a6ecf00f39530b7a1e2d2"
+      }
+    },
+    "android_raster_review": false
+  },
+  "android_execution": {
+    "hosted_linux": {
+      "run_id": 36289547795,
+      "status": "completed",
+      "conclusion": "failure",
+      "steps_materialized": false,
+      "classification": "pre-step runner/infrastructure failure"
+    },
+    "hosted_macos": {
+      "run_id": 36289547762,
+      "status": "completed",
+      "conclusion": "failure",
+      "steps_materialized": false,
+      "classification": "pre-step runner/infrastructure failure"
+    },
+    "hosted_windows": {
+      "run_id": 36289547760,
+      "status": "completed",
+      "conclusion": "failure",
+      "steps_materialized": false,
+      "classification": "pre-step runner/infrastructure failure"
+    },
+    "self_hosted": {
+      "run_id": 36289547771,
+      "status": "queued",
+      "conclusion": null,
+      "steps_materialized": false
+    },
+    "result": "PENDING_EXECUTABLE_ANDROID_EVIDENCE"
+  },
+  "final_acceptance_required": {
+    "host_build": true,
+    "apk": true,
+    "android_test_apk": true,
+    "instrumentation_tests": 39,
+    "visual_states": 46,
+    "physical_device_if_attached": "ZY22L2PTS5",
+    "crash_scan": true,
+    "portal_publish": true
+  },
+  "completion_claim": false,
+  "refreshed_at_utc": "2026-09-27T02:46:00Z"
+}
