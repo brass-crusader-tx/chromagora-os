@@ -219,6 +219,12 @@ class GenesisInteractionTest {
         compose.onNodeWithText("CSV").performClick()
         compose.onNodeWithText("TSUNAMI Replay · CSV export ready").assertExists()
         compose.onNodeWithText("Logs").performClick()
+        scrollListTo("signal-logs-list", "Test recovery")
+        compose.onNodeWithText("Test recovery").performClick()
+        compose.onNodeWithText("Recovery test active").assertExists()
+        scrollListTo("signal-logs-list", "Retry")
+        compose.onNodeWithText("Retry").performClick()
+        compose.onNodeWithText("Diagnostics healthy").assertExists()
         compose.onNodeWithText("Export bundle").performClick()
         compose.onNodeWithText("Diagnostics bundle preview ready").assertExists()
     }
