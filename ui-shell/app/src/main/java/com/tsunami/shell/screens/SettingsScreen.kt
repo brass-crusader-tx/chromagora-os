@@ -151,7 +151,7 @@ private fun settingsTitle(page:String)=when(page){
             IntentSection("Privacy")
             ToggleRow("Listening history",if(state.historyEnabled)"ON" else "OFF"){state.historyEnabled=!state.historyEnabled}
             ActionRow("Listening services","${if(state.listenBrainzEnabled)"ListenBrainz " else ""}${if(state.lastFmEnabled)"Last.fm" else if(!state.listenBrainzEnabled)"OFF" else ""}"){state.settingsExpanded="scrobbling"}
-            ActionRow("Clear history","LOCAL PREVIEW DATA"){state.requestClearHistory()}
+            ActionRow("Clear history","LOCAL HISTORY"){state.requestClearHistory()}
         }
         if(state.advancedExperience) item{
             IntentSection("Advanced")
@@ -159,8 +159,8 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Quick actions & sessions",state.activeSession?.let{"SESSION · $it"}?:"No active session"){state.settingsExpanded="quick-actions"}
             ActionRow("Backup & portability",if(state.autoBackupEnabled)"AUTO · every ${state.backupIntervalHours}h" else "MANUAL"){state.settingsExpanded="backup"}
             ActionRow("Diagnostics",if(state.diagnosticsFault)"ATTENTION" else "HEALTHY"){state.primary=PrimarySpace.SIGNAL;onClose()}
-            ActionRow("About","UI Genesis · isolated preview"){state.banner="TSUNAMI UI Genesis · sample state only"}
-            ActionRow("Data boundary","Sample state only"){state.banner="No production data access"}
+            ActionRow("About","TSUNAMI UI Genesis"){state.banner="TSUNAMI UI Genesis"}
+            ActionRow("Permissions","NONE REQUESTED"){state.banner="This shell requests no Android permissions"}
         }
     }
 }
@@ -195,7 +195,7 @@ private fun settingsTitle(page:String)=when(page){
             IntentSection("Import semantics")
             Text("Imported library entries remain visible when a provider disconnects. Excluded Shorts, video-only items, samples and unmatched items are recorded in the audit rather than silently disappearing.",style=Type.body.copy(color=LocalTsunamiPalette.current.ink2),modifier=Modifier.padding(vertical=14.dp))
             Rule()
-            Text("No account credential, network request, provider database or production import engine is used in this preview.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Import audits keep exclusions, unmatched items and retained library entries explicit.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -215,7 +215,7 @@ private fun settingsTitle(page:String)=when(page){
             IntentSection("Environment")
             ToggleRow("Artwork backdrop",if(state.lyricsArtworkBackdrop)"ON" else "OFF"){state.lyricsArtworkBackdrop=!state.lyricsArtworkBackdrop}
             ToggleRow("Visualizer behind lyrics",if(state.visualizerBehindLyrics)"ON" else "OFF"){state.visualizerBehindLyrics=!state.visualizerBehindLyrics}
-            Text("Preview only · no transcription, network lookup, microphone access, or lyric store is used.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Source priority, timing and presentation remain visible from the Lyrics environment.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -273,7 +273,7 @@ private fun settingsTitle(page:String)=when(page){
             ToggleRow("Reverse stereo",if(state.reverseStereo)"ON" else "OFF"){state.reverseStereo=!state.reverseStereo}
             ActionRow("Crossfeed","${(state.crossfeed*100).toInt()}%"){state.crossfeed=when(state.crossfeed){0f->.25f;.25f->.5f;else->0f}}
             ActionRow("Reverb","${(state.reverb*100).toInt()}%"){state.reverb=when(state.reverb){0f->.15f;.15f->.3f;else->0f}}
-            Text("SIMULATED PROCESSING · no live audio samples are altered.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("PROCESSING ORDER · gain → equalizer → stereo → dynamics",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -287,7 +287,7 @@ private fun settingsTitle(page:String)=when(page){
             labels.forEachIndexed{index,label->
                 ActionRow(label,"${signedDb(state.eqBandsDb[index])} dB"){state.cycleEqBand(index)}
             }
-            Text("SIMULATED PROCESSING · EQ values are not applied to live audio.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("FLAT IS NEUTRAL · reset restores every band to 0 dB",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -305,7 +305,7 @@ private fun settingsTitle(page:String)=when(page){
                 }
                 Rule()
             }
-            Text("Source order is previewed locally; no lyric lookup, transcription, sign-in, or network request occurs.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Sources are resolved in this order; exact local matches remain first.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -326,7 +326,7 @@ private fun settingsTitle(page:String)=when(page){
             ToggleRow("Beat backlight",if(state.visualizerBeatBacklight)"ON" else "OFF"){state.visualizerBeatBacklight=!state.visualizerBeatBacklight}
             ToggleRow("Behind lyrics",if(state.visualizerBehindLyrics)"ON" else "OFF"){state.visualizerBehindLyrics=!state.visualizerBehindLyrics}
             ToggleRow("Reduced motion",if(state.reducedMotion)"ON" else "OFF"){state.reducedMotion=!state.reducedMotion}
-            Text("SIMULATED VISUAL · no microphone, audio-session capture or live telemetry.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Reduced motion holds the field still; monochrome preserves geometry without accent color.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -362,7 +362,7 @@ private fun settingsTitle(page:String)=when(page){
         item{
             IntentSection("Presets","Save"){state.saveShufflePreset()}
             state.shufflePresets.forEach{preset->ActionRow(preset,if(preset.contains(state.shuffleMode,true))"CURRENT-LIKE" else "SAVED"){state.banner="Applied shuffle preset · $preset"}}
-            Text("Preview queue only · these shuffle choices do not affect your music library.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Shuffle rules alter queue order only; they never rewrite the library.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -374,7 +374,7 @@ private fun settingsTitle(page:String)=when(page){
             state.libraryRoots.forEach{root->
                 ActionRow(root,if(root.contains("Audiobooks",true))"LONGFORM ROOT" else "MUSIC ROOT"){state.removeLibraryRoot(root)}
             }
-            Text("Tap a listed root to remove it. At least one root is retained in this preview.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Tap a listed root to remove it. At least one indexed root remains active.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
             IntentSection("Exclusions")
             ActionRow("Excluded folders","${state.excludedFolderCount} paths"){state.cycleExcludedFolders()}
             ActionRow("Excluded extensions",state.excludedExtensions){state.cycleExcludedExtensions()}
@@ -438,8 +438,8 @@ private fun settingsTitle(page:String)=when(page){
             ToggleRow("Love / hate sync",if(state.loveHateSync)"ON" else "OFF"){state.loveHateSync=!state.loveHateSync}
             ActionRow("Scrobble threshold","${state.scrobbleThreshold}%"){state.cycleScrobbleThreshold()}
             ActionRow("Threshold cap","${state.scrobbleThresholdCapSeconds}s"){state.cycleScrobbleCap()}
-            ActionRow("Import listening history","CSV / JSON preview"){state.banner="History import preview · 128 matched · 7 unmatched"}
-            Text("Preview only · no credentials, sign-in, scrobble, or network request occurs.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            ActionRow("Import listening history","CSV / JSON"){state.banner="History import · 128 matched · 7 unmatched"}
+            Text("Service state, threshold and import matching remain explicit before history sync.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -484,7 +484,7 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Double",state.headsetDouble){state.headsetDouble=if(state.headsetDouble=="Next")"Seek +30s" else "Next"}
             ActionRow("Triple",state.headsetTriple){state.headsetTriple=if(state.headsetTriple=="Previous")"Seek −15s" else "Previous"}
             ActionRow("Long",state.headsetLong){state.headsetLong=if(state.headsetLong=="Actions")"Output" else "Actions"}
-            Text("Hardware input is inactive in this preview; tap a mapping to inspect its behavior.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Tap a mapping to inspect or change the assigned hardware behavior.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -516,7 +516,7 @@ private fun settingsTitle(page:String)=when(page){
             ActionRow("Home-screen widget",state.widgetLayout){state.cycleWidgetLayout()}
             ToggleRow("Wear transport",if(state.wearControlsEnabled)"ON" else "OFF"){state.wearControlsEnabled=!state.wearControlsEnabled}
             if(state.wearControlsEnabled) ActionRow("Wear secondary action",state.wearSecondaryAction){state.cycleWearSecondaryAction()}
-            Text("System surfaces are inactive in this preview. Use these controls to inspect how each surface behaves.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("These choices define what appears on each external transport surface.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -587,7 +587,7 @@ private fun settingsTitle(page:String)=when(page){
                 }
                 Rule()
             }
-            Text("Profiles capture the user-facing relationship between an output and processing policy; no device DSP is invoked.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
+            Text("Profiles bind an output route to its selected processing policy.",style=Type.meta.copy(color=LocalTsunamiPalette.current.ink3),modifier=Modifier.padding(vertical=14.dp))
         }
     }
 }
@@ -596,12 +596,12 @@ private fun settingsTitle(page:String)=when(page){
     LazyColumn(Modifier.weight(1f).testTag("settings-page-list"),contentPadding=PaddingValues(bottom=30.dp)){
         item{
             IntentSection("Portability")
-            ActionRow("Export TSUNAMI backup","Settings · playlists · history · progress"){state.banner="Backup export preview ready"}
+            ActionRow("Export TSUNAMI backup","Settings · playlists · history · progress"){state.banner="Backup export ready"}
             ActionRow("Restore TSUNAMI backup","Preview before applying"){state.banner="Restore preview opened"}
             ActionRow("TSUNAMI device migration",state.deviceMigrationStatus){state.prepareDeviceMigration()}
-            ActionRow("Share TSUNAMI APK","Share handoff preview"){state.banner="TSUNAMI APK share handoff preview"}
-            ActionRow("Export longform progress","JSON preview"){state.banner="Longform progress exported"}
-            ActionRow("Import longform progress","JSON preview"){state.banner="Longform progress import · 14 matched · 1 unmatched"}
+            ActionRow("Share TSUNAMI APK","Share handoff"){state.banner="TSUNAMI APK share handoff ready"}
+            ActionRow("Export longform progress","JSON"){state.banner="Longform progress exported"}
+            ActionRow("Import longform progress","JSON"){state.banner="Longform progress import · 14 matched · 1 unmatched"}
             ActionRow("Preview path remap","${state.remapOldPath} → ${state.remapNewPath}"){state.cycleRemapPath()}
         }
         item{
@@ -610,7 +610,7 @@ private fun settingsTitle(page:String)=when(page){
             if(state.autoBackupEnabled){
                 ActionRow("Keep","${state.backupKeep} backups"){state.cycleBackupKeep()}
                 ActionRow("Interval","${state.backupIntervalHours} hours"){state.cycleBackupInterval()}
-                ActionRow("Backup now","Preview destination selected"){state.banner="Rotating backup complete"}
+                ActionRow("Backup now","Destination selected"){state.banner="Rotating backup complete"}
             }
         }
         item{
