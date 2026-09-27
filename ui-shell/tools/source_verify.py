@@ -125,8 +125,8 @@ REQUIRED_ANCHORS = {
     ],
     "screens/ListenScreen.kt": ["CURRENT THREAD", "LIBRARY LENS", "TemporalTrackRow(", "showArtwork=false", "Deep cuts", "Rediscover", "Never heard", "Most played", "Unfinished", 'state.settingsExpanded="services"'],
     "screens/FindScreen.kt": ["SearchKind.FOLDERS", "folderFor(", "FOLDER MATCH", "fuzzyContains(", "withinOneEditOrTranspose("],
-    "screens/SignalScreen.kt": ["Summary", "Audio", "Library", "History", "Logs", "TSUNAMI Replay", "Lyrics quality & repair queue", "Playback integrity"],
-    "screens/OnboardingScreen.kt": ['state.settingsExpanded="services"', "Enter with the sample library", "Index a music folder"],
+    "screens/SignalScreen.kt": ["Summary", "Audio", "Library", "History", "Logs", "TSUNAMI Replay", "Lyrics quality & repair queue", "Playback integrity", 'testTag("signal-logs-list")', '"Test recovery"'],
+    "screens/OnboardingScreen.kt": ['state.settingsExpanded="services"', "Enter with the starter library", "Index a music folder"],
     "screens/ExpandedListening.kt": [
         "PlayerMode.QUEUE", "PlayerMode.LYRICS", "PlayerMode.OUTPUT", "PlayerMode.VISUAL", "PlayerMode.OUTPUT to \"Output\"", "LongformType.AUDIOBOOK", "LongformType.PODCAST", "\"Back 30 sec\"", "\"Mark played\"",
         "TimeRuler(", "Bookmark", "invokeObjectAction(", "InfoPane(", "LyricsSourcesPane(", "LyricsLanguagePane(", "val contextualActions=state.quickActions.distinct()", 'label="listening-mode"', "state.reducedMotion",
@@ -323,7 +323,7 @@ def main() -> int:
         present = [phrase for phrase in forbidden_phrases if phrase in src]
         if present:
             die(f"{rel} regressed to portfolio/prototype microcopy on a primary surface: {present}")
-    product_copy_forbidden=("demo ","prototype status","backend-free","experiential prototype","mock ","simulated ","preview only","this preview","sample state","no production")
+    product_copy_forbidden=("demo ","prototype status","backend-free","experiential prototype","mock ","simulated ","preview only","this preview","sample state","sample library","preview listening record","diagnostic fault injected","no production")
     product_copy_hits={}
     for path in sorted((SRC / "screens").glob("*.kt")):
         src=path.read_text(encoding="utf-8").lower()
