@@ -257,7 +257,7 @@ class GenesisInteractionTest {
         compose.onNodeWithContentDescription("Back").performClick()
         compose.onNodeWithText("Signal", useUnmergedTree = true).performClick()
         compose.onNodeWithText("History").performClick()
-        compose.onNodeWithText("No listening history in this preview.").assertExists()
+        compose.onNodeWithText("No listening history yet.").assertExists()
     }
 
     @Test fun advancedSettingsUseProgressiveDisclosure() {
@@ -351,7 +351,7 @@ class GenesisInteractionTest {
         compose.onNodeWithText("TSUNAMI device migration").performClick()
         compose.onNodeWithText("Ready to send").assertExists()
         compose.onNodeWithText("Share TSUNAMI APK").performClick()
-        compose.onNodeWithText("TSUNAMI APK share handoff preview").assertExists()
+        compose.onNodeWithText("TSUNAMI APK share handoff ready").assertExists()
     }
 
 
