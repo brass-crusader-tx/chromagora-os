@@ -535,6 +535,19 @@ def main() -> int:
             if len(fields)<2:
                 die(f"malformed visual capture row: {line}")
             capture_names.append(fields[1])
+    for anchor in (
+        'ORIG_FONT_SCALE=',
+        'ORIG_USER_ROTATION=',
+        'ORIG_ACCEL_ROTATION=',
+        'ORIG_WM_SIZE=',
+        'ORIG_WM_DENSITY=',
+        'restore_setting()',
+        'trap restore_device EXIT',
+        'restore_device',
+    ):
+        if anchor not in capture_script:
+            die(f"device visual harness must preserve pre-run display state: {anchor}")
+    print("DEVICE_DISPLAY_RESTORE_CONTRACT=PASS font rotation wm-size wm-density")
     expected_match=re.search(r"EXPECTED\s*=\s*\{(?P<body>[\s\S]*?)\n\}",visual_sanity)
     if not expected_match:
         die("visual sanity EXPECTED state set could not be parsed")
@@ -589,6 +602,15 @@ def main() -> int:
     ):
         if anchor not in selfhosted:
             die(f"self-hosted Motorola acceptance workflow missing anchor: {anchor}")
+    host_build=(UI / "tools/build_host.sh").read_text(encoding="utf-8")
+    for anchor in (
+        'TEST_PACKAGE="com.tsunami.shell.test"',
+        'cleanup_test_package()',
+        'trap cleanup_test_package EXIT',
+        'uninstall "$TEST_PACKAGE"',
+    ):
+        if anchor not in host_build:
+            die(f"device verification must clean instrumentation package: {anchor}")
 
     print("SOURCE_VERIFY=PASS")
     print("BACKEND_FREE_SOURCE=PASS")
