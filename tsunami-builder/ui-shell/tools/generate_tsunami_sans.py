@@ -20,8 +20,8 @@ def E(cx,cy,rx,ry,res=64): return translate(scale(Point(0,0).buffer(1,resolution
 def ring(cx,cy,rx,ry,t): return E(cx,cy,rx,ry).difference(E(cx,cy,max(1,rx-t),max(1,ry-t)))
 def U(*g): return unary_union([x for x in g if x is not None and not x.is_empty])
 def clip(g,x0,y0,x1,y1): return g.intersection(R(x0,y0,x1,y1))
-def line(x0,y0,x1,y1,t,cap=2): return LineString([(x0,y0),(x1,y1)]).buffer(t/2,cap_style=cap,join_style=2)
-def path(points,t,cap=2): return LineString(points).buffer(t/2,cap_style=cap,join_style=2)
+def line(x0,y0,x1,y1,t,cap=2): return LineString([(x0,y0),(x1,y1)]).buffer(t/2,cap_style=cap,join_style=1)
+def path(points,t,cap=2): return LineString(points).buffer(t/2,cap_style=cap,join_style=1)
 def bezier(p0,p1,p2,p3,n=28):
     out=[]
     for i in range(n+1):
@@ -85,7 +85,7 @@ def caps(ch,t):
 def lower(ch,t):
     h=XH; w=540; m=54; tl=max(34,t*.95)
     o=lambda: ring(w/2,h/2,w*.39,h/2+OV_X,tl)
-    if ch=='a': return U(o(),R(w-m-tl,0,w-m,h),R(w*.54,h*.46,w-m,h*.46+tl)),w
+    if ch=='a': return U(o(),R(w-m-tl,0,w-m,h)),w
     if ch=='b': return U(R(m,0,m+tl,ASC),translate(o(),xoff=18)),w
     if ch=='c': return o().difference(R(w*.64,h*.14,w+80,h*.86)),w
     if ch=='d': return U(R(w-m-tl,0,w-m,ASC),translate(o(),xoff=-18)),w
@@ -337,7 +337,7 @@ def proof(fonts):
     d.text((70,45),'TSUNAMI Sans — Genesis Proof v5.1',font=F('Semibold',54),fill='#111216')
     d.text((70,118),'H O n o  ·  optical control glyphs',font=F('Regular',34),fill='#44464C')
     y=185
-    samples=[('ABCDEFGHIJKLM','Regular',56),('NOPQRSTUVWXYZ','Regular',56),('abcdefghijklm','Regular',48),('nopqrstuvwxyz','Regular',48),('0123456789  01:42 / 04:19','Medium',46),('S s  G R  a e g r t k y  2 3 5 6 8','Regular',44),('I l 1   O 0   rn m   c e   v y','Regular',42),('H O n o   0 O   1 I l   e c   rn m','Medium',38),('S s  G C  R  a e g r t k y   & ? @   [] {}','Regular',36),('Æ æ  Œ œ  Ø ø  Ð ð  Þ þ  ß  Ñ ñ','Regular',34),('ÀÁÂÃÄÅ Ç ÈÉÊË Ï Ö Ü  àáâä ç éêë ï ö ü','Regular',36),('“Afterglow at the edge of the city”','Semibold',46),('Mira Sol · Refractions / Deluxe Edition','Medium',34),('FLAC 24-bit · 96 kHz   OFFLINE   QUEUED','Regular',28)]
+    samples=[('ABCDEFGHIJKLM','Regular',56),('NOPQRSTUVWXYZ','Regular',56),('abcdefghijklm','Regular',48),('nopqrstuvwxyz','Regular',48),('0123456789  01:42 / 04:19','Medium',46),('S s  G R  a e g r t k y  2 3 5 6 8','Regular',44),('I l 1   O 0   rn m   c e   v y','Regular',42),('S s  G C  R  a e g r t k y   & ? @   [] {}','Regular',36),('Æ æ  Œ œ  Ø ø  Ð ð  Þ þ  ß  Ñ ñ','Regular',34),('ÀÁÂÃÄÅ Ç ÈÉÊË Ï Ö Ü  àáâä ç éêë ï ö ü','Regular',36),('“Afterglow at the edge of the city”','Semibold',46),('Mira Sol · Refractions / Deluxe Edition','Medium',34),('FLAC 24-bit · 96 kHz   OFFLINE   QUEUED','Regular',28)]
     for txt,wt,size in samples: d.text((70,y),txt,font=F(wt,size),fill='#111216'); y+=80 if size>=46 else 66
     x=1060; y=190
     for wt in ['Light','Regular','Medium','Semibold','Bold']:
