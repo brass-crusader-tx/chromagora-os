@@ -1,0 +1,52 @@
+#!/bin/bash
+set -euxo pipefail
+
+SOURCE_HEAD="1e65095a651394be923a7aa875cfc3b83a8254f6"
+MIRROR_BASE="467b09041018099814c1b7d92a33cdf5b494cebd"
+export ANDROID_SDK_ROOT="$HOME/android-sdk"
+export ANDROID_HOME="$ANDROID_SDK_ROOT"
+TOOLS_VERSION="13114758"
+TOOLS_ZIP="$HOME/commandlinetools-linux-${TOOLS_VERSION}_latest.zip"
+TOOLS_SHA256="7ec965280a073311c339e571cd5de778b9975026cfcbe79f2b1cdcb1e15317ee"
+
+mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+curl -fL --retry 4 --retry-delay 2 "https://dl.google.com/android/repository/commandlinetools-linux-${TOOLS_VERSION}_latest.zip" -o "$TOOLS_ZIP"
+echo "$TOOLS_SHA256  $TOOLS_ZIP" | sha256sum -c -
+rm -rf "$ANDROID_SDK_ROOT/cmdline-tools/latest" "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools"
+unzip -q "$TOOLS_ZIP" -d "$ANDROID_SDK_ROOT/cmdline-tools"
+mv "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH"
+yes | sdkmanager --licenses >/dev/null 2>&1 || true
+sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+cd tsunami-builder
+python3 - <<'PY'
+import json
+from pathlib import Path
+m=json.loads(Path("MIRROR-MANIFEST.json").read_text())
+assert m["source_head"]=="1e65095a651394be923a7aa875cfc3b83a8254f6"
+assert len(m["files"])+len(m["support_files"])==58
+print("BINDER_MIRROR_CONTRACT=PASS source=1e65095a entries=58")
+PY
+
+bash ui-shell/tools/build_host.sh
+grep -q '^SOURCE_SHA=1e65095a651394be923a7aa875cfc3b83a8254f6$' build/reports/tsunami/ui-shell/host/build.txt
+grep -q '^HOST_BUILD=PASS' build/reports/tsunami/ui-shell/host/build.txt
+grep -q '^BINARY_MANIFEST_GATE=PASS' build/reports/tsunami/ui-shell/host/binary-manifest.txt
+test -s dist/TSUNAMI-UI-Genesis-debug.apk
+test -s dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
+
+mkdir -p binder-artifacts
+cp dist/TSUNAMI-UI-Genesis-debug.apk binder-artifacts/
+cp dist/TSUNAMI-UI-Genesis-debug-androidTest.apk binder-artifacts/
+cp build/reports/tsunami/ui-shell/host/build.txt binder-artifacts/
+cp build/reports/tsunami/ui-shell/host/binary-manifest.txt binder-artifacts/
+cp MIRROR-MANIFEST.json binder-artifacts/
+sha256sum binder-artifacts/*.apk > binder-artifacts/SHA256SUMS.txt
+{
+  echo "BINDER_BUILD=PASS"
+  echo "SOURCE_HEAD=$SOURCE_HEAD"
+  echo "MIRROR_BASE=$MIRROR_BASE"
+  cat binder-artifacts/SHA256SUMS.txt
+} > binder-artifacts/BUILD-EVIDENCE.txt
+cat binder-artifacts/BUILD-EVIDENCE.txt
