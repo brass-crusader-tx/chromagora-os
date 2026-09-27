@@ -77,6 +77,7 @@ def main()->int:
         "navigation/GenesisShell.kt":(
             'role=Role.Tab',
             'contentDescription="Settings"',
+            'liveRegion=LiveRegionMode.Polite',
             'semantics { contentDescription = "Open listening environment"; role=Role.Button }',
             '.onFocusChanged{focused=it.isFocused}',
             '.onFocusChanged{settingsFocused=it.isFocused}',
