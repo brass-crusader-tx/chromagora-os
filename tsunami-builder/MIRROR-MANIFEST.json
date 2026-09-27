@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "d0e26fefc9e4456039f9c47121614010aa2c46d4",
+  "source_head": "719029c134fb54802dac715945bf04c9035abf8b",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror is byte-identical to private Genesis head d0e26fefc9e4456039f9c47121614010aa2c46d4; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
+  "note": "Build-critical mirror is byte-identical to private Genesis head 719029c134fb54802dac715945bf04c9035abf8b; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -36,8 +36,8 @@
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/components/Primitives.kt",
-      "git_blob_sha": "63174e199aa77881e70a732306c8cd79694df29a",
-      "bytes": 19984
+      "git_blob_sha": "f8daa120e8dc23fd2e2858025788831bc3526943",
+      "bytes": 19948
     },
     {
       "path": "ui-shell/app/src/main/java/com/tsunami/shell/MainActivity.kt",
@@ -161,8 +161,8 @@
     },
     {
       "path": "ui-shell/tools/accessibility_verify.py",
-      "git_blob_sha": "b8d401a54e94c54aa4115b1e53af4eb92de15f95",
-      "bytes": 9636
+      "git_blob_sha": "d51f079a6ef104b31c1ecacf0070dde190549c55",
+      "bytes": 9675
     },
     {
       "path": "ui-shell/tools/bootstrap_gradle.sh",
@@ -304,13 +304,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "d0e26fefc9e4456039f9c47121614010aa2c46d4"
+    "source_head": "719029c134fb54802dac715945bf04c9035abf8b"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-27T05:41:00Z",
-    "private_head": "d0e26fefc9e4456039f9c47121614010aa2c46d4",
-    "reason": "exact-head rebuild after provider-copy and live-region accessibility reconciliation",
-    "sequence": 48
+    "requested_at_utc": "2026-09-27T05:43:00Z",
+    "private_head": "719029c134fb54802dac715945bf04c9035abf8b",
+    "reason": "exact-head rebuild after redundant-artwork accessibility refinement",
+    "sequence": 49
   },
-  "generated_at_utc": "2026-09-27T05:41:00Z"
+  "generated_at_utc": "2026-09-27T05:43:00Z"
 }
