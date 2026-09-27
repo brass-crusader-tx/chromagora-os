@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "89c3cc16fc93b80980389bc61bb98a1c40c24fb8",
+  "source_head": "43ace196781cd22b564466e64b5ade2d87304aed",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror is byte-identical to private Genesis head 89c3cc16fc93b80980389bc61bb98a1c40c24fb8; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
+  "note": "Build-critical mirror is byte-identical to private Genesis head 43ace196781cd22b564466e64b5ade2d87304aed; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -206,8 +206,8 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "faf4ce79b7736fc5afbf61eddd0c01c85d1dfa21",
-      "bytes": 34607
+      "git_blob_sha": "face76cc5691d3945e1179136ca1fe2b9bb98d04",
+      "bytes": 34657
     },
     {
       "path": "ui-shell/tools/visual_sanity_verify.py",
@@ -218,8 +218,8 @@
   "support_files": [
     {
       "path": ".github/workflows/ui-shell-genesis-selfhosted.yml",
-      "git_blob_sha": "d81cd904f8dc39c34f4c36ce42acbf0fc92554cd",
-      "bytes": 3976
+      "git_blob_sha": "8a0deff0df3d0b05641459aeab1e302486cb8d6f",
+      "bytes": 3986
     },
     {
       "path": "brand/TSUNAMI-MARK-GEOMETRY.md",
@@ -283,8 +283,8 @@
     },
     {
       "path": "tools/ui_shell_codespace_build.py",
-      "git_blob_sha": "22f98a9a1d1900c93d97101210b04afe948686b2",
-      "bytes": 15997
+      "git_blob_sha": "2098d5721f014e83d34a214118ef184b225fd2ca",
+      "bytes": 16017
     },
     {
       "path": "tools/ui_shell_gate.py",
@@ -293,8 +293,8 @@
     },
     {
       "path": "tools/ui_shell_static_check.py",
-      "git_blob_sha": "3a6b85d2c3456efde91773514b271de6b7e74921",
-      "bytes": 21094
+      "git_blob_sha": "0d7ec8198602dd5adc27e16701e1cf3140c92132",
+      "bytes": 21428
     },
     {
       "path": "tools/ui_shell_jitpack_fetch.py",
@@ -304,13 +304,13 @@
   ],
   "self_hosted_probe": {
     "purpose": "current-head UI Genesis build/device acceptance",
-    "source_head": "89c3cc16fc93b80980389bc61bb98a1c40c24fb8"
+    "source_head": "43ace196781cd22b564466e64b5ade2d87304aed"
   },
   "rebuild_request": {
-    "requested_at_utc": "2026-09-27T06:15:21Z",
-    "private_head": "89c3cc16fc93b80980389bc61bb98a1c40c24fb8",
-    "reason": "exact-head rebuild after build-evidence reconciliation",
-    "sequence": 50
+    "requested_at_utc": "2026-09-27T06:16:30Z",
+    "private_head": "43ace196781cd22b564466e64b5ade2d87304aed",
+    "reason": "exact-head rebuild after 39-test acceptance-contract reconciliation",
+    "sequence": 51
   },
-  "generated_at_utc": "2026-09-27T06:15:21Z"
+  "generated_at_utc": "2026-09-27T06:16:30Z"
 }
