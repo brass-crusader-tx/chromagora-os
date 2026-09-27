@@ -746,3 +746,23 @@ The executable product surfaces were therefore revised without changing their st
 A connector-side scan of all seven screen source files at pre-documentation executable head `e41fa606d175e2d405e8067615cc215d3da73626` found **0** occurrences of the guarded development-language tokens. The visual-review protocol now treats any such leakage as an explicit REVISE condition alongside cards/pills/gradients/artwork-dependent identity.
 
 This pass is source-level de-tackification evidence. It does not replace the outstanding Android build, 39-test instrumentation, 46-state device capture, Android TSUNAMI Sans raster review, crash scan, or human visual acceptance.
+
+
+## Signal truthfulness pass — 2026-09-26/27
+
+The de-tackification audit was extended from vocabulary to technical truthfulness. The backend-free shell had retained several precise-looking Signal values that were not derived from any fixture state—fixed PCM peaks, a fixed 384 MiB / 2 GiB cache figure, nominal 96 kHz mixer claims, a fabricated −6.20 dB ReplayGain value and fixed 118 BPM / C-minor / energy analysis. Those values made the surface look more “audiophile” without carrying trustworthy information, which is explicitly outside the Genesis brief.
+
+The Signal environment now:
+
+- reports source bitrate as unavailable when the source does not expose it;
+- describes byte verification, seekability and caching by capability/state rather than invented byte counts;
+- treats platform output format and conversion as route-negotiated/reported information rather than hard-coding 96 kHz / PCM-float claims;
+- removes fixed PCM-peak and clipping telemetry;
+- preserves the meaningful stateful diagnostic counters and gapless probe;
+- labels duplicate hashing as SHA-256 over the indexed audio payload rather than “sample bytes”;
+- reports ReplayGain policy and analysis completion without fabricated musical measurements;
+- derives visible-object format counts directly from the current fixture track set rather than hard-coding an internally inconsistent 24-bit count.
+
+`source_verify.py` now rejects the removed ornamental-precision literals if they reappear. The visual-review protocol likewise requires REVISE when precise technical numbers are present only to make the shell look technical.
+
+The corresponding state-only track-analysis action still changes from Ready → complete and remains testable, but no longer invents BPM/key/energy values. Android/device execution remains outstanding and no build PASS is inferred from this source pass.
