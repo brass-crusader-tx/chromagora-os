@@ -194,7 +194,7 @@ import com.tsunami.shell.theme.*
                     )
                 }}
             }
-            LibraryLens.RADIO -> ObjectLedger(state,listOf(Triple("Library radio","Radio","Generated locally · drawn only from your library"),Triple("Night signal","Radio","Connected source · preview"),Triple("Recent favourites","Radio","23-track rotation")),playable=true)
+            LibraryLens.RADIO -> ObjectLedger(state,listOf(Triple("Library radio","Radio","Generated locally · drawn only from your library"),Triple("Night signal","Radio","Connected source · catalogue"),Triple("Recent favourites","Radio","23-track rotation")),playable=true)
         }
     }
 }
