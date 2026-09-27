@@ -2,12 +2,12 @@
   "artifact": "TSUNAMI UI Genesis public build mirror",
   "source_repository": "brass-crusader-tx/TSUNAMI",
   "source_branch": "genesis/ui-shell-20260923",
-  "source_head": "58b4cfe22cdeb5de99157f6032fc61b4992c7d3c",
+  "source_head": "5c8f0450c52f187c545825445e93d3d6d221fade",
   "mirror_repository": "brass-crusader-tx/chromagora-os",
   "mirror_branch": "build/tsunami-ui-genesis-20260925",
   "ui_shell_file_count": 41,
   "support_file_count": 17,
-  "note": "Build-critical mirror is byte-identical to private Genesis head 58b4cfe22cdeb5de99157f6032fc61b4992c7d3c; canonical TSUNAMI Sans v5.1 remains manifest-bound for reproducible Android builds.",
+  "note": "Build-critical mirror is byte-identical to private Genesis head 5c8f0450c52f187c545825445e93d3d6d221fade; static source verification rejects TSUNAMI Sans generator drift before binary generation.",
   "files": [
     {
       "path": "ui-shell/.gitignore",
@@ -171,8 +171,8 @@
     },
     {
       "path": "ui-shell/tools/build_host.sh",
-      "git_blob_sha": "fb6df04f8bb107c8b90b7f616b49476794afcf2a",
-      "bytes": 14212
+      "git_blob_sha": "c9be3bdf0975dbe9cb66fc39b05d7e3d282025d2",
+      "bytes": 15414
     },
     {
       "path": "ui-shell/tools/capture_verify.sh",
@@ -206,8 +206,8 @@
     },
     {
       "path": "ui-shell/tools/source_verify.py",
-      "git_blob_sha": "5da464bf7cc5d2383e58761578647acc63ab85b0",
-      "bytes": 34678
+      "git_blob_sha": "4299db1ffcfbaf330713d3c22c8c463f086c3b81",
+      "bytes": 35208
     },
     {
       "path": "ui-shell/tools/visual_sanity_verify.py",
@@ -218,7 +218,7 @@
   "support_files": [
     {
       "path": ".github/workflows/ui-shell-genesis-selfhosted.yml",
-      "git_blob_sha": "8a0deff0df3d0b05641459aeab1e302486cb8d6f",
+      "git_blob_sha": "23296f2d8d8b9515131c42951640fd996ec39f53",
       "bytes": 3986
     },
     {
@@ -283,13 +283,13 @@
     },
     {
       "path": "tools/ui_shell_codespace_build.py",
-      "git_blob_sha": "2098d5721f014e83d34a214118ef184b225fd2ca",
+      "git_blob_sha": "5d7b8b1e12e246377ca2bb72891aa90b41f0df03",
       "bytes": 16017
     },
     {
       "path": "tools/ui_shell_gate.py",
-      "git_blob_sha": "96030d9cc2ad27845e3100d7e220cb0f30e5db85",
-      "bytes": 27076
+      "git_blob_sha": "0f6e21f9ce88113674ff76ff29b0f880674ab569",
+      "bytes": 26984
     },
     {
       "path": "tools/ui_shell_static_check.py",
@@ -298,7 +298,7 @@
     },
     {
       "path": "tools/ui_shell_jitpack_fetch.py",
-      "git_blob_sha": "db067924dbac6b3b69262ddf4950a2bc80f3d67f",
+      "git_blob_sha": "f6f18edb924a51287f2e5e0189ec12bd9725c516",
       "bytes": 12642
     }
   ],
