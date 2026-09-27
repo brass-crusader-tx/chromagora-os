@@ -460,6 +460,9 @@ def main() -> int:
         if anchor not in font_src:
             die(f"font generator missing anchor: {anchor}")
     font_manifest = UI.parent / "docs/TSUNAMI-SANS-v5.2-MANIFEST.json"
+    retired_font_manifest = UI.parent / "docs/TSUNAMI-SANS-v5.1-MANIFEST.json"
+    if retired_font_manifest.exists():
+        die("retired TSUNAMI Sans v5.1 manifest must not coexist with the canonical v5.2 contract")
     if not font_manifest.is_file():
         die("canonical TSUNAMI Sans v5.2 manifest is missing")
     import json
