@@ -333,6 +333,22 @@ def main() -> int:
     if product_copy_hits:
         die(f"product surfaces expose development-language copy: {product_copy_hits}")
     print("PRIMARY_COPY_TONE=PASS functional_not_portfolio development_language=absent")
+    signal_src=(SRC / "screens/SignalScreen.kt").read_text(encoding="utf-8")
+    signal_required=(
+        '"STATE" to playbackStateLabel(state)',
+        'private fun playbackStateLabel(state:ShellState)',
+        'if(!state.historyEnabled)',
+        '"Listening history is off."',
+        'TextCommand("Turn history on"',
+        'SignalLine("Sample rate",t?.quality?.let(::qualitySampleRate)',
+        'SignalLine("Bit depth",t?.quality?.let(::qualityBitDepth)',
+        'private fun qualitySampleRate(quality:String)',
+        'private fun qualityBitDepth(quality:String)',
+    )
+    missing_signal=[anchor for anchor in signal_required if anchor not in signal_src]
+    if missing_signal:
+        die(f"Signal truth/privacy contract regressed: {missing_signal}")
+    print("SIGNAL_TRUTH_PRIVACY=PASS playback_state_and_history_preference")
 
     # Cross-file state contract: every state.<member> used by UI compositions must resolve
     # to an actual ShellState property/function. This catches a class of refactor failures that a
