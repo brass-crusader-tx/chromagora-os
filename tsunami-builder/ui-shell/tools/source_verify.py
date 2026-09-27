@@ -455,7 +455,7 @@ def main() -> int:
         if "TSUNAMI-SANS-v5.1-MANIFEST.json" not in contract_source:
             die(f"{contract_name} must bind generated fonts to the canonical v5.1 manifest")
     if "OK (39 tests)" not in host_build or "OK (39 tests)" not in root_gate:
-        die("Android acceptance paths must require the full 38-test instrumentation suite")
+        die("Android acceptance paths must require the full 39-test instrumentation suite")
     for anchor in (
         'JDK 17 or newer',
         '/usr/libexec/java_home -v 17',
