@@ -1,0 +1,99 @@
+{
+  "schema": "tsunami.ui-genesis.exact-head-audit.v1",
+  "source_repository": "brass-crusader-tx/TSUNAMI",
+  "source_branch": "genesis/ui-shell-20260923",
+  "source_head": "494afd6bebddee2e121841a197995516013093a6",
+  "executable_source_boundary": "1fe4d52eaf9deee0b334e10caf6670442da41bc2",
+  "note": "Commits after executable_source_boundary reconcile verification documentation only; manifest-bound executable blobs are unchanged.",
+  "mirror_repository": "brass-crusader-tx/chromagora-os",
+  "mirror_branch": "build/tsunami-ui-genesis-20260925",
+  "mirror_head": "930e24f05e388e2dea3b2741173406ee43365ff2",
+  "mirror_manifest_blob": "2d350414aa70134115766e0bcaaadb6768a553c7",
+  "mirror_parity": {
+    "checked_entries": 57,
+    "missing": 0,
+    "divergent_sha": 0,
+    "divergent_bytes": 0,
+    "result": "PASS"
+  },
+  "static_contract": {
+    "kotlin_files": 15,
+    "compose_instrumentation_tests": {
+      "count": 38,
+      "unique": 38
+    },
+    "declared_permissions": 0,
+    "unresolved_state_references": 0,
+    "delimiter_or_lexical_failures": 0,
+    "anti_tackiness_anchor_hits": 0,
+    "production_runtime_or_root_build_paths_changed": 0,
+    "visual_capture_matrix": {
+      "count": 45,
+      "unique": 45
+    }
+  },
+  "type_contract": {
+    "family": "TSUNAMI Sans",
+    "version": "5.100",
+    "generator_blob": "43ae1290ae3063a717cddb0272080dc0c27d3b7f",
+    "canonical_manifest": "docs/TSUNAMI-SANS-v5.1-MANIFEST.json",
+    "manifest_generator_match": true,
+    "weights": [
+      300,
+      400,
+      500,
+      600,
+      700
+    ],
+    "glyphs_per_master": 176,
+    "android_raster_review": false
+  },
+  "android_execution": {
+    "public_linux": {
+      "run_id": 36273537057,
+      "status": "completed",
+      "conclusion": "failure",
+      "steps_materialized": false,
+      "classification": "pre-step runner/infrastructure failure"
+    },
+    "public_macos": {
+      "run_id": 36273537063,
+      "status": "completed",
+      "conclusion": "failure",
+      "steps_materialized": false,
+      "classification": "pre-step runner/infrastructure failure"
+    },
+    "self_hosted": {
+      "run_id": 36273537060,
+      "status": "queued",
+      "conclusion": null,
+      "steps_materialized": false
+    },
+    "private_actions_control": {
+      "run_id": 36273383976,
+      "status": "completed",
+      "conclusion": "startup_failure",
+      "jobs": 0
+    },
+    "main_actions_control": {
+      "run_id": 36273159255,
+      "status": "completed",
+      "conclusion": "startup_failure",
+      "jobs": 0
+    },
+    "result": "PENDING_EXECUTABLE_ANDROID_EVIDENCE"
+  },
+  "final_acceptance_required": {
+    "apk": true,
+    "android_test_apk": true,
+    "instrumentation_tests": 38,
+    "visual_states": 45,
+    "install_package": "com.tsunami.shell",
+    "android_font_raster_review": true,
+    "crash_scan": true,
+    "monochrome_squint_artwork_independence_review": true,
+    "portal_publish": true
+  },
+  "completion_claim": false,
+  "refreshed_at_utc": "2026-09-26T21:38:00Z"
+}

@@ -1,0 +1,91 @@
+name: TSUNAMI UI Genesis Builder
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/tsunami-ui-builder.yml"
+      - "tsunami-builder/**"
+  push:
+    branches:
+      - build/tsunami-ui-genesis-20260925
+    paths:
+      - ".github/workflows/tsunami-ui-builder.yml"
+      - "tsunami-builder/MIRROR-MANIFEST.json"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK 36
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Verify byte-identical private-source mirror
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, subprocess
+          root=pathlib.Path("tsunami-builder")
+          manifest=json.loads((root/"MIRROR-MANIFEST.json").read_text())
+          assert manifest["ui_shell_file_count"]==len(manifest["files"]), manifest
+          assert manifest["support_file_count"]==len(manifest["support_files"]), manifest
+          assert manifest["ui_shell_file_count"]>=40, manifest
+          assert manifest["support_file_count"]>=10, manifest
+          mismatches=[]
+          for row in manifest["files"] + manifest["support_files"]:
+              p=root/row["path"]
+              if not p.is_file():
+                  mismatches.append((row["path"],"missing",row["git_blob_sha"]))
+                  continue
+              actual=subprocess.check_output(["git","hash-object",str(p)],text=True).strip()
+              if actual!=row["git_blob_sha"]:
+                  mismatches.append((row["path"],actual,row["git_blob_sha"]))
+          assert not mismatches, mismatches
+          print(f"MIRROR_BINDING=PASS source_head={manifest['source_head']} ui={len(manifest['files'])} support={len(manifest['support_files'])}")
+          PY
+
+      - name: Canonical source, type and Android build
+        working-directory: tsunami-builder
+        shell: bash
+        run: |
+          bash ui-shell/tools/build_host.sh
+          test -s dist/TSUNAMI-UI-Genesis-debug.apk
+          test -s dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
+          cat build/reports/tsunami/ui-shell/host/build.txt
+
+      - name: Upload APKs and host evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: TSUNAMI-UI-Genesis-crossrepo
+          path: |
+            tsunami-builder/dist/TSUNAMI-UI-Genesis-debug.apk
+            tsunami-builder/dist/TSUNAMI-UI-Genesis-debug-androidTest.apk
+            tsunami-builder/dist/TSUNAMI-Sans-v5.2/
+            tsunami-builder/build/reports/tsunami/ui-shell/host/
+            tsunami-builder/ui-shell/tools/proofs/
+            tsunami-builder/MIRROR-MANIFEST.json
+          if-no-files-found: error
+
+# current-head mirror contract is manifest-bound; file counts may grow as isolated verification tooling grows
+
+# exact-source retry probe 2026-09-26T20:30-04:00 private=ed182b683ba604dbf9c4351f19a69561d4478c55 runner=ubuntu-22.04
+
+# push-event full-builder retry 2026-09-27T10:52Z source=1e65095a

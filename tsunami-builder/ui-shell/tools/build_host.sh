@@ -1,0 +1,369 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Reproducible host entry point for the isolated TSUNAMI UI Genesis shell.
+# It deliberately never enters the production app Gradle graph.
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+UI_ROOT="$(cd "$HERE/.." && pwd)"
+REPO_ROOT="$(cd "$UI_ROOT/.." && pwd)"
+DIST="$REPO_ROOT/dist"
+REPORT="$REPO_ROOT/build/reports/tsunami/ui-shell/host"
+mkdir -p "$DIST" "$REPORT"
+
+# Prefer a local JDK 17 on macOS when available, while accepting any runtime >= 17.
+if [[ "$(uname -s)" == "Darwin" && -x /usr/libexec/java_home ]]; then
+  if JAVA17_HOME="$(/usr/libexec/java_home -v 17 2>/dev/null)"; then
+    export JAVA_HOME="$JAVA17_HOME"
+    export PATH="$JAVA_HOME/bin:$PATH"
+  fi
+fi
+JAVA_MAJOR="$(java -version 2>&1 | awk -F'[".]' '/version/{print $2;exit}')"
+if [[ -z "$JAVA_MAJOR" || "$JAVA_MAJOR" -lt 17 ]]; then
+  echo "ERROR: UI Genesis requires JDK 17 or newer; got: $(java -version 2>&1 | head -1)" >&2
+  exit 2
+fi
+if [[ -z "${ANDROID_SDK_ROOT:-}" ]]; then
+  if [[ -n "${ANDROID_HOME:-}" && -d "$ANDROID_HOME" ]]; then
+    export ANDROID_SDK_ROOT="$ANDROID_HOME"
+  elif [[ -d "$HOME/Library/Android/sdk" ]]; then
+    export ANDROID_SDK_ROOT="$HOME/Library/Android/sdk"
+  elif [[ -d "$HOME/Android/Sdk" ]]; then
+    export ANDROID_SDK_ROOT="$HOME/Android/Sdk"
+  elif [[ -d "/opt/android-sdk-linux" ]]; then
+    export ANDROID_SDK_ROOT="/opt/android-sdk-linux"
+  elif [[ -d "/opt/android-sdk" ]]; then
+    export ANDROID_SDK_ROOT="/opt/android-sdk"
+  fi
+fi
+export ANDROID_HOME="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+
+if [[ -z "${ANDROID_SDK_ROOT:-}" || ! -d "$ANDROID_SDK_ROOT" ]]; then
+  echo "ERROR: Android SDK not found; set ANDROID_SDK_ROOT." >&2
+  exit 2
+fi
+printf 'sdk.dir=%s\n' "$ANDROID_SDK_ROOT" > "$UI_ROOT/local.properties"
+
+# Match the production Android project compile SDK. Provision API 36 on hosts
+# that have an Android SDK but have not yet installed the required platform.
+SDKMANAGER=""
+if [[ -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]]; then
+  SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+elif [[ -x "$ANDROID_SDK_ROOT/cmdline-tools/bin/sdkmanager" ]]; then
+  SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/bin/sdkmanager"
+elif [[ -x "$ANDROID_SDK_ROOT/tools/bin/sdkmanager" ]]; then
+  SDKMANAGER="$ANDROID_SDK_ROOT/tools/bin/sdkmanager"
+elif command -v sdkmanager >/dev/null 2>&1; then
+  SDKMANAGER="$(command -v sdkmanager)"
+fi
+if [[ ! -d "$ANDROID_SDK_ROOT/platforms/android-36" || ! -d "$ANDROID_SDK_ROOT/build-tools/36.0.0" ]]; then
+  if [[ -z "$SDKMANAGER" ]]; then
+    echo "ERROR: Android platform/build-tools 36 are incomplete and sdkmanager is unavailable." >&2
+    exit 2
+  fi
+  echo "Provisioning Android platform 36 and build-tools 36.0.0"
+  yes | "$SDKMANAGER" --licenses >/dev/null 2>&1 || true
+  "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+fi
+
+GRADLE_VERSION="9.4.1"
+if [[ -n "${GRADLE_BIN:-}" ]]; then
+  if [[ ! -x "$GRADLE_BIN" ]]; then
+    echo "ERROR: GRADLE_BIN is not executable: $GRADLE_BIN" >&2
+    exit 2
+  fi
+elif command -v gradle >/dev/null 2>&1 && gradle --version 2>/dev/null | grep -q "Gradle $GRADLE_VERSION"; then
+  GRADLE_BIN="$(command -v gradle)"
+  echo "Using locally installed Gradle $GRADLE_VERSION: $GRADLE_BIN"
+else
+  GRADLE_BIN="$(bash "$HERE/bootstrap_gradle.sh" --print-gradle)"
+fi
+if ! "$GRADLE_BIN" --version 2>/dev/null | grep -q "Gradle $GRADLE_VERSION"; then
+  echo "ERROR: UI Genesis requires Gradle $GRADLE_VERSION; got $("$GRADLE_BIN" --version 2>/dev/null | awk '/^Gradle /{print $2;exit}')" >&2
+  exit 2
+fi
+CACHE_ROOT="$REPO_ROOT/build/.ui-shell-toolchain"
+mkdir -p "$CACHE_ROOT"
+
+PYTHON_HOST="${PYTHON_BIN:-python3}"
+VENV="$CACHE_ROOT/venv"
+if [[ ! -x "$VENV/bin/python" ]]; then
+  # Reuse exact host packages when available; this keeps a prepared Mac/Codespace
+  # build-capable even during transient package-index/DNS outages.
+  "$PYTHON_HOST" -m venv --system-site-packages "$VENV"
+fi
+PYTHON_BIN="$VENV/bin/python"
+export TSUNAMI_FONT_PYTHON="$PYTHON_BIN"
+if ! "$PYTHON_BIN" - <<'PY'
+import fontTools, shapely, PIL
+assert fontTools.__version__ == "4.63.0", fontTools.__version__
+assert shapely.__version__ == "2.1.2", shapely.__version__
+assert PIL.__version__ == "12.3.0", PIL.__version__
+PY
+then
+  "$PYTHON_BIN" -m pip install --disable-pip-version-check --quiet     "fonttools==4.63.0" "shapely==2.1.2" "pillow==12.3.0"
+fi
+
+"$PYTHON_BIN" - <<'PY'
+import fontTools, shapely, PIL
+assert fontTools.__version__ == "4.63.0"
+assert shapely.__version__ == "2.1.2"
+assert PIL.__version__ == "12.3.0"
+print("FONT_BUILD_DEPS=PASS")
+PY
+
+cd "$UI_ROOT"
+"$PYTHON_BIN" tools/source_verify.py
+"$PYTHON_BIN" tools/accessibility_verify.py
+if command -v kotlinc >/dev/null 2>&1; then
+  bash tools/jvm_state_gate.sh "$UI_ROOT" | tee "$REPORT/jvm-state-gate.txt"
+else
+  echo "JVM_STATE_GATE=SKIP kotlinc unavailable" | tee "$REPORT/jvm-state-gate.txt"
+fi
+"$PYTHON_BIN" tools/prepare_fonts.py
+
+"$PYTHON_BIN" - <<'PY'
+from pathlib import Path
+from fontTools.ttLib import TTFont
+fonts=sorted(Path('app/src/main/res/font').glob('tsunami_sans_*.ttf'))
+assert len(fonts)==5, f"expected 5 TSUNAMI Sans masters, got {len(fonts)}"
+weights=set()
+for p in fonts:
+    f=TTFont(p)
+    try:
+        family=next(n.toUnicode() for n in f['name'].names if n.nameID==1)
+        version=next(n.toUnicode() for n in f['name'].names if n.nameID==5)
+        assert family=='TSUNAMI Sans', (p,family)
+        assert version=='Version 5.200', (p,version)
+        weights.add(int(f['OS/2'].usWeightClass))
+        assert 'GPOS' in f, f"{p}: missing GPOS"
+    finally:
+        f.close()
+assert weights=={300,400,500,600,700}, weights
+import hashlib, json
+manifest=json.loads(Path('../docs/TSUNAMI-SANS-v5.2-MANIFEST.json').read_text(encoding='utf-8'))
+assert manifest['family']=='TSUNAMI Sans' and manifest['version']=='5.200', manifest
+generator=Path('tools/generate_tsunami_sans.py')
+payload=generator.read_bytes()
+actual_blob=hashlib.sha1(b"blob "+str(len(payload)).encode('ascii')+b"\0"+payload).hexdigest()
+assert actual_blob==manifest.get('generator_blob_sha1'), (actual_blob,manifest.get('generator_blob_sha1'))
+expected_weights={name:int(meta['weight_class']) for name,meta in manifest['weights'].items()}
+assert expected_weights=={'Light':300,'Regular':400,'Medium':500,'Semibold':600,'Bold':700}, expected_weights
+proof_names=list(manifest.get('proofs') or [])
+assert proof_names==['tsunami-sans-proof.png','tsunami-sans-ui-proof.png'], proof_names
+first={
+    'fonts':{p.name:{'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size} for p in fonts},
+    'proofs':{}
+}
+for proof_name in proof_names:
+    p=Path('tools/proofs')/proof_name
+    assert p.is_file() and p.stat().st_size>10_000, p
+    first['proofs'][proof_name]={'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size}
+Path('../build/reports/tsunami/ui-shell/host/font-build-manifest-first.json').write_text(json.dumps(first,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+print("FONT_GENERATION_FIRST_PASS=PASS")
+print("FONT_GENERATOR_BLOB=PASS",actual_blob)
+print("FONT_CANONICAL_MANIFEST=PASS")
+PY
+
+# A second fresh generation is the canonical v5.2 reproducibility check. The
+# manifest binds source identity and optical/weight requirements; generated
+# binary hashes must reproduce byte-for-byte rather than being hand-updated.
+"$PYTHON_BIN" tools/prepare_fonts.py
+"$PYTHON_BIN" - <<'PY'
+from pathlib import Path
+import hashlib,json
+report=Path('../build/reports/tsunami/ui-shell/host')
+first=json.loads((report/'font-build-manifest-first.json').read_text(encoding='utf-8'))
+fonts=sorted(Path('app/src/main/res/font').glob('tsunami_sans_*.ttf'))
+second={
+  'fonts':{p.name:{'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size} for p in fonts},
+  'proofs':{}
+}
+for name in ('tsunami-sans-proof.png','tsunami-sans-ui-proof.png'):
+    p=Path('tools/proofs')/name
+    second['proofs'][name]={'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size}
+assert second==first,(first,second)
+(report/'font-build-manifest.json').write_text(json.dumps(second,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+print("FONT_REPRODUCIBILITY=PASS")
+PY
+
+FONT_DIST="$DIST/TSUNAMI-Sans-v5.2"
+rm -rf "$FONT_DIST"
+mkdir -p "$FONT_DIST"
+cp app/src/main/res/font/tsunami_sans_*.ttf "$FONT_DIST/"
+cp tools/proofs/tsunami-sans-proof.png tools/proofs/tsunami-sans-ui-proof.png "$FONT_DIST/"
+cp "$REPO_ROOT/brand/tsunami-mark.svg" "$REPO_ROOT/brand/tsunami-mark-inverse.svg" "$FONT_DIST/"
+{
+  echo "TSUNAMI Sans v5.2"
+  echo "Generated from ui-shell/tools/generate_tsunami_sans.py"
+  echo "Family: TSUNAMI Sans"
+  echo "Weights: 300 400 500 600 700"
+} > "$FONT_DIST/README.txt"
+
+"$GRADLE_BIN" --no-daemon --stacktrace --console=plain \
+  :app:assembleDebug \
+  :app:assembleDebugAndroidTest
+
+APK="$UI_ROOT/app/build/outputs/apk/debug/app-debug.apk"
+TEST_APK="$UI_ROOT/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
+test -s "$APK"
+test -s "$TEST_APK"
+
+APK_ANALYZER="${APK_ANALYZER_BIN:-}"
+if [[ -z "$APK_ANALYZER" ]]; then
+  if command -v apkanalyzer >/dev/null 2>&1; then
+    APK_ANALYZER="$(command -v apkanalyzer)"
+  elif [[ -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/apkanalyzer" ]]; then
+    APK_ANALYZER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/apkanalyzer"
+  fi
+fi
+if [[ -z "$APK_ANALYZER" || ! -x "$APK_ANALYZER" ]]; then
+  echo "ERROR: apkanalyzer is required for binary manifest verification." >&2
+  exit 2
+fi
+APP_ID="$("$APK_ANALYZER" manifest application-id "$APK" | tr -d '\r')"
+[[ "$APP_ID" == "com.tsunami.shell" ]] || { echo "ERROR: unexpected APK application id: $APP_ID" >&2; exit 2; }
+PERMISSIONS="$("$APK_ANALYZER" manifest permissions "$APK" | sed '/^[[:space:]]*$/d')"
+if grep -q '^android\.permission\.' <<<"$PERMISSIONS"; then
+  echo "ERROR: backend-free shell APK unexpectedly declares Android permissions:" >&2
+  printf '%s\n' "$PERMISSIONS" >&2
+  exit 2
+fi
+{
+  echo "APPLICATION_ID=$APP_ID"
+  echo "DECLARED_ANDROID_PERMISSIONS=0"
+  echo "BINARY_MANIFEST_GATE=PASS"
+} | tee "$REPORT/binary-manifest.txt"
+
+OUT_APK="$DIST/TSUNAMI-UI-Genesis-debug.apk"
+OUT_TEST="$DIST/TSUNAMI-UI-Genesis-debug-androidTest.apk"
+cp "$APK" "$OUT_APK"
+cp "$TEST_APK" "$OUT_TEST"
+
+hash_file() {
+  if command -v shasum >/dev/null 2>&1; then shasum -a 256 "$1" | awk '{print $1}'
+  else sha256sum "$1" | awk '{print $1}'
+  fi
+}
+bytes_file() {
+  if stat -f%z "$1" >/dev/null 2>&1; then stat -f%z "$1"
+  else stat -c%s "$1"
+  fi
+}
+
+APK_SHA="$(hash_file "$OUT_APK")"
+TEST_SHA="$(hash_file "$OUT_TEST")"
+
+# Bind build evidence to the canonical private Genesis source even when this script is
+# executed from the byte-identical public builder mirror. In the private repository
+# SOURCE_SHA and BUILD_REPO_SHA are identical. In the public mirror SOURCE_SHA comes
+# from MIRROR-MANIFEST.json while BUILD_REPO_SHA records the mirror commit that ran it.
+BUILD_REPO_SHA="$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || echo unknown)"
+SOURCE_SHA="$BUILD_REPO_SHA"
+MIRROR_MANIFEST="$REPO_ROOT/MIRROR-MANIFEST.json"
+if [[ -f "$MIRROR_MANIFEST" ]]; then
+  MIRROR_SOURCE_SHA="$("$PYTHON_BIN" - "$MIRROR_MANIFEST" <<'PY'
+import json, pathlib, sys
+data=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+print(data.get("source_head",""))
+PY
+)"
+  if [[ "$MIRROR_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+    SOURCE_SHA="$MIRROR_SOURCE_SHA"
+  else
+    echo "ERROR: public mirror manifest lacks a valid private source_head." >&2
+    exit 2
+  fi
+fi
+{
+  echo "SOURCE_SHA=$SOURCE_SHA"
+  echo "BUILD_REPO_SHA=$BUILD_REPO_SHA"
+  echo "GRADLE=$("$GRADLE_BIN" --version | awk '/^Gradle /{print $2;exit}')"
+  echo "JAVA=$(java -version 2>&1 | head -1)"
+  echo "JAVA_HOME=${JAVA_HOME:-}"
+  echo "APK=$OUT_APK"
+  echo "APK_BYTES=$(bytes_file "$OUT_APK")"
+  echo "APK_SHA256=$APK_SHA"
+  echo "TEST_APK=$OUT_TEST"
+  echo "TEST_APK_BYTES=$(bytes_file "$OUT_TEST")"
+  echo "TEST_APK_SHA256=$TEST_SHA"
+  echo "HOST_BUILD=PASS"
+} | tee "$REPORT/build.txt"
+
+MODE="${1:-}"
+if [[ "$MODE" == "--install" || "$MODE" == "--verify-device" ]]; then
+  SERIAL="${2:-${ANDROID_SERIAL:-}}"
+  ADB="${ADB_BIN:-}"
+  if [[ -z "$ADB" ]]; then
+    if command -v adb >/dev/null 2>&1; then ADB="$(command -v adb)"
+    elif [[ -x "$ANDROID_SDK_ROOT/platform-tools/adb" ]]; then ADB="$ANDROID_SDK_ROOT/platform-tools/adb"
+    fi
+  fi
+  if [[ -z "$ADB" || ! -x "$ADB" ]]; then
+    echo "ERROR: adb not found." >&2; exit 2
+  fi
+  if [[ -z "$SERIAL" ]]; then
+    SERIAL="$("$ADB" devices | awk 'NR>1 && $2=="device"{print $1;exit}')"
+  fi
+  if [[ -z "$SERIAL" ]]; then
+    echo "ERROR: no authorized Android device." >&2; exit 2
+  fi
+
+  install_apk() {
+    local apk="$1"
+    local remote="/data/local/tmp/$(basename "$apk")"
+    # `adb install` can hang indefinitely on some emulator/platform-tools combinations while
+    # the underlying Package Manager remains healthy. Stage explicitly, then ask `pm` to install.
+    "$ADB" -s "$SERIAL" push "$apk" "$remote" >/dev/null
+    "$ADB" -s "$SERIAL" shell pm install -r -t "$remote"
+    "$ADB" -s "$SERIAL" shell rm -f "$remote" || true
+  }
+
+  install_apk "$OUT_APK"
+  "$ADB" -s "$SERIAL" shell am force-stop com.tsunami.shell
+  "$ADB" -s "$SERIAL" shell am start -W -n com.tsunami.shell/.MainActivity
+  "$ADB" -s "$SERIAL" shell dumpsys package com.tsunami.shell | grep -E 'versionCode|versionName' | head -4 | tee "$REPORT/device-package.txt"
+  echo "DEVICE_INSTALL=PASS serial=$SERIAL" | tee -a "$REPORT/build.txt"
+
+  if [[ "$MODE" == "--verify-device" ]]; then
+    TEST_PACKAGE="com.tsunami.shell.test"
+    cleanup_test_package() {
+      "$ADB" -s "$SERIAL" uninstall "$TEST_PACKAGE" >/dev/null 2>&1 || true
+    }
+    trap cleanup_test_package EXIT
+    install_apk "$OUT_TEST"
+    "$ADB" -s "$SERIAL" logcat -c || true
+    "$ADB" -s "$SERIAL" shell am instrument -w -e class com.tsunami.shell.GenesisInteractionTest \
+      com.tsunami.shell.test/androidx.test.runner.AndroidJUnitRunner | tee "$REPORT/instrumentation.txt"
+    grep -Fq 'OK (39 tests)' "$REPORT/instrumentation.txt" || {
+      echo "ERROR: instrumentation did not report OK (39 tests)." >&2
+      exit 3
+    }
+
+    export ANDROID_SERIAL="$SERIAL"
+    export PATH="$(dirname "$ADB"):$PATH"
+    cd "$UI_ROOT"
+    bash tools/capture_verify.sh
+    "$PYTHON_BIN" tools/derive_review_images.py
+    "$PYTHON_BIN" tools/visual_sanity_verify.py | tee "$REPORT/visual-sanity.txt"
+
+    rm -rf "$REPORT/visual" "$REPORT/font-proofs"
+    cp -R build/verification "$REPORT/visual"
+    cp -R tools/proofs "$REPORT/font-proofs"
+    cp "$REPO_ROOT/docs/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md" "$REPORT/TSUNAMI-UI-GENESIS-VISUAL-REVIEW.md"
+    test "$(find "$REPORT/visual" -maxdepth 1 -name '[0-9][0-9]-*.png' ! -name '*-mono.png' ! -name '*-squint.png' | wc -l | tr -d ' ')" = "46"
+    test -s "$REPORT/visual/contact-sheet.png"
+    if grep -q 'FATAL EXCEPTION' "$REPORT/visual/logcat-tail.txt" && grep -q 'Process: com.tsunami.shell' "$REPORT/visual/logcat-tail.txt"; then
+      echo "ERROR: shell crash signature found in device logcat." >&2
+      exit 4
+    fi
+    {
+      echo "VISUAL_CAPTURE=PASS states=46"
+      echo "VISUAL_SANITY=PASS"
+      echo "MONOCHROME_REVIEW_DERIVATION=PASS"
+      echo "SQUINT_REVIEW_DERIVATION=PASS"
+      echo "CRASH_SCAN=PASS"
+      echo "DEVICE_VERIFY=PASS serial=$SERIAL"
+    } | tee -a "$REPORT/build.txt"
+  fi
+fi

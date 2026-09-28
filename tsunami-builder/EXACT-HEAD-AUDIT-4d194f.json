@@ -1,0 +1,152 @@
+{
+  "schema": "tsunami.ui-genesis.exact-head-audit.v1",
+  "source_repository": "brass-crusader-tx/TSUNAMI",
+  "source_branch": "genesis/ui-shell-20260923",
+  "source_head": "4d194f587e009eb7e1e19e3bcfbf6d4f36f025e6",
+  "mirror_repository": "brass-crusader-tx/chromagora-os",
+  "mirror_branch": "build/tsunami-ui-genesis-20260925",
+  "mirror_head": "2b7e64aba2c4fdafbbeeb1648fd598d78c22d68b",
+  "mirror_manifest_blob": "31a06213621987f06bf114ef7dfc4b498ce5f0e3",
+  "mirror_parity": {
+    "checked_entries": 57,
+    "ui_shell_entries": 41,
+    "support_entries": 16,
+    "missing": 0,
+    "divergent_sha": 0,
+    "divergent_bytes": 0,
+    "result": "PASS"
+  },
+  "type_contract": {
+    "family": "TSUNAMI Sans",
+    "version": "5.100",
+    "generator_blob": "43ae1290ae3063a717cddb0272080dc0c27d3b7f",
+    "weights": {
+      "Light": {
+        "bytes": 103552,
+        "sha256": "2fc7f7b9ccbedcd1b60865fc97b28719789ed769aa0e048cd99dbb0dca18c7f2"
+      },
+      "Regular": {
+        "bytes": 106124,
+        "sha256": "cf77ddb6a23bdd961735b8a7c61ecf9e7d06bcba636e4fa772e4da0212afdc42"
+      },
+      "Medium": {
+        "bytes": 107116,
+        "sha256": "53989e4315a71de4b890adb63aa25ba2314a0bdf4e7d35fc43dccb4b55424c07"
+      },
+      "Semibold": {
+        "bytes": 107720,
+        "sha256": "7e9f4610d206c3553e3697941200da6e2131053deb43faed440ba2e006f0f3c3"
+      },
+      "Bold": {
+        "bytes": 107072,
+        "sha256": "42dd3412a4e611bbb4b81bcfdc829e15b91fab24bbfc4fee5a75d1f89b4c524f"
+      }
+    },
+    "proofs": {
+      "tsunami-sans-proof.png": {
+        "bytes": 164127,
+        "sha256": "686a8182941c8d98c41129a78b6f702b126770b349def63885bfa2cf9b92b62d"
+      },
+      "tsunami-sans-ui-proof.png": {
+        "bytes": 74888,
+        "sha256": "2dbb9f20451de4a88229375cdec4e0dec14ad3ff91bd8f75066b8396dfd5f138"
+      }
+    },
+    "reproducibility_cross_check": "Reverting only the lowercase-c aperture delta reproduced the preceding canonical v5.1 hashes exactly; refined outputs are manifest-bound.",
+    "metadata_verification": {
+      "masters": 5,
+      "glyphs_per_master": 176,
+      "weight_classes": [
+        300,
+        400,
+        500,
+        600,
+        700
+      ],
+      "family": "TSUNAMI Sans",
+      "version": "Version 5.100",
+      "gpos_all_masters": true,
+      "required_ui_and_western_european_coverage": true
+    },
+    "control_pair_raster_distinctness": {
+      "rasterizer": "Pillow 12.3.0 / FreeType",
+      "sizes_px": [
+        18,
+        24,
+        34
+      ],
+      "pairs": [
+        "I/l",
+        "I/1",
+        "O/0",
+        "rn/m",
+        "c/e",
+        "v/y"
+      ],
+      "zero_difference_pairs": 0,
+      "note": "Every required ambiguous pair produced non-identical raster masks at every tested UI size; Android raster inspection remains separately required."
+    },
+    "visual_proof_review": {
+      "proof_files": [
+        "tsunami-sans-proof.png",
+        "tsunami-sans-ui-proof.png"
+      ],
+      "review_scope": "desktop proof only",
+      "result": "reviewed",
+      "android_claim": false
+    }
+  },
+  "isolation": {
+    "compared_against_main": "2543cb39737557133a37d600050f9c4aa50a3fae",
+    "production_runtime_or_root_build_changes": 0,
+    "result": "PASS"
+  },
+  "android_build_execution": {
+    "hosted_linux": {
+      "run_id": 36272186471,
+      "job_id": 108488125874,
+      "status": "completed",
+      "conclusion": "failure",
+      "steps_materialized": false,
+      "logs_materialized": false,
+      "classification": "pre-step runner/infrastructure failure"
+    },
+    "hosted_macos": {
+      "run_id": 36272186477,
+      "job_id": 108488125913,
+      "status": "completed",
+      "conclusion": "failure",
+      "steps_materialized": false,
+      "logs_materialized": false,
+      "classification": "pre-step runner/infrastructure failure"
+    },
+    "self_hosted": {
+      "run_id": 36272186694,
+      "job_id": 108488128066,
+      "status": "queued",
+      "conclusion": null,
+      "steps_materialized": false,
+      "source_binding": "exact mirror source_head 4d194f587e009eb7e1e19e3bcfbf6d4f36f025e6"
+    },
+    "result": "PENDING_EXECUTABLE_ANDROID_EVIDENCE"
+  },
+  "rpc_request": {
+    "issue": 28,
+    "status": "open",
+    "source_sha": "4d194f587e009eb7e1e19e3bcfbf6d4f36f025e6",
+    "stale_requests_retired": [
+      25,
+      26,
+      27
+    ]
+  },
+  "acceptance": {
+    "instrumentation_tests": 38,
+    "visual_states": 45,
+    "package": "com.tsunami.shell",
+    "device_serial": "ZY22L2PTS5",
+    "portal_target": "/Users/ezra/Downloads/TSUNAMI/dist/TSUNAMI-UI-Shell-Rebrand-v1-debug.apk"
+  },
+  "completion_claim": false,
+  "audit_refreshed_at_utc": "2026-09-26T21:18:00Z"
+}
